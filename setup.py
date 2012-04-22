@@ -11,7 +11,7 @@ import sys
 from distutils import log
 
 long_desc = ''' '''
-requires = ['numpy']
+requires = ['numpy', 'fluid']
 
 setup(
     name='uneven_window_mean',
