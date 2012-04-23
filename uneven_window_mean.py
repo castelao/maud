@@ -2,9 +2,96 @@
 
 import numpy as N
 import numpy
+import numpy as np
 from numpy import ma
 
-#Probalblly not the best place to put it, but to temporally resolve my problem!
+from fluid.common.distance import distance
+
+
+# ==== Bellow here, I need to do some serious work on ====
+
+def _weight_hamming_2D(x, y, l):
+    """
+    """
+    r = (x**2+y**2)**0.5
+    w = 0.54 + 0.46*numpy.cos(2*pi*r/l)
+    w[r>l] = 0
+    return w
+
+
+def window_mean_2D(x, y, z, l, method='hamming'):
+    """
+    """
+    if method == 'hamming':
+        weight_func = _weight_hamming_2D
+
+    if len(z.shape) < 2:
+        print "At least 2D"
+
+    output = ma.masked_all(z.shape)
+    if len(z.shape) > 2:
+        for i in range(z.shape[0]):
+            output[i] = window_mean_2D(x, y, z[i], method)
+
+    elif len(z.shape) == 2:
+        I,J = z.shape
+        for i in range(I):
+            for j in range(J):
+	        w = weight_func((x-x[i,j]), (y-y[i,j]), l)
+	        output[i,j] = (z*w).sum()/(w.sum())
+        return output
+
+
+def window_mean_2D_latlon(Lat, Lon, data, l, method='hamming'):
+    """
+        Right now I'm doing for Masked Arrays only.
+        data should be a dictionary with 2D arrays
+
+        Input:
+          - Lat: 2D array with latitudes
+          - Lon: 2D array with longitudes
+          - data: There are two possibilities, it can be an 
+            array of at least 2D, or a dictionary where each
+            element is an array of at least 2D.
+          - l: window filter size, in meters
+          - method: weight function type
+
+        Output:
+           
+
+        !!!ATENTION!!!
+        - Might be a good idea to eliminate the dependence on
+          fluid.
+    """
+    if method == 'hamming':
+        weight_func = _weight_hamming_2D
+
+    I,J = Lat.shape
+    data_smooth={}
+    for key in data.keys():
+        data_smooth[key] = ma.masked_all(data[key].shape)
+    for i in range(I):
+        for j in range(J):
+            r = distance(Lat,Lon,Lat[i,j],Lon[i,j])
+            ind = r<l
+            w = weight_func(r[ind],l)
+            for key in data.keys():
+                if len(data[key].shape)==2:
+                    # Stupid solution!!! Think about a better way to do this.
+                    if not hasattr(data[key][i,j],'mask'):
+                        data_smooth[key][i,j] = (data[key][ind]*w).sum()/w.sum()
+                    else:
+                        if data[key][i,j].mask==False:
+                            data_smooth[key][i,j] = (data[key][ind]*w).sum()/w.sum()
+                elif len(data[key].shape)==3:
+                    for k in range(data[key].shape[0]):
+                        if not hasattr(data[key][k,i,j],'mask'):
+                            data_smooth[key][k,i,j] = (data[key][k][ind]*w).sum()/w.sum()
+                        else:
+                            if data[key].mask[k,i,j]==False:
+                                data_smooth[key][k,i,j] = (data[key][k][ind]*w).sum()/w.sum()
+    return data_smooth
+
 
 
 def window_mean(y,x=None,x_out=None,method="rectangular",boxsize=None):
@@ -349,57 +436,6 @@ def get_halfpower_period(data, filtered):
 #w
 #y
 
-def window_mean_2D_latlon(Lat,Lon,data,l,method='hanning'):
-    """
-        Right now I'm doing for Masked Arrays only.
-        data should be a dictionary with 2D arrays
-    """
-    #if method=='hanning':
-    #    window_weight = _weight_hann
-    from fluid.common.distance import distance
-    I,J = Lat.shape
-    data_smooth={}
-    for key in data.keys():
-        #data_smooth[k] = ma.masked_all((I,J))
-        data_smooth[key] = ma.masked_all(data[key].shape)
-    for i in range(I):
-        for j in range(J):
-            r = distance(Lat,Lon,Lat[i,j],Lon[i,j])
-            ind = r<l
-            if method=='hanning':
-                #from numpy import pi
-                #w=0.5*(1+numpy.cos(pi*r[ind]/l))
-                w = _weight_hann(r[ind],l)
-            for key in data.keys():
-                if len(data[key].shape)==2:
-                    # Stupid solution!!! Think about a better way to do this.
-                    if not hasattr(data[key][i,j],'mask'):
-                        data_smooth[key][i,j] = (data[key][ind]*w).sum()/w.sum()
-                    else:
-                        if data[key][i,j].mask==False:
-                            data_smooth[key][i,j] = (data[key][ind]*w).sum()/w.sum()
-                elif len(data[key].shape)==3:
-                    for k in range(data[key].shape[0]):
-                        if not hasattr(data[key][k,i,j],'mask'):
-                            data_smooth[key][k,i,j] = (data[key][k][ind]*w).sum()/w.sum()
-                        else:
-                            if data[key].mask[k,i,j]==False:
-                                data_smooth[key][k,i,j] = (data[key][k][ind]*w).sum()/w.sum()
-    return data_smooth
-
-
-def window_mean_2D(x,y,z,l):
-    """
-    """
-    return
-    I,J = z.shape
-    z_smooth = ma.masked_all(z.shape)
-    for i in range(I):
-        for j in range(J):
-	    w = _weight_hann_2D((x-x[i,j]),(y-y[i,j]),l)
-	    #w = _weight_lanczos_2D((x-x[i,j]),(y-y[i,j]),l,2.5*l)
-	    z_smoothed[i,j] = (z*w).sum()/(w.sum())
-    return z_smoothed
 
 
 
@@ -433,14 +469,6 @@ def _weight_hamming(r,l):
     """
     w=0.54+0.46*numpy.cos(pi*r/l)
     w[numpy.absolute(r)>l]=0
-    return w
-
-def _weight_hamming_2D(x,y,l):
-    """
-    """
-    r=(x**2+y**2)**0.5
-    w=0.54 + 0.46*numpy.cos(pi*r/l)
-    w[r>l]=0
     return w
 
 def _weight_lanczos_2D(x,y,l,cutoff):
@@ -494,12 +522,5 @@ def _weight_lanczos_2D(x,y,l,cutoff):
 #else
 #                        disp('Incorrect Window type requested')
 #end
-
-
-
-
-
-
-
 
 
