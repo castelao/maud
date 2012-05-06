@@ -64,7 +64,7 @@ def window_mean_2D_latlon(Lat, Lon, data, l, method='hamming'):
           fluid.
     """
     if method == 'hamming':
-        weight_func = _weight_hamming_2D
+        weight_func = _weight_hamming
 
     I,J = Lat.shape
     data_smooth={}
