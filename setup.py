@@ -36,7 +36,7 @@ setup(
         'Topic :: Software Development :: Libraries :: Python Modules',
     ],
     platforms='any',
+    py_modules=['uneven_window_mean'],
     packages=find_packages(),
-    include_package_data=True,
     install_requires=requires,
 )
