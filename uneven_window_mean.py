@@ -4,20 +4,10 @@ import numpy as N
 import numpy
 import numpy as np
 from numpy import ma
-
 from fluid.common.distance import distance
-
+import window_func
 
 # ==== Bellow here, I need to do some serious work on ====
-
-def _weight_hamming_2D(x, y, l):
-    """
-    """
-    r = (x**2+y**2)**0.5
-    w = 0.54 + 0.46*numpy.cos(2*pi*r/l)
-    w[r>l] = 0
-    return w
-
 
 def window_mean_2D(x, y, z, l, method='hamming'):
     """
@@ -440,45 +430,6 @@ def get_halfpower_period(data, filtered):
 
 
 from numpy import pi
-
-def _weight_triangular_2D(x,y,l):
-    """
-    """
-    r=(x**2+y**2)**0.5
-    w=(l-r)/l
-    w[r>l]=0
-    return w
-
-def _weight_hann(r,l):
-    """
-    """
-    w=0.5*(1+numpy.cos(pi*r/l))
-    w[numpy.absolute(r)>l]=0
-    return w
-
-def _weight_hann_2D(x,y,l):
-    """
-    """
-    r=(x**2+y**2)**0.5
-    w=0.5*(1+numpy.cos(pi*r/l))
-    w[r>l]=0
-    return w
-
-def _weight_hamming(r,l):
-    """
-    """
-    w=0.54+0.46*numpy.cos(pi*r/l)
-    w[numpy.absolute(r)>l]=0
-    return w
-
-def _weight_lanczos_2D(x,y,l,cutoff):
-    """ Working on
-    """
-    #c=cutoff
-    r=(x**2+y**2)**0.5
-    w=numpy.sinc(r/cutoff)*numpy.sinc(r/cutoff/l)
-    w[r>3*l]=0
-
 
 #def _weight_hamming_2D(x,y,l):
 #    """
