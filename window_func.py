@@ -1,7 +1,5 @@
 """ Weight functions"""
 
-import numpy as N
-import numpy
 import numpy as np
 from numpy import ma
 
@@ -31,7 +29,7 @@ def _weight_hamming_2D(x, y, l):
     """
     """
     r = (x**2+y**2)**0.5
-    w = 0.54 + 0.46*numpy.cos(2*pi*r/l)
+    w = 0.54 + 0.46*np.cos(2*pi*r/l)
     w[r>l] = 0
     return w
 
@@ -39,8 +37,8 @@ def _weight_hamming_2D(x, y, l):
 def _weight_hann(r,l):
     """
     """
-    w=0.5*(1+numpy.cos(pi*r/l))
-    w[numpy.absolute(r)>l]=0
+    w=0.5*(1+np.cos(pi*r/l))
+    w[np.absolute(r)>l]=0
     return w
 
 # hann 2D
@@ -48,7 +46,7 @@ def _weight_hann_2D(x,y,l):
     """
     """
     r=(x**2+y**2)**0.5
-    w=0.5*(1+numpy.cos(pi*r/l))
+    w=0.5*(1+np.cos(pi*r/l))
     w[r>l]=0
     return w
 
@@ -58,5 +56,5 @@ def _weight_lanczos_2D(x,y,l,cutoff):
     """
     #c=cutoff
     r=(x**2+y**2)**0.5
-    w=numpy.sinc(r/cutoff)*numpy.sinc(r/cutoff/l)
+    w=np.sinc(r/cutoff)*np.sinc(r/cutoff/l)
     w[r>3*l]=0
