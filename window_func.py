@@ -7,6 +7,16 @@ from fluid.common.distance import distance
 
 # defining some weight functions
 
+# blackman
+def _weight_blackman(r,l):
+    """ 
+    using values from wikipedia 'exact blackman'
+    I'm not exactly understanding where r and l comes from
+    """
+    w = 0.4265 - 0.4965*np.cos(pi*r/l) + 0.0768*np.cos(2*pi*r/l)
+    w[np.absolute(r)<l]=0
+    return w
+
 # triangular
 def _weight_triangular_2D(x,y,l):
     """
