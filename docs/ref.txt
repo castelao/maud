@@ -1,0 +1,18 @@
+
+# FIR
+
+http://en.wikipedia.org/wiki/Finite_impulse_response
+http://www.mathworks.com/help/toolbox/images/f16-21256.html
+http://www.mathworks.com/help/toolbox/signal/ref/freqz.html
+http://local.wasp.uwa.edu.au/~pbourke/miscellaneous/filter/
+http://docs.scipy.org/doc/scipy/reference/generated/scipy.signal.firwin.html#scipy.signal.firwin
+
+
+# How to  configure Python packages
+
+http://packages.python.org/distribute/setuptools.html  ** Provavelmente o melhor.
+http://docs.python.org/distutils/setupscript.html
+http://wiki.python.org/moin/CheeseShopTutorial
+http://docs.python.org/release/2.4/dist/node11.html
+
+
