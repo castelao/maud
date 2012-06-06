@@ -196,7 +196,7 @@ def window_1Dmean(data,l,t=None,method='hann',axis=0):
     if t == None:
         print "The scale along the choosed axis weren't defined. I'll consider a constant sequence."
 	t = numpy.arange(data.shape[axis])
-    elif t.shape != data.shape[axis]:
+    elif t.shape != (data.shape[axis],):
         print "The scale variable t don't have the same size of the choosed axis of the data array"
     # ----
     data_smooth = ma.masked_all(data.shape)
@@ -217,7 +217,7 @@ def window_1Dmean(data,l,t=None,method='hann',axis=0):
 		    if axis == 0:
                         dt = t-t[i]
                         ind = numpy.absolute(dt)<l
-                        w = fluid.common.window_mean._weight_hann(dt[ind],l)
+                        w = _weight_hann(dt[ind],l)
                         data_smooth[i,j] = (data[ind,j]*w).sum()/(w[data[ind,j].mask==False].sum())
 		    elif axis == 1:
                         dt = t-t[j]
