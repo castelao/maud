@@ -15,7 +15,7 @@ requires = ['numpy', 'fluid']
 
 setup(
     name='uneven_window_mean',
-    version='0.2',
+    version='0.3',
     url='https://bitbucket.org/castelao/pyunevenwindowmean',
     download_url='https://bitbucket.org/castelao/pyunevenwindowmean',
     license='PSF',
@@ -36,7 +36,7 @@ setup(
         'Topic :: Software Development :: Libraries :: Python Modules',
     ],
     platforms='any',
-    py_modules=['uneven_window_mean'],
+    py_modules=['uneven_window_mean', 'window_func'],
     packages=find_packages(),
     install_requires=requires,
 )
