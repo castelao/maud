@@ -2,6 +2,7 @@
 
 import numpy as np
 from numpy import ma
+from numpy import pi
 
 from fluid.common.distance import distance
 
