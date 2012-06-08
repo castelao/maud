@@ -15,4 +15,7 @@ http://docs.python.org/distutils/setupscript.html
 http://wiki.python.org/moin/CheeseShopTutorial
 http://docs.python.org/release/2.4/dist/node11.html
 
+# Computers & Geosciences
+http://www.elsevier.com/framework_products/promis_misc/cageogfasep.pdf
+
 
