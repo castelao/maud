@@ -12,10 +12,10 @@ from fluid.common.distance import distance
 def _weight_blackman(r,l):
     """ 
     using values from wikipedia 'exact blackman'
-    I'm not exactly understanding where r and l comes from
+    
     """
-    w = 0.4265 - 0.4965*np.cos(pi*r/l) + 0.0768*np.cos(2*pi*r/l)
-    w[np.absolute(r)<l]=0
+    w = 0.42 +  0.5*np.cos(2*pi*r/l) + 0.08*np.cos(4*pi*r/l) # fase lag-> sign change
+    w[np.absolute(r)>l]=0
     return w
 
 # triangular
