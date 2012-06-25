@@ -15,7 +15,7 @@ def _weight_blackman(r,l):
     
     """
     w = 0.42 +  0.5*np.cos(2*pi*r/l) + 0.08*np.cos(4*pi*r/l) # fase lag-> sign change
-    w[np.absolute(r)>l]=0
+    w[np.absolute(r)>l/2.]=0
     return w
 
 # triangular
