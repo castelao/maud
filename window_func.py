@@ -31,8 +31,8 @@ def _weight_triangular_2D(x,y,l):
 def _weight_hamming(r,l):
     """
     """
-    w=0.54+0.46*numpy.cos(pi*r/l)
-    w[numpy.absolute(r)>l]=0
+    w=0.54+0.46*np.cos(pi*r/l)
+    w[np.absolute(r)>l]=0
     return w
 
 # hamming 2D
