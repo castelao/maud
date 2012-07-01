@@ -1,0 +1,6 @@
+build
+dist
+uneven_window_mean.egg-info
+
+syntax: glob
+*.pyc
