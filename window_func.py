@@ -19,15 +19,13 @@ def _weight_blackman(r,l):
     return w
 
 # triangular
-def _weight_triangular_2D(x,y,l):
+def _weight_triangular(r,l):
     """
     """
-    r=(x**2+y**2)**0.5
-    w=(l-r)/l
-    w[r>l]=0
+    w= 1-2*np.abs(r)/l
+    w[np.abs(r)>l/2]=0
     return w
 
-# hamming
 def _weight_hamming(r,l):
     """
     """
@@ -69,3 +67,16 @@ def _weight_lanczos_2D(x,y,l,cutoff):
     r=(x**2+y**2)**0.5
     w=np.sinc(r/cutoff)*np.sinc(r/cutoff/l)
     w[r>3*l]=0
+
+# ==== funcoes antigas para eliminar ======================
+
+def _weight_triangular_2D(x,y,l):
+    """
+    """
+    r=(x**2+y**2)**0.5
+    w=(l-r)/l
+    w[r>l]=0
+    return w
+
+# hamming
+
