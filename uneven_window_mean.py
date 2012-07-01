@@ -144,35 +144,6 @@ def window_mean(y,x=None,x_out=None,method="rectangular",boxsize=None):
 
     return y_out
 
-def window_weight(x,boxsize=None,method="rectangular"):
-    """Window weights
-    """
-
-#    # Size of the window
-#    n=N.size(x)
-#    print
- 
-    if(method=="rectangular"):
-        # Weight of window points
-        weight = N.ones(N.shape(x),N.float)
-
-    # Need to develop this triangular form!
-    elif(method=="triangular"):
-        half_size = boxsize/2.
-
-        # Resolving left side of triangle
-        left = N.less_equal(x,0)*(x+half_size)
-        # Resolving right side of triangle
-        right = N.greater(x,0)*(half_size-x)
-        weight = left + right
-    else:
-        return
-
-    # Normalized weight
-    weight = weight/N.sum(weight)
-
-    return weight
-
 # To improve, the right to way to implement these filters are to define the halfpower cutoff, instead of an l dimension. Then the l dimension is defined on the function according to the weightning system for the adequate l.
 
 def window_1Dmean(data,l,t=None,method='hann',axis=0):
