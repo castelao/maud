@@ -22,8 +22,9 @@ def _weight_blackman(r,l):
 def _weight_triangular(r,l):
     """
     """
-    w= 1-2*np.abs(r)/l
-    w[np.abs(r)>l/2]=0
+    w = ma.masked_all(r.shape)
+    ind = np.abs(r)<l/2.
+    w[ind] = 1-np.abs(2*r[ind]/l)
     return w
 
 def _weight_hamming(r,l):
