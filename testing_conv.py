@@ -1,6 +1,10 @@
-from numpy import ma
+import numpy as np
+from numpy import ma, pi
+from uneven_window_mean import window_1Dmean
+import pylab
+from window_func import _weight_blackman as blackman
 
-x =  np.range(100)
+x =  ma.array(np.sort(100*np.random.random(100)))
 y = 5*np.sin(2*pi*x/43.) + 3*np.sin(2*pi*(x-7.)/12.) + 2*np.random.rand(len(x))-1
 
 
@@ -17,12 +21,14 @@ for i in np.arange(len(x)):
     w2 = w2/sum(w2)
     y2f[i] = sum(w2*y) 
 
-
-import pylab
+zf = window_1Dmean(y,l1,method='blackman')
+zf2 = window_1Dmean(y,l1,method='hann')
 
 pylab.figure()
 pylab.plot(x,y)
 pylab.plot(x,yf,'r')
 pylab.plot(x,y2f,'og')
 pylab.plot(x,y-y2f,'k')
+pylab.plot(x,zf,'xr')
+pylab.plot(x,zf2,'xb')
 pylab.show()
