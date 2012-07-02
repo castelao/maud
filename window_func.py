@@ -18,6 +18,8 @@ def _weight_blackman(r,l):
     w[np.absolute(r)>l/2.]=0
     return w
 
+# rectangular
+
 # triangular
 def _weight_triangular(r,l):
     """
