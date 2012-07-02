@@ -167,17 +167,22 @@ def window_1Dmean(data,l,t=None,method='hann',axis=0):
     if t == None:
         print "The scale along the choosed axis weren't defined. I'll consider a constant sequence."
 	t = numpy.arange(data.shape[axis])
+
     elif t.shape != (data.shape[axis],):
         print "The scale variable t don't have the same size of the choosed axis of the data array"
+        return 
     # ----
     data_smooth = ma.masked_all(data.shape)
 
-    winfunc = window_func._weight_hann
-
+    if method == 'hann':
+        winfunc = window_func._weight_hann
+    elif method == 'blackman':
+        winfunc = window_func._weight_blackman
+    
     if len(data.shape)==1:
-        (I,) = data.shape
-	for i in range(I):
-	    if data.mask[i]==False:
+        #(I,) = np.nonzero(np.isfinite(data))
+        (I,) = np.nonzero(~data.mask)
+	for i in I:
                 dt = t-t[i]
                 ind = numpy.absolute(dt)<l
                 w = winfunc(dt[ind],l)
