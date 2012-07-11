@@ -14,8 +14,8 @@ long_desc = ''' '''
 requires = ['numpy', 'fluid']
 
 setup(
-    name='uneven_window_mean',
-    version='0.3.1',
+    name='maud',
+    version='0.4',
     url='https://bitbucket.org/castelao/pyunevenwindowmean',
     download_url='https://bitbucket.org/castelao/pyunevenwindowmean',
     license='PSF',
@@ -36,7 +36,7 @@ setup(
         'Topic :: Software Development :: Libraries :: Python Modules',
     ],
     platforms='any',
-    py_modules=['uneven_window_mean', 'window_func'],
+    py_modules=['maud', 'window_func'],
     packages=find_packages(),
     install_requires=requires,
 )
