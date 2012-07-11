@@ -16,12 +16,12 @@ requires = ['numpy', 'fluid']
 setup(
     name='maud',
     version='0.4',
-    url='https://bitbucket.org/castelao/pyunevenwindowmean',
-    download_url='https://bitbucket.org/castelao/pyunevenwindowmean',
+    url='https://bitbucket.org/castelao/maud/wiki',
+    download_url='http://pypi.python.org/packages/source/m/maud/maud-0.4.tar.gz#md5=140f31e5f1a0957accf08b8492744555',
     license='PSF',
     author='Guilherme Castelao, Bia Villas-Boas, Luiz Irber, Roberto de Almeida',
     author_email='guilherme@castelao.net, bia@melovillasboas.com, luiz.irber@gmail.com, roberto@dealmeida.net',
-    description='',
+    description='Moving Average for Uneven Data',
     long_description=long_desc,
     zip_safe=True,
     classifiers=[
