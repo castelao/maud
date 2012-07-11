@@ -1,5 +1,9 @@
 """Window means"""
 
+# Gui, 27-06-2012
+# Just an idea. Create a class of filtered data. A fake Masked Array object
+#   which gives the output on demand, filtered.
+
 import numpy as N
 import numpy
 import numpy as np
