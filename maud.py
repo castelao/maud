@@ -1,4 +1,4 @@
-"""Window means"""
+
 
 # Gui, 27-06-2012
 # Just an idea. Create a class of filtered data. A fake Masked Array object
@@ -8,7 +8,7 @@ import numpy as N
 import numpy
 import numpy as np
 from numpy import ma
-from fluid.common.distance import distance
+#from fluid.common.distance import distance
 import window_func
 
 # ==== Bellow here, I need to do some serious work on ====
@@ -180,9 +180,14 @@ def window_1Dmean(data,l,t=None,method='hann',axis=0):
 
     if method == 'hann':
         winfunc = window_func._weight_hann
+
     elif method == 'blackman':
         winfunc = window_func._weight_blackman
-    
+   
+    elif method == 'triangular':
+        winfunc = window_func._weight_triangular
+
+ 
     if len(data.shape)==1:
         #(I,) = np.nonzero(np.isfinite(data))
         (I,) = np.nonzero(~data.mask)
