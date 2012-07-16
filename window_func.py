@@ -4,7 +4,7 @@ import numpy as np
 from numpy import ma
 from numpy import pi
 
-from fluid.common.distance import distance
+#from fluid.common.distance import distance
 
 # defining some weight functions
 
@@ -26,7 +26,9 @@ def _weight_triangular(r,l):
     """
     w = ma.masked_all(r.shape)
     ind = np.abs(r)<l/2.
+    ind2 = np.abs(r)>l/2.
     w[ind] = 1-np.abs(2*r[ind]/l)
+    w[ind2] = 0
     return w
 
 def _weight_hamming(r,l):
