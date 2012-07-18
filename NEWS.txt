@@ -1,0 +1,14 @@
+.. MAUD's NEWS.
+
+News
+====
+
+0.4.1
+-----
+
+*window_1Dmean is now recursive and uses multiprocessing if it has more than 1 dimension.
+
+previous
+--------
+
+*Sorry, lost the track before this.
