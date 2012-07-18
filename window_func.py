@@ -8,6 +8,22 @@ from numpy import pi
 
 # defining some weight functions
 
+def window_func(method='hann'):
+    """ Select the weight function
+    """
+    if method == 'hann':
+        winfunc = _weight_hann
+
+    elif method == 'blackman':
+        winfunc = _weight_blackman
+
+    elif method == 'triangular':
+        winfunc = _weight_triangular
+
+    return winfunc
+
+
+
 # blackman
 def _weight_blackman(r,l):
     """ 
