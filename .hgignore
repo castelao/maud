@@ -1,6 +1,6 @@
 build
 dist
-uneven_window_mean.egg-info
+maud.egg-info
 
 syntax: glob
 *.pyc
