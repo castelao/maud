@@ -183,89 +183,82 @@ def window_1Dmean(data,l,t=None,method='hann',axis=0):
         print "The scale variable t don't have the same size of the choosed axis of the data array"
         return 
     # ----
-    import pdb; pdb.set_trace()
+    #import pdb; pdb.set_trace()
     import multiprocessing
 
-    winfunc = window_func.window_func(method)
-
     data_smooth = ma.masked_all(data.shape)
-    data_smooth2 = ma.masked_all(data.shape)
- 
-    if len(data.shape)==1:
-        nprocesses = 2*multiprocessing.cpu_count()+1
-        #pool_profiles = multiprocessing.Pool(2*multiprocessing.cpu_count())
-        #logger.info("I'll work with %s parallel processes" % nprocesses)
-        filters_pool = multiprocessing.Pool(nprocesses)
-        results = []
 
+    if len(data.shape)==1:
+        winfunc = window_func.window_func(method)
         #(I,) = np.nonzero(np.isfinite(data))
         (I,) = np.nonzero(~data.mask)
-        from datetime import datetime
 
-        t0 = datetime.now()
 	for i in I:
                 dt = t-t[i]
                 ind = numpy.absolute(dt)<l
                 w = winfunc(dt[ind],l)
                 data_smooth[i] = (data[ind]*w).sum()/(w[data[ind].mask==False].sum())
                 #data_smooth[i] = _convolve(data[ind], dt[ind], l, winfunc)
-        print "evaluation:", datetime.now() -t0
-
-        t0 = datetime.now()
-	for i in I:
-                dt = t-t[i]
-                ind = numpy.absolute(dt)<l
-                #w = winfunc(dt[ind],l)
-                #data_smooth[i] = (data[ind]*w).sum()/(w[data[ind].mask==False].sum())
-                #data_smooth[i] = _convolve(data[ind], dt[ind], l, winfunc)
-                results.append([i, filters_pool.apply_async(_convolve,(data[ind], dt[ind], l, winfunc))])
-        filters_pool.close()
-        for r in results:
-            print "Getting job: %s", r[0]
-            data_smooth2[r[0]] = r[1].get()
-        print "evaluation:", datetime.now()-t0
-        print data_smooth
-        print data_smooth2
 
     elif len(data.shape)==2:
+        nprocesses = 2*multiprocessing.cpu_count()+1
+        #pool_profiles = multiprocessing.Pool(2*multiprocessing.cpu_count())
+        #logger.info("I'll work with %s parallel processes" % nprocesses)
+        filters_pool = multiprocessing.Pool(nprocesses)
+        results = []
+        from datetime import datetime
+
+        #t0 = datetime.now()
+	#for i in I:
+        #        dt = t-t[i]
+        #        ind = numpy.absolute(dt)<l
+        #        #w = winfunc(dt[ind],l)
+        #        #data_smooth[i] = (data[ind]*w).sum()/(w[data[ind].mask==False].sum())
+        #        #data_smooth[i] = _convolve(data[ind], dt[ind], l, winfunc)
+        #filters_pool.close()
+        #for r in results:
+        #    print "Getting job: %s", r[0]
+        #    data_smooth2[r[0]] = r[1].get()
+        #print "evaluation:", datetime.now()-t0
+        #print data_smooth
+        #print data_smooth2
+
         (I,J) = data.shape
-	for i in range(I):
-	    for j in range(J):
-                if data.mask[i,j]==False:
-		    if axis == 0:
-                        dt = t-t[i]
-                        ind = numpy.absolute(dt)<l
-                        w = winfunc(dt[ind],l)
-                        data_smooth[i,j] = (data[ind,j]*w).sum()/(w[data[ind,j].mask==False].sum())
-		    elif axis == 1:
-                        dt = t-t[j]
-                        ind = numpy.absolute(dt)<l
-                        w = winfunc(dt[ind],l)
-                        data_smooth[i,j] = (data[ind,j]*w).sum()/(w[data[ind,j].mask==False].sum())
-    elif len(data.shape)==3:
-        (I,J,K) = data.shape
-	for i in range(I):
-	    if (data.mask[i]==False).any():
-                for j in range(J):
-	            if (data.mask[i,j]==False).any():
-                        #for k in range(K):
-                        for k in numpy.arange(K)[data.mask[i,j]==False]:
-                            #if data.mask[i,j,k]==False:
-                            if axis == 0:
-                                dt = t-t[i]
-                                ind = numpy.absolute(dt)<l
-                                w = _weight_hann(dt[ind],l)
-                                data_smooth[i,j,k] = (data[ind,j,k]*w).sum()/(w[data[ind,j,k].mask==False].sum())
-                            elif axis == 1:
-                                dt = t-t[j]
-                                ind = numpy.absolute(dt)<l
-                                w = _weight_hann(dt[ind],l)
-                                data_smooth[i,j,k] = (data[ind,j,k]*w).sum()/(w[data[ind,j,k].mask==False].sum())
-                            elif axis == 2:
-                                dt = t-t[k]
-                                ind = numpy.absolute(dt)<l
-                                w = _weight_hann(dt[ind],l)
-                                data_smooth[i,j,k] = (data[ind,j,k]*w).sum()/(w[data[ind,j,k].mask==False].sum())
+        if axis==0:
+            for j in range(J):
+                #data_smooth[:,j] = window_1Dmean(data[:,j],l=l,t=t,method=method)
+                #results.append([j, filters_pool.apply_async(window_1Dmean, (data[:,j], l, t, method, 0))])
+                results.append(filters_pool.apply_async(window_1Dmean, (data[:,j], l, t, method, 0)))
+            filters_pool.close()
+            for n, r in enumerate(results):
+                #data_smooth[:,r[0]] = r[1].get()
+                data_smooth[:,n] = r.get()
+        if axis==1:
+            for i in range(I):
+                data_smooth[i] = window_1Dmean(data[i],l=l,t=t,method=method)
+
+	#for i in range(I):
+	#    for j in range(J):
+        #        if data.mask[i,j]==False:
+	#	    if axis == 0:
+        #                dt = t-t[i]
+        #                ind = numpy.absolute(dt)<l
+        #                w = winfunc(dt[ind],l)
+        #                data_smooth[i,j] = (data[ind,j]*w).sum()/(w[data[ind,j].mask==False].sum())
+	#	    elif axis == 1:
+        #                dt = t-t[j]
+        #                ind = numpy.absolute(dt)<l
+        #                w = winfunc(dt[ind],l)
+        #                data_smooth[i,j] = (data[ind,j]*w).sum()/(w[data[ind,j].mask==False].sum())
+    else:
+        if axis==0:
+            I = data.shape[1]
+            for i in range(I):
+                data_smooth[:,i] = window_1Dmean(data[:,i],l=l,t=t,method=method, axis=0)
+        else:
+            I = data.shape[0]
+            for i in range(I):
+                data_smooth[i] = window_1Dmean(data[i],l=l,t=t,method=method, axis=(axis-1))
 
     return data_smooth
 
