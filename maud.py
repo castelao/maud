@@ -194,11 +194,11 @@ def window_1Dmean(data,l,t=None,method='hann',axis=0):
         (I,) = np.nonzero(~data.mask)
 
 	for i in I:
-                dt = t-t[i]
-                ind = numpy.absolute(dt)<l
-                w = winfunc(dt[ind],l)
-                data_smooth[i] = (data[ind]*w).sum()/(w[data[ind].mask==False].sum())
-                #data_smooth[i] = _convolve(data[ind], dt[ind], l, winfunc)
+            dt = t-t[i]
+            ind = numpy.absolute(dt)<l
+            w = winfunc(dt[ind],l)
+            data_smooth[i] = (data[ind]*w).sum()/(w[data[ind].mask==False].sum())
+            #data_smooth[i] = _convolve(data[ind], dt[ind], l, winfunc)
 
     elif len(data.shape)==2:
         nprocesses = 2*multiprocessing.cpu_count()+1
