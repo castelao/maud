@@ -150,6 +150,13 @@ def window_mean(y,x=None,x_out=None,method="rectangular",boxsize=None):
 
 # To improve, the right to way to implement these filters are to define the halfpower cutoff, instead of an l dimension. Then the l dimension is defined on the function according to the weightning system for the adequate l.
 
+def _convolve(x, dt, l, winfunc):
+    w = winfunc(dt, l)
+    y = (x*w).sum()/(w[x.mask==False].sum())
+    return y
+
+
+
 def window_1Dmean(data,l,t=None,method='hann',axis=0):
     """ A moving window mean filter, not necessarily a regular grid.
 
@@ -176,26 +183,50 @@ def window_1Dmean(data,l,t=None,method='hann',axis=0):
         print "The scale variable t don't have the same size of the choosed axis of the data array"
         return 
     # ----
+    import pdb; pdb.set_trace()
+    import multiprocessing
+
+    winfunc = window_func.window_func(method)
+
     data_smooth = ma.masked_all(data.shape)
-
-    if method == 'hann':
-        winfunc = window_func._weight_hann
-
-    elif method == 'blackman':
-        winfunc = window_func._weight_blackman
-   
-    elif method == 'triangular':
-        winfunc = window_func._weight_triangular
-
+    data_smooth2 = ma.masked_all(data.shape)
  
     if len(data.shape)==1:
+        nprocesses = 2*multiprocessing.cpu_count()+1
+        #pool_profiles = multiprocessing.Pool(2*multiprocessing.cpu_count())
+        #logger.info("I'll work with %s parallel processes" % nprocesses)
+        filters_pool = multiprocessing.Pool(nprocesses)
+        results = []
+
         #(I,) = np.nonzero(np.isfinite(data))
         (I,) = np.nonzero(~data.mask)
+        from datetime import datetime
+
+        t0 = datetime.now()
 	for i in I:
                 dt = t-t[i]
                 ind = numpy.absolute(dt)<l
                 w = winfunc(dt[ind],l)
                 data_smooth[i] = (data[ind]*w).sum()/(w[data[ind].mask==False].sum())
+                #data_smooth[i] = _convolve(data[ind], dt[ind], l, winfunc)
+        print "evaluation:", datetime.now() -t0
+
+        t0 = datetime.now()
+	for i in I:
+                dt = t-t[i]
+                ind = numpy.absolute(dt)<l
+                #w = winfunc(dt[ind],l)
+                #data_smooth[i] = (data[ind]*w).sum()/(w[data[ind].mask==False].sum())
+                #data_smooth[i] = _convolve(data[ind], dt[ind], l, winfunc)
+                results.append([i, filters_pool.apply_async(_convolve,(data[ind], dt[ind], l, winfunc))])
+        filters_pool.close()
+        for r in results:
+            print "Getting job: %s", r[0]
+            data_smooth2[r[0]] = r[1].get()
+        print "evaluation:", datetime.now()-t0
+        print data_smooth
+        print data_smooth2
+
     elif len(data.shape)==2:
         (I,J) = data.shape
 	for i in range(I):
