@@ -20,6 +20,12 @@ import window_func
     print "\r blablabla",
 
     Check on module progressbar
+    [Beto] eu uso o progressbar, um módulo python
+    [Luiz] ah sim, essa do print é quick-and-dirty
+    [Beto] pbar = ProgressBar(maxval=n).start()
+    for i, filename in enumerate(files):
+            pbar.update(i)
+    [Beto] pbar.finish()
 """
 
 # ==== Bellow here, I need to do some serious work on ====
