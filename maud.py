@@ -14,6 +14,14 @@ from numpy import ma
 #from fluid.common.distance import distance
 import window_func
 
+
+"""
+
+    print "\r blablabla",
+
+    Check on module progressbar
+"""
+
 # ==== Bellow here, I need to do some serious work on ====
 
 def window_mean_2D(x, y, z, l, method='hamming'):
