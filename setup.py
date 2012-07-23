@@ -15,7 +15,7 @@ requires = ['numpy', 'fluid']
 
 setup(
     name='maud',
-    version='0.4.1',
+    version='0.4.2',
     url='https://bitbucket.org/castelao/maud/wiki',
     download_url='http://pypi.python.org/packages/source/m/maud/maud-0.4.tar.gz#md5=140f31e5f1a0957accf08b8492744555',
     license='PSF',
