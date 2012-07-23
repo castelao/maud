@@ -204,14 +204,17 @@ def window_1Dmean(data,l,t=None,method='hann',axis=0):
     data_smooth = ma.masked_all(data.shape)
 
     if len(data.shape)==1:
+        #(I,) = np.nonzero(np.isfinite(data))
+        mask = np.getmaskarray(data.mask)
+        (I,) = np.nonzero(~mask)
         winfunc = window_func.window_func(method)
-        (I,) = np.nonzero(~data.mask)
 
 	for i in I:
             dt = t-t[i]
-            ind = numpy.absolute(dt)<l
+            ind = numpy.nonzero((numpy.absolute(dt)<l) & (mask==False))
             w = winfunc(dt[ind],l)
-            data_smooth[i] = (data[ind]*w).sum()/(w[data[ind].mask==False].sum())
+            #data_smooth[i] = (data[ind]*w).sum()/(w[data[ind].mask==False].sum())
+            data_smooth[i] = (data[ind]*w).sum()/(w.sum())
             #data_smooth[i] = _convolve(data[ind], dt[ind], l, winfunc)
 
     elif len(data.shape)==2:
