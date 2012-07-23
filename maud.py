@@ -205,7 +205,7 @@ def window_1Dmean(data,l,t=None,method='hann',axis=0):
 
     if len(data.shape)==1:
         #(I,) = np.nonzero(np.isfinite(data))
-        mask = ma.getmaskarray(data.mask)
+        mask = ma.getmaskarray(data)
         (I,) = np.nonzero(~mask)
         winfunc = window_func.window_func(method)
 
