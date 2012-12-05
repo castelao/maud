@@ -11,7 +11,7 @@ import numpy
 import numpy as np
 from numpy import ma
 
-#from fluid.common.distance import distance
+from fluid.common.distance import distance
 import window_func
 
 
@@ -279,10 +279,10 @@ def window_1Dmean_grid(data,l,method='hann',axis=0):
     if method == 'hann':
         #r = numpy.arange(numpy.floor(ll)+1)
 	#r = numpy.append(-numpy.flipud(r[1:]),r)
-        w = _weight_hann(r,l)
+        w = window_func._weight_hann(r,l)
         #w=_weight_hann(numpy.append(-numpy.flipud(numpy.arange(l)[1:]),numpy.arange(l)),l)
     elif method == 'hamming':
-        w = _weight_hamming(r,l)
+        w = window_func._weight_hamming(r,l)
     if axis==0:
         if len(w)>data.shape[0]:
 	    print "The filter is longer than the time series. Sorry, I'm not ready to handle that."
