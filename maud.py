@@ -218,26 +218,31 @@ def window_1Dmean(data,l,t=None,method='hann',axis=0):
             #data_smooth[i] = _convolve(data[ind], dt[ind], l, winfunc)
 
     elif len(data.shape)==2:
-        nprocesses = 2*multiprocessing.cpu_count()+1
+        nprocesses = 2*multiprocessing.cpu_count()
         #logger.info("I'll work with %s parallel processes" % nprocesses)
         filters_pool = multiprocessing.Pool(nprocesses)
         results = []
 
         (I,J) = data.shape
         if axis==0:
+            #for j in range(J):
+            #    results.append(filters_pool.apply_async(window_1Dmean, (data[:,j], l, t, method, axis)))
+            #filters_pool.close()
+            #for n, r in enumerate(results):
+            #    data_smooth[:,n] = r.get()
             for j in range(J):
-                results.append(filters_pool.apply_async(window_1Dmean, (data[:,j], l, t, method, axis)))
-            filters_pool.close()
-            for n, r in enumerate(results):
-                data_smooth[:,n] = r.get()
+                data_smooth[:,j] = window_1Dmean(data[:,j], l, t, method, axis)
 
         else:
+            #for i in range(I):
+            #    #data_smooth[i] = window_1Dmean(data[i],l=l,t=t,method=method)
+            #    results.append(filters_pool.apply_async(window_1Dmean, (data[i], l, t, method, axis)))
+            #filters_pool.close()
+            #for n, r in enumerate(results):
+            #    data_smooth[n] = r.get()
             for i in range(I):
-                #data_smooth[i] = window_1Dmean(data[i],l=l,t=t,method=method)
-                results.append(filters_pool.apply_async(window_1Dmean, (data[i], l, t, method, axis)))
-            filters_pool.close()
-            for n, r in enumerate(results):
-                data_smooth[n] = r.get()
+                data_smooth[i] = r.get()
+
 
     else:
         if axis==0:
