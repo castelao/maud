@@ -16,16 +16,6 @@ import window_func
 
 
 """
-
-    print "\r blablabla",
-
-    Check on module progressbar
-    [Beto] eu uso o progressbar, um módulo python
-    [Luiz] ah sim, essa do print é quick-and-dirty
-    [Beto] pbar = ProgressBar(maxval=n).start()
-    for i, filename in enumerate(files):
-            pbar.update(i)
-    [Beto] pbar.finish()
 """
 
 # ==== Bellow here, I need to do some serious work on ====
@@ -219,20 +209,20 @@ def window_1Dmean(data,l,t=None,method='hann',axis=0, parallel=True):
 
     elif len(data.shape)==2:
         (I,J) = data.shape
-        if parallel = True:
+        if parallel == True:
             nprocesses = 2*multiprocessing.cpu_count()
             #logger.info("I'll work with %s parallel processes" % nprocesses)
             filters_pool = multiprocessing.Pool(nprocesses)
             results = []
             if axis==0:
                 for j in range(J):
-                    results.append(filters_pool.apply_async(window_1Dmean, (data[:,j], l, t, method, axis)))
+                    results.append(filters_pool.apply_async(window_1Dmean, (data[:,j], l, t, method, axis, parallel)))
                 filters_pool.close()
                 for n, r in enumerate(results):
                     data_smooth[:,n] = r.get()
             else:
                 for i in range(I):
-                    results.append(filters_pool.apply_async(window_1Dmean, (data[i], l, t, method, axis)))
+                    results.append(filters_pool.apply_async(window_1Dmean, (data[i], l, t, method, axis, parallel)))
                 filters_pool.close()
                 for n, r in enumerate(results):
                     data_smooth[n] = r.get()
@@ -249,11 +239,11 @@ def window_1Dmean(data,l,t=None,method='hann',axis=0, parallel=True):
         if axis==0:
             I = data.shape[1]
             for i in range(I):
-                data_smooth[:,i] = window_1Dmean(data[:,i],l=l,t=t,method=method, axis=0)
+                data_smooth[:,i] = window_1Dmean(data[:,i],l=l,t=t,method=method, axis=0, parallel=parallel)
         else:
             I = data.shape[0]
             for i in range(I):
-                data_smooth[i] = window_1Dmean(data[i],l=l,t=t,method=method, axis=(axis-1))
+                data_smooth[i] = window_1Dmean(data[i],l=l,t=t,method=method, axis=(axis-1), parallel=parallel)
 
     return data_smooth
 
