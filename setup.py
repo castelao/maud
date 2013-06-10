@@ -6,13 +6,15 @@ except ImportError:
     distribute_setup.use_setuptools()
     from setuptools import setup, find_packages
 
-#from distutils.core import setup
-from distutils.extension import Extension
-from Cython.Distutils import build_ext
-
 import os
 import sys
 from distutils import log
+
+#from distutils.core import setup
+from distutils.extension import Extension
+from Cython.Distutils import build_ext
+import numpy as np
+
 
 long_desc = ''' '''
 requires = ['numpy', 'fluid']
@@ -44,5 +46,6 @@ setup(
     packages=find_packages(),
     install_requires=requires,
     cmdclass = {'build_ext': build_ext},
-    ext_modules = [Extension("cwindow_func", ["cwindow_func.pyx"])]
+    ext_modules = [Extension("cwindow_func", ["window_func.pyx"])],
+    include_dirs = [np.get_include()],
 )
