@@ -14,6 +14,14 @@ def window_func(method='hann'):
     if method == 'hann':
         winfunc = _weight_hann
 
+    elif method == 'hamming':
+        try:
+            import cwindow_func
+            winfunc = cwindow_func._weight_hamming
+        except:
+            winfunc = _weight_hamming
+
+
     elif method == 'blackman':
         winfunc = _weight_blackman
 
