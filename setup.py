@@ -6,6 +6,10 @@ except ImportError:
     distribute_setup.use_setuptools()
     from setuptools import setup, find_packages
 
+#from distutils.core import setup
+from distutils.extension import Extension
+from Cython.Distutils import build_ext
+
 import os
 import sys
 from distutils import log
@@ -15,7 +19,7 @@ requires = ['numpy', 'fluid']
 
 setup(
     name='maud',
-    version='0.4.2',
+    version='0.5.0rc1',
     url='https://bitbucket.org/castelao/maud/wiki',
     download_url='http://pypi.python.org/packages/source/m/maud/maud-0.4.tar.gz#md5=140f31e5f1a0957accf08b8492744555',
     license='PSF',
@@ -39,4 +43,6 @@ setup(
     py_modules=['maud', 'window_func'],
     packages=find_packages(),
     install_requires=requires,
+    cmdclass = {'build_ext': build_ext},
+    ext_modules = [Extension("cwindow_func", ["cwindow_func.pyx"])]
 )
