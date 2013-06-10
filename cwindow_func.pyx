@@ -1,7 +1,25 @@
 # http://docs.cython.org/src/userguide/numpy_tutorial.html#numpy-tutorial
 import numpy as np
-#cimport numpy as np
+cimport numpy as np
 from numpy import pi
+
+def window_func(method='hann'):
+    """ Select the weight function
+    """
+    if method == 'hann':
+        winfunc = _weight_hann
+
+    elif method == 'hamming':
+        winfunc = _weight_hamming
+
+    elif method == 'blackman':
+        winfunc = _weight_blackman
+
+    elif method == 'triangular':
+        winfunc = _weight_triangular
+
+    return winfunc
+
 
 # Hamming
 def _weight_hamming(r, double l):
