@@ -11,9 +11,18 @@ import numpy
 import numpy as np
 from numpy import ma
 
-from fluid.common.distance import distance
-import window_func
+try:
+    from cdistance import distance
+except:
+    from fluid.common.distance import distance
 
+try:
+    from cwindow_func import window_func
+except:
+    from window_func import window_func
+
+#from fluid.common.distance import distance
+#from window_func import window_func
 
 """
 """
@@ -64,8 +73,7 @@ def window_mean_2D_latlon(Lat, Lon, data, l, method='hamming'):
         - Might be a good idea to eliminate the dependence on
           fluid.
     """
-    if method == 'hamming':
-        weight_func = window_func._weight_hamming
+    weight_func = window_func(method)
 
     I,J = Lat.shape
     data_smooth={}
@@ -73,9 +81,13 @@ def window_mean_2D_latlon(Lat, Lon, data, l, method='hamming'):
         data_smooth[key] = ma.masked_all(data[key].shape)
     for i in range(I):
         for j in range(J):
-            r = distance(Lat,Lon,Lat[i,j],Lon[i,j])
-            ind = r<l
-            w = weight_func(r[ind],l)
+            ddeg = l/(1856*60.)
+            ind = np.nonzero((Lat<(Lat[i,j]+ddeg)) & (Lat>(Lat[i,j]-ddeg)) & (Lon<(Lon[i,j]+ddeg)) & (Lon>(Lon[i,j]-ddeg)))
+            r = distance(Lat[ind],Lon[ind],Lat[i,j],Lon[i,j], llimit=l)
+            w = weight_func(r, l)
+            #r = distance(Lat, Lon, Lat[i,j], Lon[i,j], llimit=l)
+            #ind = r<l
+            #w = weight_func(r[ind],l)
             for key in data.keys():
                 if len(data[key].shape)==2:
                     # Stupid solution!!! Think about a better way to do this.
@@ -92,7 +104,6 @@ def window_mean_2D_latlon(Lat, Lon, data, l, method='hamming'):
                             if data[key].mask[k,i,j]==False:
                                 data_smooth[key][k,i,j] = (data[key][k][ind]*w).sum()/w.sum()
     return data_smooth
-
 
 
 def window_mean(y,x=None,x_out=None,method="rectangular",boxsize=None):
@@ -164,7 +175,7 @@ def _convolve(x, dt, l, winfunc):
 
 
 
-def window_1Dmean(data,l,t=None,method='hann',axis=0, parallel=True):
+def window_1Dmean(data, l, t=None, method='hann', axis=0, parallel=True):
     """ A moving window mean filter, not necessarily a regular grid.
 
         1D means that the filter is applied to along only one
