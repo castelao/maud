@@ -8,19 +8,14 @@ from numpy import pi
 
 # defining some weight functions
 
-def window_func(method='hann'):
+def window_func(method='hamming'):
     """ Select the weight function
     """
-    if method == 'hann':
+    if method == 'hamming':
+        winfunc = _weight_hamming
+
+    elif method == 'hann':
         winfunc = _weight_hann
-
-    elif method == 'hamming':
-        try:
-            import cwindow_func
-            winfunc = cwindow_func._weight_hamming
-        except:
-            winfunc = _weight_hamming
-
 
     elif method == 'blackman':
         winfunc = _weight_blackman
