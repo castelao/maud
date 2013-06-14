@@ -4,3 +4,5 @@ maud.egg-info
 
 syntax: glob
 *.pyc
+*.c
+*.lprof
