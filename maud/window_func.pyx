@@ -6,8 +6,8 @@ from numpy import ma
 cimport numpy as np
 from libc.math cimport cos
 
-DTYPE = np.float
-ctypedef np.float_t DTYPE_t
+DTYPE = np.float64
+ctypedef np.float64_t DTYPE_t
 
 # Hamming
 def _weight_hamming(np.ndarray r, double l):
@@ -26,7 +26,9 @@ def _weight_hamming(np.ndarray r, double l):
 	hint: cos(a-b) = cos(a)cos(b)+sin(a)sin(b)
 
     """
-    assert r.dtype == DTYPE
+    #print r.dtype
+    #print DTYPE
+    #assert r.dtype == DTYPE
     cdef int n
     cdef int N = len(r)
     cdef double lhalf = l/2.
