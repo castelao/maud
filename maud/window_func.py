@@ -51,10 +51,10 @@ def _weight_triangular(r,l):
     return w
 
 def _weight_hamming(r,l):
+    """ Hamming weight
     """
-    """
-    w=0.54+0.46*np.cos(pi*r/l)
-    w[np.absolute(r)>l]=0
+    w = 0.54 + 0.46*np.cos(r*2*pi/l)
+    w[np.absolute(r)>l/2.]=0
     return w
 
 # hamming 2D
@@ -62,8 +62,8 @@ def _weight_hamming_2D(x, y, l):
     """
     """
     r = (x**2+y**2)**0.5
-    w = 0.54 + 0.46*np.cos(2*pi*r/l)
-    w[r>l] = 0
+    w = 0.54 + 0.46*np.cos(r*2*pi/l)
+    w[np.absolute(r)>l/2.] = 0
     return w
 
 # hann
