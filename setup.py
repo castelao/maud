@@ -7,7 +7,7 @@ except ImportError:
     from setuptools import setup, find_packages
 
 import os
-import sys
+#import sys
 from distutils import log
 
 #from distutils.core import setup
@@ -17,8 +17,12 @@ from Cython.Distutils.extension import Extension
 from Cython.Distutils import build_ext
 import numpy as np
 
+here = os.path.abspath(os.path.dirname(__file__))
+README = open(os.path.join(here, 'README.rst')).read()
+NEWS = open(os.path.join(here, 'NEWS.txt')).read()
 
-long_desc = ''' '''
+version='0.5.0rc2'
+
 requires = [
     'numpy>=1.1',
     'fluid>=0.2',
@@ -26,15 +30,15 @@ requires = [
 
 setup(
     name='maud',
-    version='0.5.0rc2',
+    version=version,
     url='https://bitbucket.org/castelao/maud/wiki',
     download_url='http://pypi.python.org/packages/source/m/maud/maud-0.4.tar.gz#md5=140f31e5f1a0957accf08b8492744555',
     license='PSF',
     author='Guilherme Castelao, Bia Villas-Boas, Luiz Irber',
     author_email='guilherme@castelao.net, bia@melovillasboas.com, luiz.irber@gmail.com',
     description='Moving Average for Uneven Data',
-    long_description=long_desc,
-    zip_safe=True,
+    long_description=README + '\n\n' + NEWS,
+    #zip_safe=True,
     classifiers=[
         'Development Status :: 3 - Alpha',
         'Intended Audience :: Developers',
@@ -47,11 +51,12 @@ setup(
         'Topic :: Software Development :: Libraries :: Python Modules',
     ],
     platforms='any',
-    py_modules=['maud', 'window_func'],
+    #py_modules=['maud', 'window_func'],
     packages=find_packages(),
+    #packages=['maud', 'maud.window_func'],
     install_requires=requires,
     cmdclass = {'build_ext': build_ext},
-    ext_modules = [Extension("cwindow_func", ["window_func.pyx"])],
+    ext_modules = [Extension("cwindow_func", ["maud/window_func.pyx"])],
     include_dirs = [np.get_include()],
     #ext_modules = [
     #    Extension("maud.cwindow_func", ["window_func.pyx"],
