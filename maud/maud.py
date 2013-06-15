@@ -16,15 +16,15 @@ from numpy import ma
 #except:
 #    from fluid.common.distance import distance
 
-#try:
-#    from cwindow_func import window_func
-#except:
-#    from window_func import window_func
+try:
+    from cwindow_func import window_func
+except:
+    from window_func import window_func
 
 #from cdistance import distance
 #from cwindow_func import window_func
 from fluid.common.distance import distance
-from window_func import window_func
+#from window_func import window_func
 
 """
 """

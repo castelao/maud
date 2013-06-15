@@ -21,7 +21,7 @@ here = os.path.abspath(os.path.dirname(__file__))
 README = open(os.path.join(here, 'README.rst')).read()
 NEWS = open(os.path.join(here, 'NEWS.txt')).read()
 
-version='0.5.0rc2'
+version='0.5.1'
 
 requires = [
     'numpy>=1.1',
@@ -56,7 +56,7 @@ setup(
     #packages=['maud', 'maud.window_func'],
     install_requires=requires,
     cmdclass = {'build_ext': build_ext},
-    ext_modules = [Extension("cwindow_func", ["maud/window_func.pyx"])],
+    ext_modules = [Extension("maud.cwindow_func", ["maud/window_func.pyx"])],
     include_dirs = [np.get_include()],
     #ext_modules = [
     #    Extension("maud.cwindow_func", ["window_func.pyx"],

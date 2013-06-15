@@ -12,7 +12,12 @@ ctypedef np.float_t DTYPE_t
 # Hamming
 def _weight_hamming(np.ndarray r, double l):
     """ Cython hamming weight
+
+        Input:
+	    r np.array
+	    l double
     """
+    assert r.dtype == DTYPE
     cdef int n
     cdef int N = len(r)
     cdef double lhalf = l/2.
