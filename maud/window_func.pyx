@@ -2,8 +2,26 @@
 
 import numpy as np
 from numpy import ma
+
 cimport numpy as np
-from numpy import pi
+from libc.math cimport cos
+
+DTYPE = np.float
+ctypedef np.float_t DTYPE_t
+
+# Hamming
+def _weight_hamming(np.ndarray r, double l):
+    """ Cython hamming weight
+    """
+    cdef int n
+    cdef int N = len(r)
+    cdef double lhalf = l/2.
+    cdef double scale = 2*np.pi/l
+    cdef np.ndarray w = np.zeros(N, dtype=DTYPE)
+    for n in range(N):
+        if abs(r[n])<=lhalf:
+            w[n] = 0.54 + 0.46*cos(scale*r[n])
+    return w
 
 
 def window_func(method='hamming'):
@@ -22,19 +40,3 @@ def window_func(method='hamming'):
     #    winfunc = _weight_triangular
 
     return winfunc
-
-
-# Hamming
-def _weight_hamming(r, double l):
-    """
-    """
-    #print "c hamming"
-    cdef int N, n
-    cdef double pi
-    N = r.shape[0]
-    w = ma.zeros(N, dtype=r.dtype)
-    for n in range(N):
-        #if np.absolute(r[n])<=l:
-        if (r[n]>=l) & (r[n]<=l):
-            w[n]=0.54+0.46*np.cos(pi*r[n]/l)
-    return w
