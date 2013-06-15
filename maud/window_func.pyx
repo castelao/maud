@@ -16,6 +16,15 @@ def _weight_hamming(np.ndarray r, double l):
         Input:
 	    r np.array
 	    l double
+
+	w = 0.54 - 0.46*cos(2*pi*n/(N-1))
+	where n is the element index of a total N elements.
+	or
+	w = 0.54 + 0.46*cos(2*pi*r/l),
+	where r is the distance to the center of the window,
+	and l is the total width of the filter window.
+	hint: cos(a-b) = cos(a)cos(b)+sin(a)sin(b)
+
     """
     assert r.dtype == DTYPE
     cdef int n
