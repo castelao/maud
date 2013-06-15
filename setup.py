@@ -11,13 +11,18 @@ import sys
 from distutils import log
 
 #from distutils.core import setup
-from distutils.extension import Extension
+# Which Extension to use?
+#from distutils.extension import Extension
+from Cython.Distutils.extension import Extension
 from Cython.Distutils import build_ext
 import numpy as np
 
 
 long_desc = ''' '''
-requires = ['numpy', 'fluid']
+requires = [
+    'numpy>=1.1',
+    'fluid>=0.2',
+    ]
 
 setup(
     name='maud',
@@ -48,4 +53,11 @@ setup(
     cmdclass = {'build_ext': build_ext},
     ext_modules = [Extension("cwindow_func", ["window_func.pyx"])],
     include_dirs = [np.get_include()],
+    #ext_modules = [
+    #    Extension("maud.cwindow_func", ["window_func.pyx"],
+    #    #libraries=['maud'],
+    #    include_dirs = [np.get_include()],
+    #    #pyrex_include_dirs=['.']
+    #    ),
+    #    ],
 )

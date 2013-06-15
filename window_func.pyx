@@ -28,11 +28,13 @@ def window_func(method='hamming'):
 def _weight_hamming(r, double l):
     """
     """
+    #print "c hamming"
     cdef int N, n
     cdef double pi
     N = r.shape[0]
     w = ma.zeros(N, dtype=r.dtype)
     for n in range(N):
-        if np.absolute(r[n])<=l:
+        #if np.absolute(r[n])<=l:
+        if (r[n]>=l) & (r[n]<=l):
             w[n]=0.54+0.46*np.cos(pi*r[n]/l)
     return w

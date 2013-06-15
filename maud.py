@@ -11,18 +11,20 @@ import numpy
 import numpy as np
 from numpy import ma
 
-try:
-    from cdistance import distance
-except:
-    from fluid.common.distance import distance
+#try:
+#    from cdistance import distance
+#except:
+#    from fluid.common.distance import distance
 
-try:
-    from cwindow_func import window_func
-except:
-    from window_func import window_func
+#try:
+#    from cwindow_func import window_func
+#except:
+#    from window_func import window_func
 
-#from fluid.common.distance import distance
-#from window_func import window_func
+#from cdistance import distance
+#from cwindow_func import window_func
+from fluid.common.distance import distance
+from window_func import window_func
 
 """
 """
@@ -50,7 +52,6 @@ def window_mean_2D(x, y, z, l, method='hamming'):
 	        w = weight_func((x-x[i,j]), (y-y[i,j]), l)
 	        output[i,j] = (z*w).sum()/(w.sum())
         return output
-
 
 def window_mean_2D_latlon(Lat, Lon, data, l, method='hamming'):
     """
@@ -104,7 +105,6 @@ def window_mean_2D_latlon(Lat, Lon, data, l, method='hamming'):
                             if data[key].mask[k,i,j]==False:
                                 data_smooth[key][k,i,j] = (data[key][k][ind]*w).sum()/w.sum()
     return data_smooth
-
 
 def window_mean(y,x=None,x_out=None,method="rectangular",boxsize=None):
     """Windowed means along 1-D array
