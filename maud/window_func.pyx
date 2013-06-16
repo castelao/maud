@@ -77,8 +77,8 @@ def window_func(method='hamming'):
     if method == 'hamming':
         winfunc = _weight_hamming
 
-    #elif method == 'hann':
-    #    winfunc = _weight_hann
+    elif method == 'hann':
+        winfunc = _weight_hann
 
     #elif method == 'blackman':
     #    winfunc = _weight_blackman
