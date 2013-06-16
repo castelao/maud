@@ -68,6 +68,7 @@ def _weight_hamming(r,l):
 # hamming 2D
 def _weight_hamming_2D(x, y, l):
     """
+        check _weight_hamming
     """
     r = (x**2+y**2)**0.5
     w = 0.54 + 0.46*np.cos(2*pi*r/l)
@@ -76,18 +77,28 @@ def _weight_hamming_2D(x, y, l):
 
 # hann
 def _weight_hann(r,l):
+    """ Hann weight 
+        
+        from the definition of the Hann window centered in n = (N-1)/2:
+        w = 0.5*(1 + np.cos(2*pi*n/(N-1))),
+        where n is the element index of a toal of N elements.
+        To make it symmetrical, i.e centered in n=0, we should add a 
+        phase of pi in the cosine argument. So,
+        w = 0.5*(1 - np.cos(2*pi*r/l)),
+        where r is the distance to the center of teh window
+        and l is the total width of the window.
     """
-    """
-    w=0.5*(1+np.cos(pi*r/l))
+    w=0.5*(1+np.cos(2*pi*r/l))
     w[np.absolute(r)>l]=0
     return w
 
 # hann 2D
 def _weight_hann_2D(x,y,l):
     """
+        Check _weight_hann 
     """
     r=(x**2+y**2)**0.5
-    w=0.5*(1+np.cos(pi*r/l))
+    w=0.5*(1+np.cos(2*pi*r/l))
     w[r>l]=0
     return w
 
