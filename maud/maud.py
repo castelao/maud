@@ -13,6 +13,7 @@ from numpy import ma
 
 try:
     from fluid.cdistance import distance
+    from fluid.cdistance import find_closer_then
 except:
     from fluid.common.distance import distance
 
@@ -77,28 +78,28 @@ def window_mean_2D_latlon(Lat, Lon, data, l, method='hamming'):
         data_smooth[key] = ma.masked_all(data[key].shape)
     for i in range(I):
         for j in range(J):
-            ddeg = l/(1856*60.)
-            ind = np.nonzero((Lat<=(Lat[i,j]+ddeg)) & (Lat>=(Lat[i,j]-ddeg)) & (Lon<=(Lon[i,j]+ddeg)) & (Lon>=(Lon[i,j]-ddeg)))
-            r = distance(Lat.data[ind],Lon.data[ind],Lat[i,j],Lon[i,j], llimit=l)
+            ind, r = find_closer_then(Lat, Lon, Lat[i,j], Lon[i,j], llimit=l)
+            #r = distance(Lat.data, Lon.data, Lat[i,j], Lon[i,j], llimit=l)
             w = weight_func(r, l)
-            #r = distance(Lat, Lon, Lat[i,j], Lon[i,j], llimit=l)
             #ind = r<l
             #w = weight_func(r[ind],l)
             for key in data.keys():
                 if len(data[key].shape)==2:
+                    good = np.nonzero(data[key][ind])
+                    #ind = np.nonzero(data[key])
                     # Stupid solution!!! Think about a better way to do this.
                     if not hasattr(data[key][i,j],'mask'):
-                        data_smooth[key][i,j] = (data[key][ind]*w).sum()/w.sum()
+                        data_smooth[key][i,j] = (data[key][ind]*w).sum()/w[good].sum()
                     else:
                         if data[key][i,j].mask==False:
-                            data_smooth[key][i,j] = (data[key][ind]*w).sum()/w.sum()
+                            data_smooth[key][i,j] = (data[key][ind]*w).sum()/w[good].sum()
                 elif len(data[key].shape)==3:
                     for k in range(data[key].shape[0]):
                         if not hasattr(data[key][k,i,j],'mask'):
-                            data_smooth[key][k,i,j] = (data[key][k][ind]*w).sum()/w.sum()
+                            data_smooth[key][k,i,j] = (data[key][k][ind]*w).sum()/w[good].sum()
                         else:
                             if data[key].mask[k,i,j]==False:
-                                data_smooth[key][k,i,j] = (data[key][k][ind]*w).sum()/w.sum()
+                                data_smooth[key][k,i,j] = (data[key][k][ind]*w).sum()/w[good].sum()
     return data_smooth
 
 def window_mean(y,x=None,x_out=None,method="rectangular",boxsize=None):
