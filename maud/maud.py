@@ -16,6 +16,7 @@ try:
     from fluid.cdistance import find_closer_then
 except:
     from fluid.common.distance import distance
+    from fluid.common.distance import find_closer_then
 
 try:
     from maud.cwindow_func import window_func
@@ -26,29 +27,6 @@ except:
 """
 """
 
-# ==== Bellow here, I need to do some serious work on ====
-
-def window_mean_2D(x, y, z, l, method='hamming'):
-    """
-    """
-    if method == 'hamming':
-        weight_func = _weight_hamming_2D
-
-    if len(z.shape) < 2:
-        print "At least 2D"
-
-    output = ma.masked_all(z.shape)
-    if len(z.shape) > 2:
-        for i in range(z.shape[0]):
-            output[i] = window_mean_2D(x, y, z[i], method)
-
-    elif len(z.shape) == 2:
-        I,J = z.shape
-        for i in range(I):
-            for j in range(J):
-	        w = weight_func((x-x[i,j]), (y-y[i,j]), l)
-	        output[i,j] = (z*w).sum()/(w.sum())
-        return output
 
 def window_mean_2D_latlon(Lat, Lon, data, l, method='hamming'):
     """
@@ -101,6 +79,32 @@ def window_mean_2D_latlon(Lat, Lon, data, l, method='hamming'):
                             if data[key].mask[k,i,j]==False:
                                 data_smooth[key][k,i,j] = (data[key][k][ind]*w).sum()/w[good].sum()
     return data_smooth
+
+# ==== Bellow here, I need to do some serious work on ====
+
+def window_mean_2D(x, y, z, l, method='hamming'):
+    """
+    """
+    if method == 'hamming':
+        weight_func = _weight_hamming_2D
+
+    if len(z.shape) < 2:
+        print "At least 2D"
+
+    output = ma.masked_all(z.shape)
+    if len(z.shape) > 2:
+        for i in range(z.shape[0]):
+            output[i] = window_mean_2D(x, y, z[i], method)
+
+    elif len(z.shape) == 2:
+        I,J = z.shape
+        for i in range(I):
+            for j in range(J):
+	        w = weight_func((x-x[i,j]), (y-y[i,j]), l)
+	        output[i,j] = (z*w).sum()/(w.sum())
+        return output
+
+
 
 def window_mean(y,x=None,x_out=None,method="rectangular",boxsize=None):
     """Windowed means along 1-D array
