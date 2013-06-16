@@ -52,8 +52,16 @@ def _weight_triangular(r,l):
 
 def _weight_hamming(r,l):
     """ Hamming weight
+
+        w = 0.54 - 0.46*cos(2*pi*n/(N-1))
+        where n is the element index of a total N elements.
+        or
+        w = 0.54 + 0.46*cos(2*pi*r/l),
+        where r is the distance to the center of the window,
+        and l is the total width of the filter window.
+        hint: cos(a-b) = cos(a)cos(b)+sin(a)sin(b)
     """
-    w = 0.54 + 0.46*np.cos(r*2*pi/l)
+    w = 0.54 + 0.46*np.cos(2*pi*r/l)
     w[np.absolute(r)>l/2.]=0
     return w
 
@@ -62,7 +70,7 @@ def _weight_hamming_2D(x, y, l):
     """
     """
     r = (x**2+y**2)**0.5
-    w = 0.54 + 0.46*np.cos(r*2*pi/l)
+    w = 0.54 + 0.46*np.cos(2*pi*r/l)
     w[np.absolute(r)>l/2.] = 0
     return w
 
