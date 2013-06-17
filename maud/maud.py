@@ -57,10 +57,7 @@ def window_mean_2D_latlon(Lat, Lon, data, l, method='hamming'):
     for i in range(I):
         for j in range(J):
             ind, r = find_closer_then(Lat, Lon, Lat[i,j], Lon[i,j], llimit=l)
-            #r = distance(Lat.data, Lon.data, Lat[i,j], Lon[i,j], llimit=l)
             w = weight_func(r, l)
-            #ind = r<l
-            #w = weight_func(r[ind],l)
             for key in data.keys():
                 if len(data[key].shape)==2:
                     good = np.nonzero(data[key][ind])
@@ -204,11 +201,11 @@ def window_1Dmean(data, l, t=None, method='hann', axis=0, parallel=True):
 
     data_smooth = ma.masked_all(data.shape)
 
-    if len(data.shape)==1:
+    if data.ndim==1:
         #(I,) = np.nonzero(np.isfinite(data))
         mask = ma.getmaskarray(data)
         (I,) = np.nonzero(~mask)
-        winfunc = window_func.window_func(method)
+        winfunc = window_func(method)
 
 	for i in I:
             dt = t-t[i]
