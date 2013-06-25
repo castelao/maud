@@ -1,0 +1,76 @@
+#!/usr/bin/env python
+
+""" This is a first prototype of MAUD script to filter a NetCDF file
+
+    Far away from an ideal solution. It's just to resolve the Bia's
+      problem for now.
+"""
+
+from optparse import OptionParser
+
+#import yaml
+from netCDF4 import Dataset
+
+from numpy import ma
+
+# ==== Parsing the options on command line
+parser = OptionParser()
+
+parser.add_option("-l", "--windowlength", dest="windowlength",
+    help="Length of the filter window. Must be on the same scale of the scalevar")
+
+parser.add_option("--scalevar", dest="scalevar",
+    help="The scale on the dimension to be filtered.", default="time")
+
+parser.add_option("--var", dest="var",
+    help="Variable to be filtered")
+
+parser.add_option("-w", dest="windowmethod",
+    help="Type of window [hamming, hann, boxcar, triangle, lanczos]",
+    default="hamming")
+
+
+(options, args) = parser.parse_args()
+
+options.windowlength = float(options.windowlength)
+options.varout  = options.var + "_maud"
+
+nc = Dataset(args[0], 'a')
+
+#if var not in nc.variables.keys():
+#    import sys; sys.exit()
+
+
+attributes = nc.variables[options.var].ncattrs()
+try:
+    out = nc.createVariable(options.varout, 
+              nc.variables[options.var].dtype, 
+              nc.variables[options.var].dimensions, 
+              fill_value=nc.variables[options.var]._FillValue)
+    attributes.remove('_FillValue')
+except:
+    out = nc.createVariable(options.varout, 
+              nc.variables[options.var].dtype, 
+              nc.variables[options.var].dimensions)
+
+for a in attributes:
+    setattr(out, a, getattr(nc.variables[options.var], a))
+
+from maud import window_1Dmean
+
+#window_1Dmean(data, l, t=None, method='hann', axis=0, parallel=True)
+
+axis = nc.variables[options.var].dimensions.index(nc.variables[options.scalevar].dimensions[0])
+
+assert axis==0
+assert len(nc.variables[options.var].dimensions)==3
+    
+I, J = nc.variables[options.var].shape[1:]
+for i in range(I):
+    for j in range(J):
+        out[:, i, j] = window_1Dmean(data=ma.array(nc.variables[options.var][:, i, j]), 
+                        t = nc.variables[options.scalevar][:],
+                        l=options.windowlength, axis=axis, 
+                        parallel=False)
+
+nc.close()
