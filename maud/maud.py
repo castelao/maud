@@ -170,7 +170,23 @@ def _convolve(x, dt, l, winfunc):
     y = (x*w).sum()/(w[x.mask==False].sum())
     return y
 
+def window_1Dbandpass(data, llow, lup, t=None, method='hann', axis=0, parallel=True):
+    """
+    """
+    if axis > len(data.shape):
+        print "The data array don't contain so many dimensions. Choose another axis"
+	return
 
+    if t == None:
+        print "The scale along the choosed axis weren't defined. I'll consider a constant sequence."
+	t = numpy.arange(data.shape[axis])
+
+    elif t.shape != (data.shape[axis],):
+        print "The scale variable t don't have the same size of the choosed axis of the data array"
+        return 
+    # ----
+
+    data_smooth = ma.masked_all(data.shape)
 
 def window_1Dmean(data, l, t=None, method='hann', axis=0, parallel=True):
     """ A moving window mean filter, not necessarily a regular grid.
