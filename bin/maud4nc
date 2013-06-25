@@ -7,6 +7,7 @@
 """
 
 from optparse import OptionParser
+from progressbar import ProgressBar
 
 #import yaml
 from netCDF4 import Dataset
@@ -66,8 +67,10 @@ assert axis==0
 assert len(nc.variables[options.var].dimensions)==3
     
 I, J = nc.variables[options.var].shape[1:]
+pbar = ProgressBar(maxval=I*J).start()
 for i in range(I):
     for j in range(J):
+        pbar.update((i+1)*(j+1))
         out[:, i, j] = window_1Dmean(data=ma.array(nc.variables[options.var][:, i, j]), 
                         t = nc.variables[options.scalevar][:],
                         l=options.windowlength, axis=axis, 
