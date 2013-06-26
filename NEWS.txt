@@ -7,7 +7,7 @@ News
 
 *Including some resources with cython, hence faster.
 
-*You must have the package dsitribute with a newer version than 0.6.24dev-r0, otherwise it will fail to install
+*You must have the package distribute with a newer version than 0.6.24dev-r0, otherwise it will fail to install
 
 0.4.1
 -----
