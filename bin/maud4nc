@@ -35,7 +35,8 @@ parser.add_option("-w", dest="windowmethod",
 
 (options, args) = parser.parse_args()
 
-options.windowlength = float(options.windowlength)
+options.lowpasswindowlength = float(options.lowpasswindowlength)
+options.highpasswindowlength = float(options.highpasswindowlength)
 options.varout  = options.var + "_maud"
 
 nc = Dataset(args[0], 'a')
