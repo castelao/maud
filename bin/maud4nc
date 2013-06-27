@@ -16,7 +16,10 @@ from numpy import ma
 # ==== Parsing the options on command line
 parser = OptionParser()
 
-parser.add_option("-l", "--windowlength", dest="windowlength",
+parser.add_option("--lowpasswindowlength", dest="lowpasswindowlength",
+    help="Length of the filter window. Must be on the same scale of the scalevar")
+
+parser.add_option("--highpasswindowlength", dest="highpasswindowlength",
     help="Length of the filter window. Must be on the same scale of the scalevar")
 
 parser.add_option("--scalevar", dest="scalevar",
@@ -71,15 +74,28 @@ try:
     pbar = ProgressBar(maxval=I*J).start()
 except:
     pass
+
+data = nc.variables[options.var]
+
 for i in range(I):
     for j in range(J):
         try:
             pbar.update((i+1)*(j+1))
         except:
             pass
-        out[:, i, j] = window_1Dmean(data=ma.array(nc.variables[options.var][:, i, j]), 
+        #out[:, i, j] = window_1Dmean(data=ma.array(nc.variables[options.var][:, i, j]), 
+        #                t = nc.variables[options.scalevar][:],
+        #                l=options.windowlength, axis=axis, 
+        #                parallel=False)
+
+        tmp = window_1Dmean(data=ma.array(data[:, i, j]), 
                         t = nc.variables[options.scalevar][:],
-                        l=options.windowlength, axis=axis, 
+                        l=options.lowpasswindowlength, axis=axis, 
+                        parallel=False)
+
+        out[:, i, j] = tmp - window_1Dmean(data=ma.array(tmp), 
+                        t = nc.variables[options.scalevar][:],
+                        l=options.highpasswindowlength, axis=axis, 
                         parallel=False)
 
 nc.close()
