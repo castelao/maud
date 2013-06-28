@@ -31,8 +31,8 @@ requires = [
 setup(
     name='maud',
     version=version,
-    url='https://bitbucket.org/castelao/maud/wiki',
-    download_url='http://pypi.python.org/packages/source/m/maud/maud-0.4.tar.gz#md5=140f31e5f1a0957accf08b8492744555',
+    url='http://maud.castelao.net',
+    download_url='http://pypi.python.org/packages/source/m/maud/maud-'+version+'.tar.gz',
     license='PSF',
     author='Guilherme Castelao, Bia Villas-Boas, Luiz Irber',
     author_email='guilherme@castelao.net, bia@melovillasboas.com, luiz.irber@gmail.com',
