@@ -172,6 +172,10 @@ def _convolve(x, dt, l, winfunc):
 
 def window_1Dbandpass(data, lshortpass, llongpass, t=None, method='hann', axis=0, parallel=True):
     """
+
+        Input:
+            lshortpass
+            llongpass
     """
     if axis > len(data.shape):
         print "The data array don't contain so many dimensions. Choose another axis"
@@ -286,10 +290,6 @@ def window_1Dmean(data, l, t=None, method='hann', axis=0, parallel=True):
 
     return data_smooth
 
-
-def window_mean_1D_grid(data,l,method='hann',axis=0):
-    print "ATENTION, update the code to call window_1Dmean_grid instead"
-    return window_1Dmean_grid(data,l,method=method,axis=axis)
 
 def window_1Dmean_grid(data,l,method='hann',axis=0):
     """ A moving window mean filter applied to a regular grid.
