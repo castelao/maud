@@ -224,6 +224,16 @@ def window_1Dmean(data, l, t=None, method='hann', axis=0, parallel=True):
     """
     assert axis <= data.ndim, "Invalid axis!"
 
+    if axis != 0:
+        data_smooth = window_1Dmean(data.swapaxes(0,axis),
+            l = l,
+            t = t,
+            method = method,
+            axis=0,
+            parallel = parallel)
+
+        return data_smooth.swapaxes(0,axis)
+
     if t == None:
         print "The scale along the choosed axis weren't defined. I'll consider a constant sequence."
 	t = numpy.arange(data.shape[axis])
@@ -239,51 +249,39 @@ def window_1Dmean(data, l, t=None, method='hann', axis=0, parallel=True):
     if data.ndim==1:
         # It's faster than getmaskarray
         (I,) = np.nonzero(np.isfinite(data))
-
 	for i in I:
             dt = t-t[i]
-            ind = numpy.nonzero((numpy.absolute(dt)<l) & (data.mask==False))
+            ind = numpy.nonzero((numpy.absolute(dt)<l))
             w = winfunc(dt[ind],l)
             data_smooth[i] = (data[ind]*w).sum()/(w.sum())
-        return data_smooth
 
-    elif len(data.shape)==2:
-        (I,J) = data.shape
-        if parallel == True:
-            nprocesses = 2*multiprocessing.cpu_count()
-            #logger.info("I'll work with %s parallel processes" % nprocesses)
-            filters_pool = multiprocessing.Pool(nprocesses)
-            results = []
-            if axis==0:
-                for j in range(J):
-                    results.append(filters_pool.apply_async(window_1Dmean, (data[:,j], l, t, method, axis, parallel)))
-                filters_pool.close()
-                for n, r in enumerate(results):
-                    data_smooth[:,n] = r.get()
-            else:
-                for i in range(I):
-                    results.append(filters_pool.apply_async(window_1Dmean, (data[i], l, t, method, axis, parallel)))
-                filters_pool.close()
-                for n, r in enumerate(results):
-                    data_smooth[n] = r.get()
-        else:
-            if axis==0:
-                for j in range(J):
-                    data_smooth[:,j] = window_1Dmean(data[:,j], l, t, method, axis)
-            else:
-                for i in range(I):
-                    data_smooth[i] = r.get()
     else:
-        if axis==0:
-            I = data.shape[1]
-            for i in range(I):
-                data_smooth[:,i] = window_1Dmean(data[:,i],l=l,t=t,method=method, axis=0, parallel=parallel)
-        else:
-            I = data.shape[0]
-            for i in range(I):
-                data_smooth[i] = window_1Dmean(data[i],l=l,t=t,method=method, axis=(axis-1), parallel=parallel)
+        I = data.shape[1]
+        for i in range(I):
+            data_smooth[:,i] = window_1Dmean(data[:,i], 
+                    l = l,
+                    t = t,
+                    method = method, 
+                    axis = 0, 
+                    parallel=parallel)
 
     return data_smooth
+
+#    elif len(data.shape)==2:
+#        (I,J) = data.shape
+#        if parallel == True:
+#            nprocesses = 2*multiprocessing.cpu_count()
+#            #logger.info("I'll work with %s parallel processes" % nprocesses)
+#            filters_pool = multiprocessing.Pool(nprocesses)
+#            results = []
+#            for j in range(J):
+#                results.append(filters_pool.apply_async(window_1Dmean, (data[:,j], l, t, method, axis, parallel)))
+#            filters_pool.close()
+#            for n, r in enumerate(results):
+#                data_smooth[:,n] = r.get()
+#        else:
+#            for j in range(J):
+#                data_smooth[:,j] = window_1Dmean(data[:,j], l, t, method, axis)
 
 
 def window_1Dmean_grid(data, l, method='hann', axis=0, parallel=False):
