@@ -204,7 +204,7 @@ def window_1Dbandpass(data, lshortpass, llongpass, t=None, method='hann', axis=0
                         axis = axis,
                         parallel=False)
 
-     return data_smooth
+    return data_smooth
 
 
 
@@ -222,14 +222,14 @@ def window_1Dmean(data, l, t=None, method='hann', axis=0, parallel=True):
 
         l is the size of the filter.
     """
-    assert axis <= data.ndim, "The data array don't contain so many dimensions. Choose another axis"
+    assert axis <= data.ndim, "Invalid axis!"
 
     if t == None:
         print "The scale along the choosed axis weren't defined. I'll consider a constant sequence."
 	t = numpy.arange(data.shape[axis])
 
     elif t.shape != (data.shape[axis],):
-        print "The scale variable t don't have the same size of the choosed axis of the data array"
+        print "Invalid size of t."
         return 
     # ----
     winfunc = window_func(method)
@@ -239,8 +239,6 @@ def window_1Dmean(data, l, t=None, method='hann', axis=0, parallel=True):
     if data.ndim==1:
         # It's faster than getmaskarray
         (I,) = np.nonzero(np.isfinite(data))
-        #mask = ma.getmaskarray(data)
-        #(I,) = np.nonzero(~mask)
 
 	for i in I:
             dt = t-t[i]
@@ -248,7 +246,6 @@ def window_1Dmean(data, l, t=None, method='hann', axis=0, parallel=True):
             w = winfunc(dt[ind],l)
             data_smooth[i] = (data[ind]*w).sum()/(w.sum())
         return data_smooth
-
 
     elif len(data.shape)==2:
         (I,J) = data.shape
@@ -286,12 +283,10 @@ def window_1Dmean(data, l, t=None, method='hann', axis=0, parallel=True):
             for i in range(I):
                 data_smooth[i] = window_1Dmean(data[i],l=l,t=t,method=method, axis=(axis-1), parallel=parallel)
 
-
-
     return data_smooth
 
 
-def window_1Dmean_grid(data,l,method='hann',axis=0):
+def window_1Dmean_grid(data, l, method='hann', axis=0, parallel=False):
     """ A moving window mean filter applied to a regular grid.
 
         1D means that the filter is applied to along only one
@@ -306,66 +301,48 @@ def window_1Dmean_grid(data,l,method='hann',axis=0):
 
         l is in number of cells around the point being evaluated.
     """
-    if method == 'hanning':
-        method = 'hann'
+    assert axis <= data.ndim, "Invalid axis!"
 
-    r = numpy.arange(numpy.floor(l)+1)
-    r = numpy.append(-numpy.flipud(r[1:]),r)
-    if method == 'hann':
-        #r = numpy.arange(numpy.floor(ll)+1)
-	#r = numpy.append(-numpy.flipud(r[1:]),r)
-        w = window_func._weight_hann(r,l)
-        #w=_weight_hann(numpy.append(-numpy.flipud(numpy.arange(l)[1:]),numpy.arange(l)),l)
-    elif method == 'hamming':
-        w = window_func._weight_hamming(r,l)
-    if axis==0:
-        if len(w)>data.shape[0]:
-	    print "The filter is longer than the time series. Sorry, I'm not ready to handle that."
-	    return
-    #data_smooth={}
-    #for key in data:
-    #    data_smooth[key] = ma.masked_all(data[key].shape)
+    if axis != 0:
+        data_smooth = window_1Dmean_grid(data.swapaxes(0, axis), 
+                l = l, 
+                method = method, 
+                axis = 0, 
+                parallel = parallel)
+
+        return data_smooth.swapaxes(0, axis)
+
+    winfunc = window_func(method)
+    r = np.arange(-np.floor(l/2),np.floor(l/2)+1)
+    w = winfunc(r, l)
+
     data_smooth = ma.masked_all(data.shape)
-    #for key in data:
-    #if len(data.shape)==2:
-    #    I,J = data.shape
-    #    if axis==0:
-    #        for j in range(J):
-    #          data_smooth[:,j] = numpy.convolve(ssh[:,j],w/w.sum(),mode='same')
-    #elif len(data.shape)==3:
+
+    I = data.shape[0]
+    norm = np.convolve(np.ones(I), w ,mode='same')
     if len(data.shape)==1:
-        if axis!=0:
-	    print "Wait a minute. This is an 1D array, axis need to be equal to 0"
-	    return
-	I = data.shape
 	norm=numpy.convolve(numpy.ones(I),w,mode='same')
 	data_smooth[:] = numpy.convolve(data[:],w,mode='same')/norm
-    elif len(data.shape)==2:
-        I,J = data.shape
-        if axis==0:
-            norm=numpy.convolve(numpy.ones(I),w,mode='same')
-            for j in range(J):
-                data_smooth[:,j] = numpy.convolve(data[:,j],w,mode='same')/norm
-	elif axis==1:
-            norm=numpy.convolve(numpy.ones(J),w,mode='same')
-            for i in range(I):
-                data_smooth[i,:] = numpy.convolve(data[i,:],w,mode='same')/norm
-    elif len(data.shape)==3:
-        I,J,K = data.shape
-        if axis==0:
-            norm=numpy.convolve(numpy.ones(I),w,mode='same')
-            for j in range(J):
-                for k in range(K):
-                    data_smooth[:,j,k] = numpy.convolve(data[:,j,k],w,mode='same')/norm
-            #for i in range(l):
-            #    data_smooth[i,j,k]=data_smooth[i,j,k]*w.sum()/w[(l-i):].sum()
-        #if type(data)==numpy.ma.core.MaskedArray:
+
+    elif len(data.shape) == 2:
+        I, J = data.shape
+        for j in range(J):
+            data_smooth[:,j] = np.convolve(data[:,j], w, mode='same')/norm
+
+    elif len(data.shape) >2:
+        I, J = data.shape[:2]
+        for j in range(J):
+                data_smooth[:,j] = window_1Dmean_grid(data[:,j], 
+                        l = l, 
+                        method = method, 
+                        axis=0, 
+                        parallel = parallel)
+
+    try:
         data_smooth.mask = data.mask
-        #    data_smooth[data_smooth.data>1e19]=1e20
-        #    data_smooth[data_smooth.data>1e19].mask=True
-    else:
-        print "Sorry, incomplete function. Works only for input arrays with 3D or less."
-        return
+    except:
+        pass
+
     return data_smooth
 
 
