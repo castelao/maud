@@ -80,6 +80,10 @@ def window_func(method='hamming'):
     elif method == 'hann':
         winfunc = _weight_hann
 
+    else:
+        print "Filter %s is not available" % method
+        return
+
     #elif method == 'blackman':
     #    winfunc = _weight_blackman
 
