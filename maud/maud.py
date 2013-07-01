@@ -170,7 +170,7 @@ def _convolve(x, dt, l, winfunc):
     y = (x*w).sum()/(w[x.mask==False].sum())
     return y
 
-def window_1Dbandpass(data, llow, lup, t=None, method='hann', axis=0, parallel=True):
+def window_1Dbandpass(data, lshortpass, llongpass, t=None, method='hann', axis=0, parallel=True):
     """
     """
     if axis > len(data.shape):
@@ -186,7 +186,23 @@ def window_1Dbandpass(data, llow, lup, t=None, method='hann', axis=0, parallel=T
         return 
     # ----
 
-    data_smooth = ma.masked_all(data.shape)
+    #data_smooth = ma.masked_all(data.shape)
+
+    data_smooth = window_1Dmean(data,
+                        t = t,
+                        l = llongpass,
+                        axis = axis,
+                        parallel = False)
+
+    data_smooth = data_smooth - window_1Dmean(data_smooth,
+                        t = t,
+                        l = lshortpass,
+                        axis = axis,
+                        parallel=False)
+
+     return data_smooth
+
+
 
 def window_1Dmean(data, l, t=None, method='hann', axis=0, parallel=True):
     """ A moving window mean filter, not necessarily a regular grid.
@@ -202,9 +218,7 @@ def window_1Dmean(data, l, t=None, method='hann', axis=0, parallel=True):
 
         l is the size of the filter.
     """
-    if axis > len(data.shape):
-        print "The data array don't contain so many dimensions. Choose another axis"
-	return
+    assert axis <= data.ndim, "The data array don't contain so many dimensions. Choose another axis"
 
     if t == None:
         print "The scale along the choosed axis weren't defined. I'll consider a constant sequence."
@@ -214,22 +228,23 @@ def window_1Dmean(data, l, t=None, method='hann', axis=0, parallel=True):
         print "The scale variable t don't have the same size of the choosed axis of the data array"
         return 
     # ----
+    winfunc = window_func(method)
 
     data_smooth = ma.masked_all(data.shape)
 
     if data.ndim==1:
-        #(I,) = np.nonzero(np.isfinite(data))
-        mask = ma.getmaskarray(data)
-        (I,) = np.nonzero(~mask)
-        winfunc = window_func(method)
+        # It's faster than getmaskarray
+        (I,) = np.nonzero(np.isfinite(data))
+        #mask = ma.getmaskarray(data)
+        #(I,) = np.nonzero(~mask)
 
 	for i in I:
             dt = t-t[i]
-            ind = numpy.nonzero((numpy.absolute(dt)<l) & (mask==False))
+            ind = numpy.nonzero((numpy.absolute(dt)<l) & (data.mask==False))
             w = winfunc(dt[ind],l)
-            #data_smooth[i] = (data[ind]*w).sum()/(w[data[ind].mask==False].sum())
             data_smooth[i] = (data[ind]*w).sum()/(w.sum())
-            #data_smooth[i] = _convolve(data[ind], dt[ind], l, winfunc)
+        return data_smooth
+
 
     elif len(data.shape)==2:
         (I,J) = data.shape
@@ -257,8 +272,6 @@ def window_1Dmean(data, l, t=None, method='hann', axis=0, parallel=True):
             else:
                 for i in range(I):
                     data_smooth[i] = r.get()
-
-
     else:
         if axis==0:
             I = data.shape[1]
@@ -268,6 +281,8 @@ def window_1Dmean(data, l, t=None, method='hann', axis=0, parallel=True):
             I = data.shape[0]
             for i in range(I):
                 data_smooth[i] = window_1Dmean(data[i],l=l,t=t,method=method, axis=(axis-1), parallel=parallel)
+
+
 
     return data_smooth
 
