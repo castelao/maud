@@ -1,0 +1,11 @@
+*.c
+
+# Packages
+*.egg
+*.egg-info
+dist
+build
+eggs
+parts
+sdist
+develop-eggs
