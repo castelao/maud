@@ -84,11 +84,6 @@ for i in range(I):
             pbar.update((i+1)*(j+1))
         except:
             pass
-        #out[:, i, j] = window_1Dmean(data=ma.array(nc.variables[options.var][:, i, j]), 
-        #                t = nc.variables[options.scalevar][:],
-        #                l=options.windowlength, axis=axis, 
-        #                parallel=False)
-
         #tmp = window_1Dmean(data=ma.array(data[:, i, j]), 
         #                t = nc.variables[options.scalevar][:],
         #                l=options.lowpasswindowlength, axis=axis, 
