@@ -101,6 +101,6 @@ for i in range(I):
                 t = nc.variables[options.scalevar][:], 
                 method = options.windowmethod, 
                 axis=0, 
-                parallel = False):
+                parallel = False)
 
 nc.close()
