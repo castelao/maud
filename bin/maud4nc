@@ -8,10 +8,11 @@
 
 from optparse import OptionParser
 
-#import yaml
+from numpy import ma
 from netCDF4 import Dataset
 
-from numpy import ma
+from maud import window_1Dbandpass
+
 
 # ==== Parsing the options on command line
 parser = OptionParser()
@@ -59,8 +60,6 @@ except:
 
 for a in attributes:
     setattr(out, a, getattr(nc.variables[options.var], a))
-
-from maud import window_1Dmean
 
 #window_1Dmean(data, l, t=None, method='hann', axis=0, parallel=True)
 
