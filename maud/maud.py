@@ -18,10 +18,11 @@ except:
     from fluid.common.distance import distance
     from fluid.common.distance import find_closer_then
 
-try:
-    from maud.cwindow_func import window_func
-except:
-    from window_func import window_func
+#try:
+#    from maud.cwindow_func import window_func
+#except:
+#    from window_func import window_func
+from window_func import window_func
 
 
 """
@@ -189,9 +190,7 @@ def window_1Dbandpass(data, lshortpass, llongpass, t=None, method='hann', axis=0
         print "The scale variable t don't have the same size of the choosed axis of the data array"
         return 
     # ----
-
     #data_smooth = ma.masked_all(data.shape)
-
     data_smooth = window_1Dmean(data,
                         t = t,
                         l = llongpass,
@@ -205,7 +204,6 @@ def window_1Dbandpass(data, lshortpass, llongpass, t=None, method='hann', axis=0
                         parallel=False)
 
     return data_smooth
-
 
 
 def window_1Dmean(data, l, t=None, method='hann', axis=0, parallel=True):
