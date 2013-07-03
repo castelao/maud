@@ -171,12 +171,12 @@ def _convolve(x, dt, l, winfunc):
     y = (x*w).sum()/(w[x.mask==False].sum())
     return y
 
-def window_1Dbandpass(data, lshortpass, llongpass, t=None, method='hann', axis=0, parallel=True):
+def window_1Dbandpass(data, lshorterpass, llongerpass, t=None, method='hann', axis=0, parallel=True):
     """
 
         Input:
-            lshortpass
-            llongpass
+            lshorterpass: shorter wavelenghts are preserved
+            llongerpass: longer wavelengths are preserved
     """
     if axis > len(data.shape):
         print "The data array don't contain so many dimensions. Choose another axis"
@@ -193,13 +193,13 @@ def window_1Dbandpass(data, lshortpass, llongpass, t=None, method='hann', axis=0
     #data_smooth = ma.masked_all(data.shape)
     data_smooth = window_1Dmean(data,
                         t = t,
-                        l = llongpass,
+                        l = llongerpass,
                         axis = axis,
                         parallel = False)
 
     data_smooth = data_smooth - window_1Dmean(data_smooth,
                         t = t,
-                        l = lshortpass,
+                        l = lshorterpass,
                         axis = axis,
                         parallel=False)
 

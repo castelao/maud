@@ -96,10 +96,10 @@ for i in range(I):
         #                parallel=False)
 
         out[:, i, j] = window_1Dbandpass(data[:, i, j], 
-                lshortpass = options.highpasswindowlength, 
-                llongpass = options.lowpasswindowlength, 
+                lshorterpass = options.highpasswindowlength, 
+                llongerpass = options.lowpasswindowlength, 
                 t = nc.variables[options.scalevar][:], 
-                method='hann', 
+                method = options.windowmethod, 
                 axis=0, 
                 parallel = False):
 
