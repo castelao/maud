@@ -89,7 +89,7 @@ def _weight_hann(r,l):
         and l is the total width of the window.
     """
     w=0.5*(1+np.cos(2*pi*r/l))
-    w[np.absolute(r)>l]=0
+    w[np.absolute(r)>l/2.]=0
     return w
 
 # hann 2D
@@ -111,7 +111,7 @@ def _weight_lanczos_2D(x,y,l,cutoff):
     w=np.sinc(r/cutoff)*np.sinc(r/cutoff/l)
     w[r>3*l]=0
 
-# ==== funcoes antigas para eliminar ======================
+# ==== funcoes antigas ======================
 
 def _weight_triangular_2D(x,y,l):
     """
@@ -120,6 +120,3 @@ def _weight_triangular_2D(x,y,l):
     w=(l-r)/l
     w[r>l]=0
     return w
-
-# hamming
-
