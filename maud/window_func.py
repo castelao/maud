@@ -102,6 +102,27 @@ def _weight_hann_2D(x,y,l):
     w[r>l]=0
     return w
 
+# hann 1D bandpass
+def _weight_hann_band(r,l1,l2):
+    """ Hann weight 
+        
+        from the definition of the Hann window centered in n = (N-1)/2:
+        w = 0.5*(1 + np.cos(2*pi*n/(N-1))),
+        where n is the element index of a toal of N elements.
+        To make it symmetrical, i.e centered in n=0, we should add a 
+        phase of pi in the cosine argument. So,
+        w = 0.5*(1 - np.cos(2*pi*r/l)),
+        where r is the distance to the center of teh window
+        and l1 is the width of the first low-pass window and l2
+        is the width of the second low-pass window.
+        So, the band-pass is going to be for l2 > f > l1.
+    """
+    w= ((np.cos(pi*r/l1)**2))*((np.sin(pi*r/l2))**2)
+    w[np.absolute(r)>l1/2.]=0
+    w[np.absolute(r)<l2/2.]=0
+    return w
+
+
 # lanczos 2D
 def _weight_lanczos_2D(x,y,l,cutoff):
     """ Working on
