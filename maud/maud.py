@@ -51,10 +51,12 @@ def window_mean_2D_latlon(Lat, Lon, data, l, method='hamming'):
     """
     weight_func = window_func(method)
 
-    I,J = Lat.shape
+    I, J = Lat.shape
+
     data_smooth={}
     for key in data.keys():
         data_smooth[key] = ma.masked_all(data[key].shape)
+
     for i in range(I):
         for j in range(J):
             ind, r = find_closer_then(Lat, Lon, Lat[i,j], Lon[i,j], llimit=l)
