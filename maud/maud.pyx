@@ -6,6 +6,12 @@ from numpy import ma
 cimport numpy as np
 from libc.math cimport cos
 
+#from fluid.common.distance import distance
+from fluid.common.distance import find_closer_then
+#from fluid.cdistance import distance
+#from fluid.cdistance import find_closer_then
+
+
 DTYPE = np.float64
 ctypedef np.float64_t DTYPE_t
 
@@ -72,4 +78,61 @@ def window_1Dmean(data, double l, t=None, method='hann', axis=0, parallel=True):
                     axis = 0,
                     parallel=parallel)
 
+    return data_smooth
+
+def window_mean_2D_latlon(Lat, Lon, data, l, method='hamming'):
+    """
+        Right now I'm doing for Masked Arrays only.
+        data should be a dictionary with 2D arrays
+
+        Input:
+          - Lat: 2D array with latitudes
+          - Lon: 2D array with longitudes
+          - data: There are two possibilities, it can be an
+            array of at least 2D, or a dictionary where each
+            element is an array of at least 2D.
+          - l: window filter size, in meters
+          - method: weight function type
+
+        Output:
+
+        !!!ATENTION!!!
+        - Might be a good idea to eliminate the dependence on
+          fluid.
+    """
+
+    if type(data) == dict:
+        #print "Sorry, I'm not ready yet to handle dictionaries. Please, run variable by variable."
+        return
+
+    assert (Lat.ndim == 2) & (Lon.ndim == 2), "Lat and Lon must be 2D array"
+    assert data.ndim == 2, "data must be a 2D array"
+
+    weight_func = window_func(method)
+
+    data_smooth = ma.masked_all(data.shape)
+
+    I, J = np.nonzero(np.isfinite(data))
+    #for i in range(I):
+    #    for j in range(J):
+    for i, j in zip(I,J):
+            ind, r = find_closer_then(Lat, Lon, Lat[i,j], Lon[i,j], llimit=l)
+
+            w = weight_func(r, l)
+            if len(data.shape)==2:
+                good = np.nonzero(data[ind])
+                #ind = np.nonzero(data[key])
+                # Stupid solution!!! Think about a better way to do this.
+                if not hasattr(data[i,j],'mask'):
+                    data_smooth[i,j] = (data[ind]*w).sum()/w[good].sum()
+                else:
+                    if data[i,j].mask==False:
+                        data_smooth[i,j] = (data[ind]*w).sum()/w[good].sum()
+            elif len(data.shape)==3:
+                for k in range(data.shape[0]):
+                    if not hasattr(data[k,i,j],'mask'):
+                        data_smooth[k,i,j] = (data[k][ind]*w).sum()/w[good].sum()
+                    else:
+                        if data.mask[k,i,j]==False:
+                            data_smooth[k,i,j] = (data[k][ind]*w).sum()/w[good].sum()
     return data_smooth
