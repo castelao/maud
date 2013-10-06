@@ -79,7 +79,7 @@ try:
 except:
     pass
 
-for nt in range(T)[:3]:
+for nt in range(T):
         try:
             pbar.update(nt)
         except:
