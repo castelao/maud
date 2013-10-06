@@ -1,0 +1,91 @@
+#!/usr/bin/env python
+
+""" This is a first prototype of MAUD script to filter a NetCDF file
+
+    Far away from an ideal solution. It's just to resolve the Bia's
+      problem for now.
+"""
+
+from optparse import OptionParser
+
+import numpy as np
+from numpy import ma
+from netCDF4 import Dataset
+
+from maud import window_1Dbandpass
+from cmaud import window_mean_2D_latlon
+
+
+# ==== Parsing the options on command line
+parser = OptionParser()
+
+parser.add_option("-l", dest="l",
+    help=".")
+
+parser.add_option("--var", dest="var",
+    help="Variable to be filtered")
+
+parser.add_option("-w", dest="windowmethod",
+    help="Type of window [hamming, hann, boxcar, triangle, lanczos]",
+    default="hamming")
+
+
+(options, args) = parser.parse_args()
+
+options.l = float(options.l)
+options.varout  = options.var + "_maud"
+
+nc = Dataset(args[0], 'a')
+
+#if var not in nc.variables.keys():
+#    import sys; sys.exit()
+
+
+attributes = nc.variables[options.var].ncattrs()
+#nc.variables[options.var].missing_value
+try:
+    out = nc.createVariable(options.varout, 
+              nc.variables[options.var].dtype, 
+              nc.variables[options.var].dimensions, 
+              fill_value=nc.variables[options.var]._FillValue)
+    attributes.remove('_FillValue')
+except:
+    out = nc.createVariable(options.varout, 
+              nc.variables[options.var].dtype, 
+              nc.variables[options.var].dimensions)
+
+for a in attributes:
+    setattr(out, a, getattr(nc.variables[options.var], a))
+
+#window_1Dmean(data, l, t=None, method='hann', axis=0, parallel=True)
+
+lat = nc.variables['latitude']
+lon = nc.variables['longitude']
+
+if (len(lat.dimensions)==1) & (len(lon.dimensions)==1):
+    if (lat.dimensions[0] == nc.variables[options.var].dimensions[1]) & \
+            (lon.dimensions[0] == nc.variables[options.var].dimensions[2]):
+                Lon, Lat = np.meshgrid(lon[:], lat[:])
+    T, I, J = nc.variables[options.var].shape
+else:
+    import sys; sys.exit()
+
+
+data = nc.variables[options.var]
+
+try:
+    from progressbar import ProgressBar
+    pbar = ProgressBar(maxval=T).start()
+except:
+    pass
+
+for nt in range(T)[:3]:
+        try:
+            pbar.update(nt)
+        except:
+            pass
+
+        tmp = window_mean_2D_latlon(Lat, Lon, data[nt], options.l, method = options.windowmethod) 
+        out[nt] = tmp - data[nt]
+
+nc.close()
