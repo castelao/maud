@@ -66,6 +66,6 @@ setup(
     #    #pyrex_include_dirs=['.']
     #    ),
     #    ],
-    scripts=["bin/maud4nc"],
+    scripts=["bin/maud4nc", "maud4latlonnc"],
 )
 
