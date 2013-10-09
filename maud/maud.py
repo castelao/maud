@@ -1,5 +1,4 @@
 
-
 # Gui, 27-06-2012
 # Just an idea. Create a class of filtered data. A fake Masked Array object
 #   which gives the output on demand, filtered.
@@ -29,7 +28,7 @@ from window_func import window_func
 """
 
 
-def window_mean_2D_latlon(Lat, Lon, data, l, method='hamming'):
+def window_mean_2D_latlon(Lat, Lon, data, l, method='hamming', interp='False'):
     """
         Right now I'm doing for Masked Arrays only.
         data should be a dictionary with 2D arrays
@@ -49,35 +48,38 @@ def window_mean_2D_latlon(Lat, Lon, data, l, method='hamming'):
         - Might be a good idea to eliminate the dependence on
           fluid.
     """
+    if type(data) == dict:
+        output = {}
+        for k in data.keys():
+            output[k] = window_mean_2D_latlon(Lat, Lon, data[k], l, method)
+        return output
+
     weight_func = window_func(method)
 
-    I, J = Lat.shape
+    data_smooth = ma.masked_all(data.shape)
 
-    data_smooth={}
-    for key in data.keys():
-        data_smooth[key] = ma.masked_all(data[key].shape)
+    if interp == True:
+        I, J = data.shape
+        I, J = np.meshgrid(range(I), range(J))
+        I = I.reshape(-1); J = J.reshape(-1)
+    else:
+        I, J = np.nonzero(np.isfinite(data))
 
-    for i in range(I):
-        for j in range(J):
+    for i, j in zip(I, J):
             ind, r = find_closer_then(Lat, Lon, Lat[i,j], Lon[i,j], llimit=l)
-            w = weight_func(r, l)
-            for key in data.keys():
-                if len(data[key].shape)==2:
-                    good = np.nonzero(data[key][ind])
-                    #ind = np.nonzero(data[key])
-                    # Stupid solution!!! Think about a better way to do this.
-                    if not hasattr(data[key][i,j],'mask'):
-                        data_smooth[key][i,j] = (data[key][ind]*w).sum()/w[good].sum()
+            if len(r) > 0:
+                w = weight_func(r, l)
+                if data.ndim == 2:
+                        #good = np.nonzero(data[ind])
+                        tmp = data[ind]*w
+                        wsum = w[np.nonzero(tmp)].sum()
+                        if wsum != 0:
+                            data_smooth[i,j] = (tmp).sum()/wsum
+                elif data.ndim == 3:
+                    for k in range(data.shape[0]):
+                        data_smooth[k,i,j] = (data[k][ind]*w).sum()/w[good].sum()
                     else:
-                        if data[key][i,j].mask==False:
-                            data_smooth[key][i,j] = (data[key][ind]*w).sum()/w[good].sum()
-                elif len(data[key].shape)==3:
-                    for k in range(data[key].shape[0]):
-                        if not hasattr(data[key][k,i,j],'mask'):
-                            data_smooth[key][k,i,j] = (data[key][k][ind]*w).sum()/w[good].sum()
-                        else:
-                            if data[key].mask[k,i,j]==False:
-                                data_smooth[key][k,i,j] = (data[key][k][ind]*w).sum()/w[good].sum()
+                        data_smooth[k,i,j] = (data[k][ind]*w).sum()/w[good].sum()
     return data_smooth
 
 # ==== Bellow here, I need to do some serious work on ====
