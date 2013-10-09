@@ -41,6 +41,10 @@ def window_mean_2D_latlon(Lat, Lon, data, l, method='hamming', interp='False'):
             element is an array of at least 2D.
           - l: window filter size, in meters
           - method: weight function type
+          - interp: if False, estimate only for the gridponits
+              of valid data, i.e. data.mask = output.mask. If
+              True, estimate for all gridpoints that has at
+              least one valida data point inside the l/2 radius 
 
         Output:
 
