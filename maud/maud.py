@@ -58,6 +58,8 @@ def window_mean_2D_latlon(Lat, Lon, data, l, method='hamming', interp='False'):
             output[k] = window_mean_2D_latlon(Lat, Lon, data[k], l, method)
         return output
 
+    assert data.ndim == 2, "Sorry, for now I'm only handeling 2D arrays"
+
     weight_func = window_func(method)
 
     data_smooth = ma.masked_all(data.shape)
@@ -79,11 +81,11 @@ def window_mean_2D_latlon(Lat, Lon, data, l, method='hamming', interp='False'):
                         wsum = w[np.nonzero(tmp)].sum()
                         if wsum != 0:
                             data_smooth[i,j] = (tmp).sum()/wsum
-                elif data.ndim == 3:
-                    for k in range(data.shape[0]):
-                        data_smooth[k,i,j] = (data[k][ind]*w).sum()/w[good].sum()
-                    else:
-                        data_smooth[k,i,j] = (data[k][ind]*w).sum()/w[good].sum()
+                #elif data.ndim == 3:
+                #    for k in range(data.shape[0]):
+                #        data_smooth[k,i,j] = (data[k][ind]*w).sum()/w[good].sum()
+                #    else:
+                #        data_smooth[k,i,j] = (data[k][ind]*w).sum()/w[good].sum()
     return data_smooth
 
 # ==== Bellow here, I need to do some serious work on ====
