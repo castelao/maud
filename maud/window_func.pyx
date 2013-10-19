@@ -70,7 +70,6 @@ def _weight_hann(np.ndarray r, double l):
     return w
 
 
-
 def window_func(method='hamming'):
     """ Select the weight function
     """
@@ -91,3 +90,32 @@ def window_func(method='hamming'):
     #    winfunc = _weight_triangular
 
     return winfunc
+
+def window_func_scalar(method='hamming'):
+    """ Select the weight function
+    """
+    if method == 'hamming':
+        winfunc = _weight_hamming_scalar
+
+    #elif method == 'hann':
+    #    winfunc = _weight_hann_scalar
+
+    else:
+        print "Filter %s is not available" % method
+        return
+
+    #elif method == 'blackman':
+    #    winfunc = _weight_blackman
+
+    #elif method == 'triangular':
+    #    winfunc = _weight_triangular
+
+    return winfunc
+
+# Hamming
+def _weight_hamming_scalar(double r, double l):
+
+    if abs(r) > l/2.:
+        return 0
+
+    return 0.54 + 0.46*cos(r*2*np.pi/l)
