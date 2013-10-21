@@ -116,18 +116,35 @@ def window_mean_2D_latlon(Lat, Lon, data, l, method='hamming', interp=False):
     #    return output
 
     assert (Lat.ndim == 2) & (Lon.ndim == 2), "Lat and Lon must be 2D array"
-    assert data.ndim == 2, "Sorry, for now I'm only handeling 2D arrays"
+    #assert data.ndim == 2, "Sorry, for now I'm only handeling 2D arrays"
 
-    if type(data) == np.ndarray:
-        return _window_mean_2D_latlon(Lat, Lon, data, l, method)
+    if data.ndim == 2:
+        if type(data) == np.ndarray:
+            return _window_mean_2D_latlon(Lat, Lon, data, l, method)
 
-    elif type(data) == ma.MaskedArray:
-        if (data.mask == False).all():
-            data_smooth = _window_mean_2D_latlon(Lat, Lon, data.data, l, method)
-            return ma.array(data_smooth) 
-        else:
-            data_smooth, mask = _window_mean_2D_latlon_masked(Lat, Lon, data.data, data.mask.astype('int8'), l, method, interp)
-            return ma.masked_array(data_smooth, mask)
+        elif type(data) == ma.MaskedArray:
+            if (data.mask == False).all():
+                data_smooth = _window_mean_2D_latlon(Lat, Lon, data.data, l, method)
+                return ma.array(data_smooth)
+            else:
+                data_smooth, mask = _window_mean_2D_latlon_masked(Lat, Lon, data.data, data.mask.astype('int8'), l, method, interp)
+                return ma.masked_array(data_smooth, mask)
+    elif data.ndim == 3:
+        import multiprocessing as mp
+        npes = 2 * mp.cpu_count()
+        print " Will work with %s npes" % npes
+        data_smooth = ma.empty(data.shape)
+        pool = mp.Pool(npes)
+        results = []
+
+        N = data.shape[0]
+        for n in range(N):
+            #data_smooth[n] = window_mean_2D_latlon(Lat, Lon, data[n], l, method, interp)
+            results.append( pool.apply_async( window_mean_2D_latlon, (Lat, Lon, data[n], l, method, interp) ) )
+        for i, r in enumerate(results):
+            data_smooth[i] = r.get()
+
+        return data_smooth
 
     #if interp == True:
     #    I, J = data.shape
