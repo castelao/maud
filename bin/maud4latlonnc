@@ -32,6 +32,10 @@ parser.add_option("-w", dest="windowmethod",
 parser.add_option("--interp", dest="interp",
     help="If selected fill the masked points if is there available data around.")
 
+parser.add_option("--npes", dest="npes",
+    help="Define the number of parallel processes.",
+    default=None)
+
 (options, args) = parser.parse_args()
 
 options.l = float(options.l)
@@ -86,7 +90,11 @@ except:
 
 try:
     import multiprocessing as mp
-    npes = 2 * mp.cpu_count()
+    if options.npes is None:
+        npes = 2 * mp.cpu_count()
+    else:
+        #assert type(options.npes) == int
+        npes = int(options.npes)
     print " Will work with %s npes" % npes
     data_smooth = ma.empty(data.shape)
     pool = mp.Pool(npes)
