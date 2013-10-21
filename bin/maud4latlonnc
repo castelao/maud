@@ -29,11 +29,17 @@ parser.add_option("-w", dest="windowmethod",
     help="Type of window [hamming, hann, boxcar, triangle, lanczos]",
     default="hamming")
 
+parser.add_option("--interp", dest="interp",
+    help="If selected fill the masked points if is there available data around.")
 
 (options, args) = parser.parse_args()
 
 options.l = float(options.l)
 options.varout  = options.var + "_maud"
+if hasattr(options, 'interp'):
+    options.interp = True
+else:
+    options.interp = False
 
 nc = Dataset(args[0], 'a')
 
@@ -70,22 +76,44 @@ if (len(lat.dimensions)==1) & (len(lon.dimensions)==1):
 else:
     import sys; sys.exit()
 
-
 data = nc.variables[options.var]
 
 try:
     from progressbar import ProgressBar
     pbar = ProgressBar(maxval=T).start()
 except:
-    pass
+    print "ProgressBar is not available"
 
-for nt in range(T):
+try:
+    import multiprocessing as mp
+    npes = 2 * mp.cpu_count()
+    print " Will work with %s npes" % npes
+    data_smooth = ma.empty(data.shape)
+    pool = mp.Pool(npes)
+    results = []
+
+    for nt in range(T):
+        results.append( pool.apply_async( window_mean_2D_latlon, (Lat, Lon, data[nt], options.l, options.windowmethod, options.interp) ) )
+
+    for nt, r in enumerate(results):
         try:
             pbar.update(nt)
         except:
             pass
 
-        tmp = window_mean_2D_latlon(Lat, Lon, data[nt], options.l, method = options.windowmethod) 
-        out[nt] = tmp - data[nt]
+        out[nt] = data[nt] - r.get()
+
+except:
+    print "Sorry, didn't work to filter in parallel"
+    raise
+
+#for nt in range(T):
+#        try:
+#            pbar.update(nt)
+#        except:
+#            pass
+#
+#        tmp = window_mean_2D_latlon(Lat, Lon, data[nt], options.l, method = options.windowmethod) 
+#        out[nt] = tmp - data[nt]
 
 nc.close()
