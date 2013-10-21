@@ -130,6 +130,11 @@ def window_mean_2D_latlon(Lat, Lon, data, l, method='hamming', interp=False):
                 data_smooth, mask = _window_mean_2D_latlon_masked(Lat, Lon, data.data, data.mask.astype('int8'), l, method, interp)
                 return ma.masked_array(data_smooth, mask)
     elif data.ndim == 3:
+        try:
+            from progressbar import ProgressBar
+        except:
+            print "ProgressBar is not available"
+
         import multiprocessing as mp
         npes = 2 * mp.cpu_count()
         print " Will work with %s npes" % npes
@@ -138,10 +143,21 @@ def window_mean_2D_latlon(Lat, Lon, data, l, method='hamming', interp=False):
         results = []
 
         N = data.shape[0]
+
+        try:
+            pbar = ProgressBar(maxval=N).start()
+        except:
+            pass
+
         for n in range(N):
             #data_smooth[n] = window_mean_2D_latlon(Lat, Lon, data[n], l, method, interp)
             results.append( pool.apply_async( window_mean_2D_latlon, (Lat, Lon, data[n], l, method, interp) ) )
+
         for i, r in enumerate(results):
+            try:
+                pbar.update(i)
+            except:
+                pass
             data_smooth[i] = r.get()
 
         return data_smooth
