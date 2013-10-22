@@ -87,26 +87,26 @@ def window_1Dmean(data, double l, t=None, method='hann', axis=0, parallel=True):
 
 def window_mean_2D_latlon(Lat, Lon, data, l, method='hamming', interp=False):
     """
-        Right now I'm doing for Masked Arrays only.
-        data should be a dictionary with 2D arrays
+        Cython version of the window_mean_2D_latlon()
 
         Input:
           - Lat: 2D array with latitudes
           - Lon: 2D array with longitudes
-          - data: There are two possibilities, it can be an
-            array of at least 2D, or a dictionary where each
-            element is an array of at least 2D.
+          - data: An array or a masked array. It must be 2D or 3D. In
+	      the case of a 3D, the two last dimensions will be
+	      considered as lat and lon, while it will run along the
+	      first dimension with the multiprocessing.
           - l: window filter size, in meters
-          - method: weight function type
+          - method: ['hann', 'hamming', 'blackman']
+	      Defines the weight function type
 
-        Output:
+        Output: An array of the same type and dimension of the input
+	  data. This will be the low (frequency) pass filtered data,
+	  i.e. it will eliminate all short variability
 
         !!!ATENTION!!!
         - Might be a good idea to eliminate the dependence on
           fluid.
-
-	- I can't get the shape of an np.ndarray[DTYPE_t, ndim=2],
-	    so I need to use data2, a stupid solution
     """
 
     #if type(data) == dict:
@@ -118,17 +118,23 @@ def window_mean_2D_latlon(Lat, Lon, data, l, method='hamming', interp=False):
     assert (Lat.ndim == 2) & (Lon.ndim == 2), "Lat and Lon must be 2D array"
     #assert data.ndim == 2, "Sorry, for now I'm only handeling 2D arrays"
 
+    # ==== data is a 2D array ======================================
     if data.ndim == 2:
         if type(data) == np.ndarray:
             return _window_mean_2D_latlon(Lat, Lon, data, l, method)
 
         elif type(data) == ma.MaskedArray:
             if (data.mask == False).all():
-                data_smooth = _window_mean_2D_latlon(Lat, Lon, data.data, l, method)
+                data_smooth = _window_mean_2D_latlon(Lat, Lon, data.data, l,
+				method)
                 return ma.array(data_smooth)
             else:
-                data_smooth, mask = _window_mean_2D_latlon_masked(Lat, Lon, data.data, data.mask.astype('int8'), l, method, interp)
+                data_smooth, mask = _window_mean_2D_latlon_masked(Lat, Lon,
+				data.data, data.mask.astype('int8'), l, method,
+				interp)
                 return ma.masked_array(data_smooth, mask)
+
+    # ==== data is a 3D array ======================================
     elif data.ndim == 3:
         try:
             from progressbar import ProgressBar
@@ -202,7 +208,8 @@ def _window_mean_2D_latlon(np.ndarray[DTYPE_t, ndim=2] Lat, np.ndarray[DTYPE_t, 
             D = 0
             for ii in range(I):
                 for jj in range(J):
-                    r = _distance_scalar(Lat[i,j], Lon[i,j], Lat[ii,jj], Lon[ii,jj])
+                    r = _distance_scalar(Lat[i,j], Lon[i,j],
+				    Lat[ii,jj], Lon[ii,jj])
                     if r <= l:
                         w = weight_func(r, l)
                         if w != 0:
@@ -213,7 +220,11 @@ def _window_mean_2D_latlon(np.ndarray[DTYPE_t, ndim=2] Lat, np.ndarray[DTYPE_t, 
 
     return data_smooth
 
-def _window_mean_2D_latlon_masked(np.ndarray[DTYPE_t, ndim=2] Lat, np.ndarray[DTYPE_t, ndim=2] Lon, np.ndarray[DTYPE_t, ndim=2] data, np.ndarray[np.int8_t, ndim=2] mask, l, method, interp):
+def _window_mean_2D_latlon_masked(np.ndarray[DTYPE_t, ndim=2] Lat,
+		np.ndarray[DTYPE_t, ndim=2] Lon,
+		np.ndarray[DTYPE_t, ndim=2] data,
+		np.ndarray[np.int8_t, ndim=2] mask,
+		l, method, interp):
 #    """
 #    """
     weight_func = window_func_scalar(method)
@@ -224,17 +235,19 @@ def _window_mean_2D_latlon_masked(np.ndarray[DTYPE_t, ndim=2] Lat, np.ndarray[DT
     cdef unsigned int I = data.shape[0]
     cdef unsigned int J = data.shape[1]
     cdef np.ndarray[DTYPE_t, ndim=2] data_smooth = np.empty((I,J))
-    cdef np.ndarray[np.int8_t, ndim=2] mask_smooth = np.ones((I,J), dtype=np.int8)
+    cdef np.ndarray[np.int8_t, ndim=2] mask_smooth = \
+		    np.ones((I,J), dtype=np.int8)
 
     for i in range(I):
         for j in range(J):
-            if (interp == True) or (mask[i, j] == 0):
+            if (interp is True) or (mask[i, j] == 0):
                 W = 0
                 D = 0
                 for ii in range(I):
                     for jj in range(J):
                         if mask[ii, jj] == 0:
-                            r = _distance_scalar(Lat[i,j], Lon[i,j], Lat[ii,jj], Lon[ii,jj])
+                            r = _distance_scalar(Lat[i,j], Lon[i,j],
+					    Lat[ii,jj], Lon[ii,jj])
                             if r <= l:
                                 w = weight_func(r, l)
                                 if w != 0:
