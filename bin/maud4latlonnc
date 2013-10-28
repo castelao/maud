@@ -45,6 +45,10 @@ if hasattr(options, 'interp'):
 else:
     options.interp = False
 
+# ============================================================================
+lat_var = 'lat'
+lon_var = 'lon'
+
 nc = Dataset(args[0], 'a')
 
 #if var not in nc.variables.keys():
@@ -69,8 +73,8 @@ for a in attributes:
 
 #window_1Dmean(data, l, t=None, method='hann', axis=0, parallel=True)
 
-lat = nc.variables['latitude']
-lon = nc.variables['longitude']
+lat = nc.variables[lat_var]
+lon = nc.variables[lon_var]
 
 if (len(lat.dimensions)==1) & (len(lon.dimensions)==1):
     if (lat.dimensions[0] == nc.variables[options.var].dimensions[1]) & \
