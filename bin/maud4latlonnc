@@ -46,10 +46,14 @@ else:
     options.interp = False
 
 # ============================================================================
-lat_var = 'lat'
-lon_var = 'lon'
-
 nc = Dataset(args[0], 'a')
+
+if ('latitude' in nc.variables) and ('longitude' in nc.variables):
+    lat_var = 'latitude'
+    lon_var = 'longitude'
+elif ('lat' in nc.variables) and ('lon' in nc.variables):
+    lat_var = 'lat'
+    lon_var = 'lon'
 
 #if var not in nc.variables.keys():
 #    import sys; sys.exit()
