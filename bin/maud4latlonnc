@@ -79,11 +79,21 @@ else:
 for a in attributes:
     setattr(out, a, getattr(nc.variables[options.var], a))
 
-#window_1Dmean(data, l, t=None, method='hann', axis=0, parallel=True)
 
+# ==== Handling Lat & Lon variables
+# ---- First I'll guess the name of the variables
+if ('latitude' in nc.variables) and ('longitude' in nc.variables):
+    lat_var = 'latitude'
+    lon_var = 'longitude'
+elif ('lat' in nc.variables) and ('lon' in nc.variables):
+    lat_var = 'lat'
+    lon_var = 'lon'
+else:
+    print "Sorry, I couldn't guess the name of the lat lon variables."
 lat = nc.variables[lat_var]
 lon = nc.variables[lon_var]
 
+# ---- If lat & lon are 1D variables, I'll need to do a meshgrid
 if (len(lat.dimensions)==1) & (len(lon.dimensions)==1):
     if (lat.dimensions[0] == nc.variables[options.var].dimensions[1]) & \
             (lon.dimensions[0] == nc.variables[options.var].dimensions[2]):
