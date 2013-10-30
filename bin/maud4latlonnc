@@ -19,8 +19,9 @@ from cmaud import window_mean_2D_latlon
 # ==== Parsing the options on command line
 parser = OptionParser()
 
-parser.add_option("-l", dest="l",
-    help=".")
+parser.add_option("-l",
+    action="store", type="float", dest="l",
+    help="The filter scale in meters. For example: -l 100e3")
 
 parser.add_option("--var", dest="var",
     help="Variable to be filtered")
@@ -29,22 +30,20 @@ parser.add_option("-w", dest="windowmethod",
     help="Type of window [hamming, hann, boxcar, triangle, lanczos]",
     default="hamming")
 
-parser.add_option("--interp", dest="interp",
-    help="If selected fill the masked points if is there available data around.")
+parser.add_option("--interp",
+    action="store_true", dest="interp",
+    help="If selected fill the masked points if is there available data around.",
+    default = False)
 
-parser.add_option("--npes", dest="npes",
-    help="Define the number of parallel processes.",
+parser.add_option("--npes",
+    action="store", type="int", dest="npes",
+    help="Defines the number of parallel processes.",
     default=None)
 
 (options, args) = parser.parse_args()
 
-options.l = float(options.l)
-options.varout  = options.var + "_maud"
-if hasattr(options, 'interp'):
-    options.interp = True
-else:
-    options.interp = False
-
+print "args: ", args
+print "options: ", options
 # ============================================================================
 nc = Dataset(args[0], 'a')
 
