@@ -47,29 +47,34 @@ print "options: ", options
 # ============================================================================
 nc = Dataset(args[0], 'a')
 
-if ('latitude' in nc.variables) and ('longitude' in nc.variables):
-    lat_var = 'latitude'
-    lon_var = 'longitude'
-elif ('lat' in nc.variables) and ('lon' in nc.variables):
-    lat_var = 'lat'
-    lon_var = 'lon'
-
 #if var not in nc.variables.keys():
 #    import sys; sys.exit()
 
 
 attributes = nc.variables[options.var].ncattrs()
 #nc.variables[options.var].missing_value
-try:
-    out = nc.createVariable(options.varout, 
-              nc.variables[options.var].dtype, 
-              nc.variables[options.var].dimensions, 
-              fill_value=nc.variables[options.var]._FillValue)
-    attributes.remove('_FillValue')
-except:
-    out = nc.createVariable(options.varout, 
-              nc.variables[options.var].dtype, 
-              nc.variables[options.var].dimensions)
+# Think well how to do it. Probably I should first delete the old one and create from scratch, so there is no risk of old attributes and other stuff left behind.
+options.varout  = options.var + "_maud"
+if (options.varout in nc.variables):
+    print "Hey! %s is already in this file. I'll overwrite it" % \
+        options.varout
+    out = nc.variables[options.varout]
+    if '_FillValue' in attributes:
+        out[:] = nc.variables[options.var]._FillValue
+        attributes.remove('_FillValue')
+    elif 'missing_value' in attributes:
+        out[:] = nc.variables[options.var].missing_value
+else:
+    try:
+        out = nc.createVariable(options.varout, 
+                  nc.variables[options.var].dtype, 
+                  nc.variables[options.var].dimensions, 
+                  fill_value=nc.variables[options.var]._FillValue)
+        attributes.remove('_FillValue')
+    except:
+        out = nc.createVariable(options.varout, 
+                  nc.variables[options.var].dtype, 
+                  nc.variables[options.var].dimensions)
 
 for a in attributes:
     setattr(out, a, getattr(nc.variables[options.var], a))
