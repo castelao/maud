@@ -1,9 +1,23 @@
 #!/usr/bin/env python
 
-""" This is a first prototype of MAUD script to filter a NetCDF file
+""" This is a MAUD script to filter a NetCDF file
 
     Far away from an ideal solution. It's just to resolve the Bia's
       problem for now.
+
+    This script will use the latitude and longitude provided in the
+      netcdf file itself, and apply a moving average window considering
+      the linear distances.
+
+    This script is mostly usefull for regular cartesian grids, and so
+      it is not regular on linear distances, or for numerical model
+      grids, that can change the spacing between the grids.
+
+      Type this command with -h to see the help. Here is an example:
+
+      maud4latlonnc -l 600e3 --var='temperature' -w hamming --interp --npes=18 model_output.nc
+
+      This will save on the same netcdf another variable named temperature_maud
 """
 
 from optparse import OptionParser
