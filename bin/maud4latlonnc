@@ -112,19 +112,24 @@ except:
 
 try:
     import multiprocessing as mp
-    if options.npes is None:
-        npes = 2 * mp.cpu_count()
+    npesmax = 2 * mp.cpu_count() +1
+    if options.npes > npesmax:
+        print "Considering the numper of cpu on your machine, I'll stick with npe=%s"  % npesmax
+        npes = npesmax
     else:
-        #assert type(options.npes) == int
-        npes = int(options.npes)
+        npes = options.npes
+
     print " Will work with %s npes" % npes
     data_smooth = ma.empty(data.shape)
     pool = mp.Pool(npes)
     results = []
 
+    print "Preparing the workers."
     for nt in range(T):
         results.append( pool.apply_async( window_mean_2D_latlon, (Lat, Lon, data[nt], options.l, options.windowmethod, options.interp) ) )
 
+    pool.close()
+    print "Collecting the results."
     for nt, r in enumerate(results):
         try:
             pbar.update(nt)
