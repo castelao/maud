@@ -218,7 +218,6 @@ def window_1Dbandpass(data, lshorterpass, llongerpass, t=None, method='hann', ax
 
     return data_smooth
 
-
 def window_1Dmean(data, l, t=None, method='hann', axis=0, parallel=True):
     """ A moving window mean filter, not necessarily a regular grid.
 
@@ -244,14 +243,14 @@ def window_1Dmean(data, l, t=None, method='hann', axis=0, parallel=True):
     assert axis <= data.ndim, "Invalid axis!"
 
     if axis != 0:
-        data_smooth = window_1Dmean(data.swapaxes(0,axis),
+        data_smooth = window_1Dmean(data.swapaxes(0, axis),
             l = l,
             t = t,
             method = method,
-            axis=0,
+            axis = 0,
             parallel = parallel)
 
-        return data_smooth.swapaxes(0,axis)
+        return data_smooth.swapaxes(0, axis)
 
     if t == None:
         print "The scale along the choosed axis weren't defined. I'll consider a constant sequence."
