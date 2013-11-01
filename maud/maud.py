@@ -3,7 +3,10 @@
 # Just an idea. Create a class of filtered data. A fake Masked Array object
 #   which gives the output on demand, filtered.
 
-import multiprocessing
+try:
+    import multiprocessing
+except:
+    print "I couldn't import multiprocessing"
 
 import numpy as N
 import numpy
@@ -244,11 +247,10 @@ def window_1Dmean(data, l, t=None, method='hann', axis=0, parallel=True):
 
     if t == None:
         print "The scale along the choosed axis weren't defined. I'll consider a constant sequence."
-	t = numpy.arange(data.shape[axis])
+	t = np.arange(data.shape[axis])
 
-    elif t.shape != (data.shape[axis],):
-        print "Invalid size of t."
-        return 
+    assert t.shape == (data.shape[axis],), print "Invalid size of t."
+
     # ----
     winfunc = window_func(method)
 
@@ -257,11 +259,19 @@ def window_1Dmean(data, l, t=None, method='hann', axis=0, parallel=True):
     if data.ndim==1:
         # It's faster than getmaskarray
         (I,) = np.nonzero(np.isfinite(data))
-	for i in I:
-            dt = t-t[i]
-            ind = numpy.nonzero((numpy.absolute(dt)<l))
-            w = winfunc(dt[ind],l)
-            data_smooth[i] = (data[ind]*w).sum()/(w.sum())
+        if parallel is False:
+            for i in I:
+                data_smooth[i] = _apply_window_1Dmean(i, t, l, winfunc, data)
+        else:
+            npe = 2*multiprocessing.cpu_count()
+            pool = multiprocessing.Pool(npe)
+            results = []
+            for i in I:
+                results.append(pool.apply_async(_apply_window_1Dmean, \
+                        (i, t, l, winfunc, data)))
+            pool.close()
+            for n, r in enumerate(results):
+                data_smooth[:,n] = r.get()
 
     else:
         I = data.shape[1]
@@ -291,6 +301,13 @@ def window_1Dmean(data, l, t=None, method='hann', axis=0, parallel=True):
 #            for j in range(J):
 #                data_smooth[:,j] = window_1Dmean(data[:,j], l, t, method, axis)
 
+def _apply_window_1Dmean(i, t, l, winfunc, data):
+    """
+    """
+    dt = t-t[i]
+    ind = np.nonzero((np.absolute(dt)<l))
+    w = winfunc(dt[ind],l)
+    return (data[ind]*w).sum()/(w.sum())
 
 def window_1Dmean_grid(data, l, method='hann', axis=0, parallel=False):
     """ A moving window mean filter applied to a regular grid.
