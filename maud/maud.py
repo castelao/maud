@@ -229,9 +229,17 @@ def window_1Dmean(data, l, t=None, method='hann', axis=0, parallel=True):
 
         It's not optimized for a regular grid.
 
-	t is the scale of the choosed axis
-
-        l is the size of the filter.
+        Input:
+            - data: np.array or ma.maked_array, nD
+            - l: is the size of the filter, in the same unit
+                of the t.
+	    - t: is the scale of the choosed axis, 1D. If not
+                defined, it will be considered a sequence.
+            - method: ['hann', 'hamming', 'blackman']
+                Defines the weight function type
+            - axis: Dimension which the filter will be applied
+            - parallel: [True] Will apply the filter with
+                multiple processors.
     """
     assert axis <= data.ndim, "Invalid axis!"
 
@@ -285,24 +293,9 @@ def window_1Dmean(data, l, t=None, method='hann', axis=0, parallel=True):
 
     return data_smooth
 
-#    elif len(data.shape)==2:
-#        (I,J) = data.shape
-#        if parallel == True:
-#            nprocesses = 2*multiprocessing.cpu_count()
-#            #logger.info("I'll work with %s parallel processes" % nprocesses)
-#            filters_pool = multiprocessing.Pool(nprocesses)
-#            results = []
-#            for j in range(J):
-#                results.append(filters_pool.apply_async(window_1Dmean, (data[:,j], l, t, method, axis, parallel)))
-#            filters_pool.close()
-#            for n, r in enumerate(results):
-#                data_smooth[:,n] = r.get()
-#        else:
-#            for j in range(J):
-#                data_smooth[:,j] = window_1Dmean(data[:,j], l, t, method, axis)
-
 def _apply_window_1Dmean(i, t, l, winfunc, data):
-    """
+    """ Effectively apply 1D moving mean along 1D array
+        Support function to window_1Dmean
     """
     dt = t-t[i]
     ind = np.nonzero((np.absolute(dt)<l))
