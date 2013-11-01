@@ -249,7 +249,7 @@ def window_1Dmean(data, l, t=None, method='hann', axis=0, parallel=True):
         print "The scale along the choosed axis weren't defined. I'll consider a constant sequence."
 	t = np.arange(data.shape[axis])
 
-    assert t.shape == (data.shape[axis],), print "Invalid size of t."
+    assert t.shape == (data.shape[axis],), "Invalid size of t."
 
     # ----
     winfunc = window_func(method)
