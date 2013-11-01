@@ -1,9 +1,10 @@
 import numpy as np
 from numpy import ma, pi
-from maud import window_1Dmean, window_1Dbandpass
+from maud import window_1Dmean
 import pylab
 
-x =  ma.array(np.sort(100*np.random.random(100)))
+N = 100
+x =  ma.array(np.sort(100*np.random.random(N)))
 y1 = 5*np.sin(2*pi*x/50.)
 
 Y = y1 + 1*(np.random.randn(len(x)))
