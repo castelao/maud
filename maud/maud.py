@@ -10,12 +10,8 @@ import numpy
 import numpy as np
 from numpy import ma
 
-try:
-    from fluid.cdistance import distance
-    from fluid.cdistance import find_closer_then
-except:
-    from fluid.common.distance import distance
-    from fluid.common.distance import find_closer_then
+from fluid.common.distance import distance
+from fluid.common.distance import find_closer_then
 
 #try:
 #    from maud.cwindow_func import window_func
