@@ -7,7 +7,7 @@ except ImportError:
     from setuptools import setup, find_packages
 
 import os
-#import sys
+import sys
 from distutils import log
 
 #from distutils.core import setup
@@ -17,11 +17,25 @@ from Cython.Distutils.extension import Extension
 from Cython.Distutils import build_ext
 import numpy as np
 
+# ============================================================================
+from setuptools.command.test import test as TestCommand
+class PyTest(TestCommand):
+    def finalize_options(self):
+        TestCommand.finalize_options(self)
+        self.test_args = []
+        self.test_suite = True
+    def run_tests(self):
+        #import here, cause outside the eggs aren't loaded
+        import pytest
+        errno = pytest.main(self.test_args)
+        sys.exit(errno)
+# ============================================================================
+
 here = os.path.abspath(os.path.dirname(__file__))
 README = open(os.path.join(here, 'README.rst')).read()
 NEWS = open(os.path.join(here, 'NEWS.txt')).read()
 
-version='0.7.0'
+version='0.8.0'
 
 requires = [
     'numpy>=1.1',
@@ -56,7 +70,7 @@ setup(
     packages=find_packages(),
     #packages=['maud', 'maud.window_func'],
     install_requires=requires,
-    cmdclass = {'build_ext': build_ext},
+    cmdclass = {'build_ext': build_ext, 'test': PyTest},
     ext_modules = [Extension("maud.cwindow_func", ["maud/window_func.pyx"]), Extension("cmaud", ["maud/maud.pyx"])],
     include_dirs = [np.get_include()],
     #ext_modules = [
@@ -67,5 +81,6 @@ setup(
     #    ),
     #    ],
     scripts=["bin/maud4nc", "bin/maud4latlonnc"],
+    tests_require=['pytest'],
 )
 
