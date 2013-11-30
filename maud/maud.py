@@ -279,6 +279,7 @@ def window_1Dmean(data, l, t=None, method='hann', axis=0, parallel=True):
             pool.close()
             for n, r in enumerate(results):
                 data_smooth[n] = r.get()
+            pool.terminate()
 
     else:
         I = data.shape[1]
