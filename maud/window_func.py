@@ -11,6 +11,8 @@ from numpy import pi
 def window_func(method='hamming'):
     """ Select the weight function
     """
+    assert type(method) == str, 'method must be a string'
+
     if method == 'hamming':
         winfunc = _weight_hamming
 
