@@ -80,7 +80,9 @@ def window_mean_2D_latlon(Lat, Lon, data, l, method='hamming', interp='False'):
                 if data.ndim == 2:
                         #good = np.nonzero(data[ind])
                         tmp = data[ind]*w
-                        wsum = w[np.isfinite(tmp)].sum()
+                        # There is a problem here. In the case of valid
+                        #   but zero value, should be used anyways.
+                        wsum = w[np.nonzero(tmp)].sum()
                         if wsum != 0:
                             data_smooth[i,j] = (tmp).sum()/wsum
                 #elif data.ndim == 3:
