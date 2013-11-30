@@ -24,9 +24,9 @@ def test_answer():
 
 
     # Test if masked data is not considered in the average
-    h = np.array([[ 1e3,  1e3,  1e3],
-         [ 1e3,  3.14,  1e3],
-         [ 1e3,  1e3,  1e3]])
+    h = np.array([[ 1e9,  1e9,  1e9],
+         [ 1e9,  3.14,  1e9],
+         [ 1e9,  1e9,  1e9]])
 
     h = ma.masked_greater(h, 10)
 
@@ -35,7 +35,9 @@ def test_answer():
     Lon, Lat = np.meshgrid(lon, lat)
 
     h_smooth = window_mean_2D_latlon(Lat, Lon, h, l=1e10)
-    assert (h_smooth == h).all()
+    assert (h_smooth.mask == h.mask).all()
+    #assert (h_smooth.compressed() == h.compressed()).all()
+    assert (np.absolute(h_smooth - h).sum() == 0.)
 
 #np.absolute(err).mean() > 0.02
 #
