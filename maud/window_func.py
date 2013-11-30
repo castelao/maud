@@ -23,6 +23,9 @@ def window_func(method='hamming'):
     elif method == 'triangular':
         winfunc = _weight_triangular
 
+    elif method == 'boxcar':
+        winfunc = _weight_boxcar
+
     return winfunc
 
 
@@ -37,7 +40,14 @@ def _weight_blackman(r,l):
     w[np.absolute(r)>l/2.]=0
     return w
 
-# rectangular
+# boxcar or rectangular
+def _weight_boxcar(r, l):
+    """
+    """
+    w = np.zeros(r.shape)
+    w[np.abs(r)<=l/2.] = 1
+    return w
+
 
 # triangular
 def _weight_triangular(r,l):
