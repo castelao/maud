@@ -118,7 +118,7 @@ def _weight_hamming_scalar(double r, double l):
     if abs(r) > l/2.:
         return 0
 
-    return 0.54 + 0.46*cos(r*2*np.pi/l)
+    return 0.54 + 0.46*cos(2*np.pi*r/l)
 
 # Hann
 def _weight_hann_scalar(double r, double l):
