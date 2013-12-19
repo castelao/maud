@@ -58,20 +58,31 @@ def window_1Dmean(data, double l, t=None, method='hann', axis=0, parallel=True):
     assert t.shape == (data.shape[axis],)
 
     # ----
-    winfunc = window_func(method)
+    weight_func = window_func_scalar(method)
 
     data_smooth = ma.masked_all(data.shape)
 
-    cdef int i
+    cdef int i, ii
+    cdef double dt, w
+    cdef double D, W
 
     if data.ndim==1:
         # It's faster than getmaskarray
         (I,) = np.nonzero(np.isfinite(data))
+        #cdef np.ndarray[DTYPE_t, ndim=1] I = np.nonzero(np.isfinite(data))[0]
+
         for i in I:
-            dt = t-t[i]
-            ind = np.nonzero((np.absolute(dt)<l))
-            w = winfunc(dt[ind],l)
-            data_smooth[i] = (data[ind]*w).sum()/(w.sum())
+            W = 0
+            D = 0
+            for ii in I:
+                dt = t[ii] - t[i]
+                if abs(dt) <= l:
+                    w = weight_func(dt, l)
+                    if w != 0:
+                        D += data[ii] * w
+                        W += w
+            if W != 0:
+                data_smooth[i] = D/W
 
     else:
         I = data.shape[1]
