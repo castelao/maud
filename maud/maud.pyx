@@ -13,7 +13,7 @@ from libc.math cimport cos
 #from fluid.common.distance import find_closer_then
 #from fluid.cdistance import distance
 from fluid.cdistance import find_closer_then
-from fluid.cdistance import _distance_scalar
+from fluid.cdistance import distance_scalar
 
 np.import_array()
 
@@ -219,7 +219,7 @@ def _window_mean_2D_latlon(np.ndarray[DTYPE_t, ndim=2] Lat, np.ndarray[DTYPE_t, 
             D = 0
             for ii in range(I):
                 for jj in range(J):
-                    r = _distance_scalar(Lat[i,j], Lon[i,j],
+                    r = distance_scalar(Lat[i,j], Lon[i,j],
 				    Lat[ii,jj], Lon[ii,jj])
                     if r <= l:
                         w = weight_func(r, l)
@@ -257,7 +257,7 @@ def _window_mean_2D_latlon_masked(np.ndarray[DTYPE_t, ndim=2] Lat,
                 for ii in range(I):
                     for jj in range(J):
                         if mask[ii, jj] == 0:
-                            r = _distance_scalar(Lat[i,j], Lon[i,j],
+                            r = distance_scalar(Lat[i,j], Lon[i,j],
 					    Lat[ii,jj], Lon[ii,jj])
                             if r <= l:
                                 w = weight_func(r, l)
