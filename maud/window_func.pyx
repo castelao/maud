@@ -97,8 +97,8 @@ def window_func_scalar(method='hamming'):
     if method == 'hamming':
         winfunc = _weight_hamming_scalar
 
-    #elif method == 'hann':
-    #    winfunc = _weight_hann_scalar
+    elif method == 'hann':
+        winfunc = _weight_hann_scalar
 
     else:
         print "Filter %s is not available" % method
