@@ -62,14 +62,9 @@ def window_1Dmean(data, double l, t=None, method='hann', axis=0, parallel=True):
 
     data_smooth = ma.masked_all(data.shape)
 
-    cdef int i, ii
-    cdef double dt, w
-    cdef double D, W
-
     if data.ndim==1:
         # It's faster than getmaskarray
         (I,) = np.nonzero(np.isfinite(data))
-        #cdef np.ndarray[DTYPE_t, ndim=1] I = np.nonzero(np.isfinite(data))[0]
 
         for i in I:
             #data_smooth[i] = apply_window_1Dmean(data, t[i], t, l, I, weight_func)
