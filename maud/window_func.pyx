@@ -9,6 +9,8 @@ from libc.math cimport cos
 DTYPE = np.float64
 ctypedef np.float64_t DTYPE_t
 
+cdef double pi = np.pi
+
 # Hamming
 def _weight_hamming(np.ndarray r, double l):
     """ Cython hamming weight
@@ -118,7 +120,7 @@ def _weight_hamming_scalar(double r, double l):
     if abs(r) > l/2.:
         return 0
 
-    return 0.54 + 0.46*cos(2*np.pi*r/l)
+    return 0.54 + 0.46*cos(2*pi*r/l)
 
 # Hann
 def _weight_hann_scalar(double r, double l):
@@ -127,4 +129,4 @@ def _weight_hann_scalar(double r, double l):
     if abs(r) > l/2.:
         return 0
 
-    return 0.5*(1 + cos(2*np.pi*r/l))
+    return 0.5*(1 + cos(2*pi*r/l))
