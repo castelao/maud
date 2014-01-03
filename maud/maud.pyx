@@ -52,7 +52,7 @@ def window_1Dmean(data, double l, t=None, method='hann', axis=0, parallel=True):
     # If t is not given, creates a regularly spaced t
     if t == None:
         print "The scale along the choosed axis weren't defined. I'll consider a constant sequence."
-        t = np.arange(data.shape[axis])
+        t = np.arange(data.shape[axis], dtype=np.float)
 
     # t must has the same shape of data along axis
     assert t.shape == (data.shape[axis],)
@@ -72,17 +72,10 @@ def window_1Dmean(data, double l, t=None, method='hann', axis=0, parallel=True):
         #cdef np.ndarray[DTYPE_t, ndim=1] I = np.nonzero(np.isfinite(data))[0]
 
         for i in I:
-            W = 0
-            D = 0
-            for ii in I:
-                dt = t[ii] - t[i]
-                if abs(dt) <= l:
-                    w = weight_func(dt, l)
-                    if w != 0:
-                        D += data[ii] * w
-                        W += w
-            if W != 0:
-                data_smooth[i] = D/W
+            #data_smooth[i] = apply_window_1Dmean(data, t[i], t, l, I, weight_func)
+            out = apply_window_1Dmean(data, t[i], t, l, I, weight_func)
+            if out is not None:
+                data_smooth[i] = out
 
     else:
         I = data.shape[1]
@@ -95,6 +88,25 @@ def window_1Dmean(data, double l, t=None, method='hann', axis=0, parallel=True):
                     parallel=parallel)
 
     return data_smooth
+
+def apply_window_1Dmean(np.ndarray[DTYPE_t, ndim=1] data, double t0, np.ndarray[DTYPE_t, ndim=1] t, double l, np.ndarray[np.int_t, ndim=1] I, weight_func):
+    cdef int i
+    cdef double D, W
+    cdef double dt, w
+    #cdef size_t I
+
+    W = 0
+    D = 0
+
+    for i in I:
+        dt = t[i] - t0
+        if abs(dt) <= l:
+            w = weight_func(dt, l)
+            if w != 0:
+                D += data[i] * w
+                W += w
+    if W != 0:
+        return D/W
 
 def window_mean_2D_latlon(Lat, Lon, data, l, method='hamming', interp=False):
     """
