@@ -11,6 +11,11 @@ from libc.math cimport cos
 
 from maud.cwindow_func import window_func, window_func_scalar
 
+try:
+    from progressbar import ProgressBar
+except:
+    print "ProgressBar is not available"
+
 #from fluid.common.distance import distance
 #from fluid.common.distance import find_closer_then
 #from fluid.cdistance import distance
@@ -81,11 +86,20 @@ def window_1Dmean(data, double l, t=None, method='hann', axis=0, parallel=True):
         pool = mp.Pool(npes)
         results = []
         I = data.shape[1]
+        try:
+            pbar = ProgressBar(maxval=I).start()
+        except:
+            pass
+
         for i in range(I):
             results.append( pool.apply_async( window_1Dmean, \
-			    (data[:,i], l, t, method, 0, False)))
+                           (data[:,i], l, t, method, 0, False)))
         pool.close()
         for i, r in enumerate(results):
+            try:
+                pbar.update(i)
+            except:
+                pass
             data_smooth[:,i] = r.get()
         pool.terminate()
 
