@@ -1,8 +1,6 @@
 # -*- coding: utf-8 -*-
 # vim: tabstop=4 shiftwidth=4 softtabstop=4 expandtab
 
-from maud.cwindow_func import window_func, window_func_scalar
-
 import numpy as np
 from numpy import ma
 
@@ -10,6 +8,8 @@ import multiprocessing as mp
 
 cimport numpy as np
 from libc.math cimport cos
+
+from maud.cwindow_func import window_func, window_func_scalar
 
 #from fluid.common.distance import distance
 #from fluid.common.distance import find_closer_then
