@@ -55,6 +55,8 @@ def window_1Dmean(data, double l, t=None, method='hann', axis=0, parallel=True):
     if t == None:
         print "The scale along the choosed axis weren't defined. I'll consider a constant sequence."
         t = np.arange(data.shape[axis], dtype=np.float)
+    else:
+        assert t.dtype == np.float, "Var t must be of type np.float"
 
     # t must has the same shape of data along axis
     assert t.shape == (data.shape[axis],)
