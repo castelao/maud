@@ -244,6 +244,7 @@ def window_1Dmean(data, l, t=None, method='hann', axis=0, parallel=True):
     """
     assert axis <= data.ndim, "Invalid axis!"
 
+    # If necessary, move the axis to be filtered for the first axis
     if axis != 0:
         data_smooth = window_1Dmean(data.swapaxes(0, axis),
             l = l,
@@ -253,7 +254,9 @@ def window_1Dmean(data, l, t=None, method='hann', axis=0, parallel=True):
             parallel = parallel)
 
         return data_smooth.swapaxes(0, axis)
+    # Bellow here, the filter will be always applied on axis=0
 
+    # If t is not given, creates a regularly spaced t
     if t == None:
         print "The scale along the choosed axis weren't defined. I'll consider a constant sequence."
 	t = np.arange(data.shape[axis])
