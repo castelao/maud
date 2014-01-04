@@ -5,6 +5,7 @@
 
 try:
     import multiprocessing
+    import multiprocessing as mp
 except:
     print "I couldn't import multiprocessing"
 
@@ -267,20 +268,22 @@ def window_1Dmean(data, l, t=None, method='hann', axis=0, parallel=True):
     if data.ndim==1:
         # It's faster than getmaskarray
         (I,) = np.nonzero(np.isfinite(data))
-        if parallel is False:
-            for i in I:
-                data_smooth[i] = _apply_window_1Dmean(i, t, l, winfunc, data)
-        else:
-            npe = 2*multiprocessing.cpu_count()
-            pool = multiprocessing.Pool(npe)
-            results = []
-            for i in I:
-                results.append(pool.apply_async(_apply_window_1Dmean, \
-                        (i, t, l, winfunc, data)))
-            pool.close()
-            for n, r in enumerate(results):
-                data_smooth[n] = r.get()
-            pool.terminate()
+        for i in I:
+            data_smooth[i] = _apply_window_1Dmean(i, t, l, winfunc, data)
+
+    elif parallel is True:
+        import multiprocessing as mp
+        npes = 2 * mp.cpu_count()
+        pool = mp.Pool(npes)
+        results = []
+        I = data.shape[1]
+        for i in range(I):
+            results.append(pool.apply_async(window_1Dmean, \
+                    (data[:,i], l, t, method, 0, False)))
+        pool.close()
+        for i, r in enumerate(results):
+            data_smooth[:,i] = r.get()
+        pool.terminate()
 
     else:
         I = data.shape[1]
