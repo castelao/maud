@@ -66,11 +66,13 @@ nc = Dataset(args[0], 'a')
 #if var not in nc.variables.keys():
 #    import sys; sys.exit()
 
+ver_maud = pkg_resources.get_distribution("maud").version
+
 
 attributes = nc.variables[options.var].ncattrs()
 #nc.variables[options.var].missing_value
 # Think well how to do it. Probably I should first delete the old one and create from scratch, so there is no risk of old attributes and other stuff left behind.
-options.varout  = options.var + "_maud"
+options.varout  =  "%s_maud2D" % options.var 
 if (options.varout in nc.variables):
     print "Hey! %s is already in this file. I'll overwrite it" % \
         options.varout
