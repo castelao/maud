@@ -35,7 +35,7 @@ here = os.path.abspath(os.path.dirname(__file__))
 README = open(os.path.join(here, 'README.rst')).read()
 NEWS = open(os.path.join(here, 'NEWS.txt')).read()
 
-version='0.8.5'
+version='0.8.6'
 
 requires = [
     'numpy>=1.1',

@@ -19,6 +19,8 @@
 
       This will save on the same netcdf another variable named temperature_maud
 """
+import pkg_resources
+from datetime import datetime
 
 from optparse import OptionParser
 
@@ -92,6 +94,13 @@ else:
 
 for a in attributes:
     setattr(out, a, getattr(nc.variables[options.var], a))
+
+# Saving the filter window size as an attribute of the output variable
+setattr(out, 'filter_window_size' , options.l)
+# Saving the version as an attribute of the output variable
+setattr(out, 'maud_version' , ver_maud)
+# Saving the filtering date  as an attribute of the output variable
+setattr(out, 'maud_processing_date', datetime.now().isoformat())
 
 
 # ==== Handling Lat & Lon variables
