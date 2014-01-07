@@ -138,11 +138,11 @@ except:
 try:
     import multiprocessing as mp
     npesmax = 2 * mp.cpu_count() +1
-    if options.npes > npesmax:
+    if (options.npes <= npesmax) & (options.npes > 0):
+        npes = options.npes
+    else:
         print "Considering the numper of cpu on your machine, I'll stick with npe=%s"  % npesmax
         npes = npesmax
-    else:
-        npes = options.npes
 
     print " Will work with %s npes" % npes
     data_smooth = ma.empty(data.shape)
