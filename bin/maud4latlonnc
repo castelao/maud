@@ -28,7 +28,6 @@ import numpy as np
 from numpy import ma
 from netCDF4 import Dataset
 
-from maud import window_1Dbandpass
 from cmaud import window_mean_2D_latlon
 
 
