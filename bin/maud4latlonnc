@@ -141,7 +141,7 @@ try:
     if (options.npes <= npesmax) & (options.npes > 0):
         npes = options.npes
     else:
-        print "Considering the numper of cpu on your machine, I'll stick with npe=%s"  % npesmax
+        print "Considering the number of cpu on your machine, I'll stick with npe=%s"  % npesmax
         npes = npesmax
 
     print " Will work with %s npes" % npes
