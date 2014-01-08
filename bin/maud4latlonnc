@@ -144,7 +144,7 @@ try:
         npes = npesmax
 
     print " Will work with %s npes" % npes
-    data_smooth = ma.empty(data.shape)
+    #data_smooth = ma.empty(data.shape)
     pool = mp.Pool(npes)
     results = []
 
@@ -160,7 +160,7 @@ try:
         except:
             pass
 
-        out[nt] = data[nt] - r.get()
+        out[nt] = r.get()
 
 except:
     print "Sorry, didn't work to filter in parallel"
