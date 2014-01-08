@@ -27,6 +27,95 @@ from window_func import window_func
 """
 """
 
+def window_1Dmean(data, l, t=None, method='hann', axis=0, parallel=True):
+    """ A moving window mean filter, not necessarily a regular grid.
+
+        1D means that the filter is applied to along only one
+          of the dimensions, but in the whole array. For example
+          in a 3D array, each latXlon point is filtered along the
+          time.
+
+        It's not optimized for a regular grid.
+
+        Input:
+            - data: np.array or ma.maked_array, nD
+            - l: is the size of the filter, in the same unit
+                of the t.
+	    - t: is the scale of the choosed axis, 1D. If not
+                defined, it will be considered a sequence.
+            - method: ['hann', 'hamming', 'blackman']
+                Defines the weight function type
+            - axis: Dimension which the filter will be applied
+            - parallel: [True] Will apply the filter with
+                multiple processors.
+    """
+    assert axis <= data.ndim, "Invalid axis!"
+
+    # If necessary, move the axis to be filtered for the first axis
+    if axis != 0:
+        data_smooth = window_1Dmean(data.swapaxes(0, axis),
+            l = l,
+            t = t,
+            method = method,
+            axis = 0,
+            parallel = parallel)
+
+        return data_smooth.swapaxes(0, axis)
+    # Bellow here, the filter will be always applied on axis=0
+
+    # If t is not given, creates a regularly spaced t
+    if t == None:
+        print "The scale along the choosed axis weren't defined. I'll consider a constant sequence."
+	t = np.arange(data.shape[axis])
+
+    assert t.shape == (data.shape[axis],), "Invalid size of t."
+
+    # ----
+    winfunc = window_func(method)
+
+    data_smooth = ma.masked_all(data.shape)
+
+    if data.ndim==1:
+        # It's faster than getmaskarray
+        (I,) = np.nonzero(np.isfinite(data))
+        for i in I:
+            data_smooth[i] = _apply_window_1Dmean(i, t, l, winfunc, data)
+
+    elif parallel is True:
+        import multiprocessing as mp
+        npes = 2 * mp.cpu_count()
+        pool = mp.Pool(npes)
+        results = []
+        I = data.shape[1]
+        for i in range(I):
+            results.append(pool.apply_async(window_1Dmean, \
+                    (data[:,i], l, t, method, 0, False)))
+        pool.close()
+        for i, r in enumerate(results):
+            data_smooth[:,i] = r.get()
+        pool.terminate()
+
+    else:
+        I = data.shape[1]
+        for i in range(I):
+            data_smooth[:,i] = window_1Dmean(data[:,i],
+                    l = l,
+                    t = t,
+                    method = method,
+                    axis = 0,
+                    parallel=parallel)
+
+    return data_smooth
+
+def _apply_window_1Dmean(i, t, l, winfunc, data):
+    """ Effectively apply 1D moving mean along 1D array
+        Support function to window_1Dmean
+    """
+    dt = t-t[i]
+    ind = np.nonzero((np.absolute(dt)<l))
+    w = winfunc(dt[ind],l)
+    return (data[ind]*w).sum()/(w.sum())
+
 
 def window_mean_2D_latlon(Lat, Lon, data, l, method='hamming', interp='False'):
     """
@@ -219,95 +308,6 @@ def window_1Dbandpass(data, lshorterpass, llongerpass, t=None, method='hann', ax
                         parallel=False)
 
     return data_smooth
-
-def window_1Dmean(data, l, t=None, method='hann', axis=0, parallel=True):
-    """ A moving window mean filter, not necessarily a regular grid.
-
-        1D means that the filter is applied to along only one
-          of the dimensions, but in the whole array. For example
-          in a 3D array, each latXlon point is filtered along the
-          time.
-
-        It's not optimized for a regular grid.
-
-        Input:
-            - data: np.array or ma.maked_array, nD
-            - l: is the size of the filter, in the same unit
-                of the t.
-	    - t: is the scale of the choosed axis, 1D. If not
-                defined, it will be considered a sequence.
-            - method: ['hann', 'hamming', 'blackman']
-                Defines the weight function type
-            - axis: Dimension which the filter will be applied
-            - parallel: [True] Will apply the filter with
-                multiple processors.
-    """
-    assert axis <= data.ndim, "Invalid axis!"
-
-    # If necessary, move the axis to be filtered for the first axis
-    if axis != 0:
-        data_smooth = window_1Dmean(data.swapaxes(0, axis),
-            l = l,
-            t = t,
-            method = method,
-            axis = 0,
-            parallel = parallel)
-
-        return data_smooth.swapaxes(0, axis)
-    # Bellow here, the filter will be always applied on axis=0
-
-    # If t is not given, creates a regularly spaced t
-    if t == None:
-        print "The scale along the choosed axis weren't defined. I'll consider a constant sequence."
-	t = np.arange(data.shape[axis])
-
-    assert t.shape == (data.shape[axis],), "Invalid size of t."
-
-    # ----
-    winfunc = window_func(method)
-
-    data_smooth = ma.masked_all(data.shape)
-
-    if data.ndim==1:
-        # It's faster than getmaskarray
-        (I,) = np.nonzero(np.isfinite(data))
-        for i in I:
-            data_smooth[i] = _apply_window_1Dmean(i, t, l, winfunc, data)
-
-    elif parallel is True:
-        import multiprocessing as mp
-        npes = 2 * mp.cpu_count()
-        pool = mp.Pool(npes)
-        results = []
-        I = data.shape[1]
-        for i in range(I):
-            results.append(pool.apply_async(window_1Dmean, \
-                    (data[:,i], l, t, method, 0, False)))
-        pool.close()
-        for i, r in enumerate(results):
-            data_smooth[:,i] = r.get()
-        pool.terminate()
-
-    else:
-        I = data.shape[1]
-        for i in range(I):
-            data_smooth[:,i] = window_1Dmean(data[:,i], 
-                    l = l,
-                    t = t,
-                    method = method, 
-                    axis = 0, 
-                    parallel=parallel)
-
-    return data_smooth
-
-def _apply_window_1Dmean(i, t, l, winfunc, data):
-    """ Effectively apply 1D moving mean along 1D array
-        Support function to window_1Dmean
-    """
-    dt = t-t[i]
-    ind = np.nonzero((np.absolute(dt)<l))
-    w = winfunc(dt[ind],l)
-    return (data[ind]*w).sum()/(w.sum())
 
 def window_1Dmean_grid(data, l, method='hann', axis=0, parallel=False):
     """ A moving window mean filter applied to a regular grid.
