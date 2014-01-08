@@ -16,11 +16,7 @@ try:
 except:
     print "ProgressBar is not available"
 
-#from fluid.common.distance import distance
-#from fluid.common.distance import find_closer_then
-#from fluid.cdistance import distance
-from fluid.cdistance import find_closer_then
-from fluid.cdistance import distance_scalar
+from fluid.cdistance import distance_scalar as cdistance_scalar
 
 np.import_array()
 
@@ -224,7 +220,7 @@ def window_mean_2D_latlon(Lat, Lon, data, l, method='hamming', interp=False):
     #else:
     #    I, J = np.nonzero(np.isfinite(data))
 
-#        #ind, r = find_closer_then(Lat, Lon, Lat[i,j], Lon[i,j], llimit=l)
+#        #ind, r = cfind_closer_then(Lat, Lon, Lat[i,j], Lon[i,j], llimit=l)
 #        #if len(r) > 0:
 #        #    w = weight_func(r, l)
 #        #    tmp = data[ind]*w
@@ -257,7 +253,7 @@ def _window_mean_2D_latlon(np.ndarray[DTYPE_t, ndim=2] Lat, np.ndarray[DTYPE_t, 
             D = 0
             for ii in range(I):
                 for jj in range(J):
-                    r = distance_scalar(Lat[i,j], Lon[i,j],
+                    r = cdistance_scalar(Lat[i,j], Lon[i,j],
 				    Lat[ii,jj], Lon[ii,jj])
                     if r <= l:
                         w = weight_func(r, l)
@@ -295,7 +291,7 @@ def _window_mean_2D_latlon_masked(np.ndarray[DTYPE_t, ndim=2] Lat,
                 for ii in range(I):
                     for jj in range(J):
                         if mask[ii, jj] == 0:
-                            r = distance_scalar(Lat[i,j], Lon[i,j],
+                            r = cdistance_scalar(Lat[i,j], Lon[i,j],
 					    Lat[ii,jj], Lon[ii,jj])
                             if r <= l:
                                 w = weight_func(r, l)
