@@ -200,7 +200,6 @@ def window_mean_2D_latlon(Lat, Lon, data, l, method='hamming', interp=False):
             pass
 
         for n in range(N):
-            #data_smooth[n] = window_mean_2D_latlon(Lat, Lon, data[n], l, method, interp)
             results.append( pool.apply_async( window_mean_2D_latlon, (Lat, Lon, data[n], l, method, interp) ) )
 
         for i, r in enumerate(results):
