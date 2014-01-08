@@ -264,7 +264,7 @@ def apply_window_mean_2D_latlon(np.ndarray[DTYPE_t, ndim=2] Lat, np.ndarray[DTYP
 
     return data_smooth
 
-def _window_mean_2D_latlon_masked(np.ndarray[DTYPE_t, ndim=2] Lat,
+def apply_window_mean_2D_latlon_masked(np.ndarray[DTYPE_t, ndim=2] Lat,
 		np.ndarray[DTYPE_t, ndim=2] Lon,
 		np.ndarray[DTYPE_t, ndim=2] data,
 		np.ndarray[np.int8_t, ndim=2] mask,
