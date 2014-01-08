@@ -165,19 +165,18 @@ def window_mean_2D_latlon(Lat, Lon, data, l, method='hamming', interp=False):
 
     # ==== data is a 2D array ======================================
     if data.ndim == 2:
-        if type(data) == np.ndarray:
-            return _window_mean_2D_latlon(Lat, Lon, data, l, method)
-
-        elif type(data) == ma.MaskedArray:
-            if (data.mask == False).all():
-                data_smooth = _window_mean_2D_latlon(Lat, Lon, data.data, l,
-				method)
-                return ma.array(data_smooth)
-            else:
-                data_smooth, mask = _window_mean_2D_latlon_masked(Lat, Lon,
+        if hasattr(data, 'mask'):
+            if (data.mask==True).any():
+                data_smooth, mask = apply_window_mean_2D_latlon_masked(Lat, Lon,
 				data.data, data.mask.astype('int8'), l, method,
 				interp)
                 return ma.masked_array(data_smooth, mask)
+            else:
+                data_smooth = apply_window_mean_2D_latlon(Lat, Lon, data.data, l,
+				method, interp)
+                return ma.array(data_smooth)
+        else: # type(data) == np.ndarray:
+            return apply_window_mean_2D_latlon(Lat, Lon, data, l, method, interp)
 
     # ==== data is a 3D array ======================================
     elif data.ndim == 3:
@@ -235,7 +234,7 @@ def window_mean_2D_latlon(Lat, Lon, data, l, method='hamming', interp=False):
 #    return data_out
     #return data_smooth
 
-def _window_mean_2D_latlon(np.ndarray[DTYPE_t, ndim=2] Lat, np.ndarray[DTYPE_t, ndim=2] Lon, np.ndarray[DTYPE_t, ndim=2] data, l, method='hamming'):
+def apply_window_mean_2D_latlon(np.ndarray[DTYPE_t, ndim=2] Lat, np.ndarray[DTYPE_t, ndim=2] Lon, np.ndarray[DTYPE_t, ndim=2] data, l, method='hamming'):
 #    """
 #    """
     weight_func = window_func_scalar(method)
