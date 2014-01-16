@@ -39,7 +39,7 @@ version='0.8.7'
 
 requires = [
     'numpy>=1.1',
-    'fluid>=0.3',
+    'fluid>=0.1.7',
     'distribute>=0.6.40',
     ]
 
