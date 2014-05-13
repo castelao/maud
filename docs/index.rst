@@ -3,6 +3,11 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
+
+##################
+MAUD Documentation
+##################
+
 Welcome to MAUD's documentation!
 ================================
 
@@ -13,6 +18,7 @@ Contents:
 .. toctree::
    :maxdepth: 2
 
+   install
    getting_started
 
 
