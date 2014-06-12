@@ -23,6 +23,9 @@ parser.add_option("--lowpasswindowlength", dest="lowpasswindowlength",
 parser.add_option("--highpasswindowlength", dest="highpasswindowlength",
     help="Length of the filter window. Must be on the same scale of the scalevar")
 
+parser.add_option("-o", dest="outputfile",
+    help="The output file where the filtered data will be saved.")
+
 parser.add_option("--scalevar", dest="scalevar",
     help="The scale on the dimension to be filtered.", default="time")
 
