@@ -4,6 +4,10 @@
 
     Far away from an ideal solution. It's just to resolve the Bia's
       problem for now.
+
+    Type this command with -h to see the help. Here is an example:
+
+    maud4nc -lowpasswindowlength=7 --highpasswindowlength=90 --var='temperature' -w hamming --npes=18 -o model_output.nc
 """
 
 from optparse import OptionParser
