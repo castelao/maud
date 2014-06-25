@@ -165,7 +165,7 @@ if newfile == True:
         #        parallel = False)
 
         tmp = window_1Dmean(data[:, n],
-                        l = options.highpasswindowlength,
+                        l = options.lowpasswindowlength,
                         t = scale,
                         method = options.windowmethod,
                         axis=0,
