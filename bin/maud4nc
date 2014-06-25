@@ -156,20 +156,35 @@ if newfile == True:
         except:
             pass
 
-        #out[:, i, j] = window_1Dbandpass(data[:, i, j, k], 
-        #        lshorterpass = options.highpasswindowlength, 
-        #        llongerpass = options.lowpasswindowlength, 
-        #        t = scale,
-        #        method = options.windowmethod, 
-        #        axis=0, 
-        #        parallel = False)
+        if (options.highpasswindowlength is not None) and \
+                (options.lowpasswindowlength is not None):
+                    tmp = window_1Dbandpass(data[:, n],
+                            lshorterpass = options.highpasswindowlength,
+                            llongerpass = options.lowpasswindowlength,
+                            t = scale,
+                            method = options.windowmethod,
+                            axis=0,
+                            parallel=True)
 
-        tmp = window_1Dmean(data[:, n],
-                        l = options.lowpasswindowlength,
-                        t = scale,
-                        method = options.windowmethod,
-                        axis=0,
-                        parallel = True)
+        elif (options.lowpasswindowlength is not None):
+            tmp = window_1Dmean(data[:, n],
+                    l=options.lowpasswindowlength,
+                    t=scale,
+                    method=options.windowmethod,
+                    axis=0,
+                    parallel=True)
+
+        elif (options.highpasswindowlength is not None):
+            tmp = data[:, n] - \
+                    window_1Dmean(data[:, n],
+                            l=options.highpasswindowlength,
+                            t=scale,
+                            method=options.windowmethod,
+                            axis=0,
+                            parallel=True)
+
+        else:
+            import sys; sys.exit()
 
         if add_offset is not None:
             tmp = tmp - add_offset
