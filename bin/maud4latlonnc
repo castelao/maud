@@ -15,13 +15,14 @@
 
       Type this command with -h to see the help. Here is an example:
 
-      maud4latlonnc -l 600e3 --var='temperature' -w hamming --interp --npes=18 model_output.nc
+      maud4latlonnc -l 600e3 --var='temperature' -w hamming --interp --npes=18 --output=temperature_smooth_output.nc model_output.nc
 
       This will save on the same netcdf another variable named temperature_maud
 """
+
+from os.path import isfile
 import pkg_resources
 from datetime import datetime
-
 from optparse import OptionParser
 
 import numpy as np
@@ -54,6 +55,10 @@ parser.add_option("--npes",
     action="store", type="int", dest="npes",
     help="Defines the number of parallel processes.",
     default=None)
+
+parser.add_option("--output", dest="outputfile",
+            help="The output file where the filtered data will be saved.")
+
 
 (options, args) = parser.parse_args()
 
