@@ -15,7 +15,7 @@
 
       Type this command with -h to see the help. Here is an example:
 
-      maud4latlonnc -l 600e3 --var='temperature' -w hamming --interp --npes=18 --output=temperature_smooth_output.nc model_output.nc
+      maud4latlonnc --shorterpasslength 600e3 --var='temperature' -w hamming --interp --npes=18 --output=temperature_smooth_output.nc model_output.nc
 
       This will save on the same netcdf another variable named temperature_maud
 """
@@ -38,6 +38,14 @@ parser = OptionParser()
 parser.add_option("-l",
     action="store", type="float", dest="l",
     help="The filter scale in meters. For example: -l 100e3")
+
+parser.add_option("--largerpasslength",
+        type="float", dest="largerpasslength", default=None,
+        help="Length of the filter window in meters.")
+
+parser.add_option("--shorterpasslength",
+        type="float", dest="shorterpasslength", default=None,
+        help="Length of the filter window in meters.")
 
 parser.add_option("--var", dest="var",
     help="Variable to be filtered")
@@ -65,12 +73,187 @@ parser.add_option("--output", dest="outputfile",
 print "args: ", args
 print "options: ", options
 # ============================================================================
+if ((options.largerpasslength is None) and
+        (options.shorterpasslength is not None)):
+    filtertype = 'highpass'
+elif ((options.largerpasslength is not None) and
+        (options.shorterpasslength is None)):
+    filtertype = 'lowpass'
+elif ((options.largerpasslength is not None) and
+        (options.shorterpasslength is not None)):
+    filtertype = 'bandpass'
+else:
+    import sys; sys.exit()
+
+# ============================================================================
+assert isfile(args[0])
+
+varname = options.var
+if options.outputfile is None:
+    options.varout  = options.var + "_maud"
+    newfile = False
+else:
+    options.varout  = options.var
+    newfile = True
+
+ver_maud = pkg_resources.get_distribution("maud").version
+# ============================================================================
+# ==== Handling Lat & Lon variables
+# ---- First I'll guess the name of the variables
+ncin = Dataset(args[0], 'r')
+
+if ('latitude' in ncin.variables) and ('longitude' in ncin.variables):
+    lat_var = 'latitude'
+    lon_var = 'longitude'
+elif ('lat' in ncin.variables) and ('lon' in ncin.variables):
+    lat_var = 'lat'
+    lon_var = 'lon'
+else:
+    print "Sorry, I couldn't guess the name of the lat lon variables."
+
+lat = ncin.variables[lat_var]
+lon = ncin.variables[lon_var]
+
+
+# ---- If lat & lon are 1D variables, I'll need to do a meshgrid
+if (len(lat.dimensions)==1) & (len(lon.dimensions)==1):
+    if (lat.dimensions[0] == ncin.variables[options.var].dimensions[1]) & \
+            (lon.dimensions[0] == ncin.variables[options.var].dimensions[2]):
+                Lon, Lat = np.meshgrid(lon[:], lat[:])
+    T, I, J = ncin.variables[options.var].shape
+else:
+    import sys; sys.exit()
+
+ncin.close()
+
+
+ncin = Dataset(args[0], 'r')
+try:
+    add_offset = float(getattr(ncin.variables[varname], 'add_offset'))
+except:
+    add_offset = None
+
+try:
+    scale_factor = float(getattr(ncin.variables[varname], 'scale_factor'))
+except:
+    scale_factor = None
+ncin.close()
+
+# ============================================================================
+if newfile is True:
+    ncin = Dataset(args[0], 'r')
+    ncout = Dataset(options.outputfile, 'w')
+
+    # Global Attributes
+
+    # Copying dimensions
+    dims = ncin.variables[varname].dimensions
+    for dim in dims:
+        ncout.createDimension(dim, len(ncin.dimensions[dim]))
+
+    # Copying variables related to the dimensions
+    variables = {}
+
+    for dim in dims:
+        variables[dim] = ncout.createVariable(dim,
+                ncin.variables[dim].datatype.name,
+                ncin.variables[dim].dimensions)
+        variables[dim][:] = ncin.variables[dim][:]
+        #attributes = nc.variables[dim].ncattrs()
+        #for a in attributes:
+        for a in ncin.variables[dim].ncattrs():
+            setattr(ncout.variables[dim], a, getattr(ncin.variables[dim], a))
+
+    output = ncout.createVariable(varname,
+            ncin.variables[varname].dtype.name,
+            ncin.variables[varname].dimensions,
+            fill_value=ncin.variables[varname]._FillValue)
+
+    # If there is a scale factor, I would need to save the output
+    #   considering that.
+    attrs = ncin.variables[varname].ncattrs()
+    attrs = [a for a in attrs if a != '_FillValue']
+
+    data = ncin.variables[options.var]
+
+    import multiprocessing as mp
+    npesmax = 2 * mp.cpu_count() +1
+    if (options.npes <= npesmax) & (options.npes > 0):
+        npes = options.npes
+    else:
+        print "Considering the number of cpu on your machine, I'll stick with npe=%s"  % npesmax
+        npes = npesmax
+
+    print " Will work with %s npes" % npes
+
+    pool = mp.Pool(npes)
+    results = []
+
+    print "Preparing the workers."
+    if filtertype == 'highpass':
+        l = options.shorterpasslength
+    elif filtertype == 'lowpass':
+        l = options.largerpasslength
+    #elif filtertype = 'bandpass'
+
+    for nt in range(T):
+        results.append( pool.apply_async(
+            window_mean_2D_latlon,
+            (Lat, Lon, data[nt], l, options.windowmethod,
+                options.interp)
+            ) )
+    pool.close()
+    print "Collecting the results."
+    for nt, r in enumerate(results):
+        try:
+            pbar.update(nt)
+        except:
+            pass
+
+        if filtertype == 'lowpass':
+            tmp = r.get()
+        elif filtertype == 'highpass':
+            tmp = data[nt] - r.get()
+
+        if add_offset is not None:
+            tmp = tmp - add_offset
+        if scale_factor is not None:
+            tmp = tmp / scale_factor
+
+        if output.dtype in ['int16']:
+            output[nt] = tmp.round()
+        else:
+            output[nt] = tmp
+
+    for a in attrs:
+        setattr(ncout.variables[varname], a,
+                getattr(ncin.variables[varname], a))
+
+    # Saving the filter window size as an attribute of the output variable
+    if filtertype == 'highpass':
+        setattr(output, 'filter_window_size' , options.shorterpasslength)
+    elif filtertype == 'lowpass':
+        setattr(output, 'filter_window_size' , options.largerpasslength)
+    else:
+        setattr(output, 'filter_window_size' , options.l)
+    # Saving the version as an attribute of the output variable
+    setattr(output, 'maud_version' , ver_maud)
+    # Saving the filtering date  as an attribute of the output variable
+    setattr(output, 'maud_processing_date', datetime.now().isoformat())
+
+
+    ncin.close()
+    ncout.sync()
+    ncout.close()
+    import sys; sys.exit()
+
+
+# Here goes if newfile is False
 nc = Dataset(args[0], 'a')
 
 #if var not in nc.variables.keys():
 #    import sys; sys.exit()
 
-ver_maud = pkg_resources.get_distribution("maud").version
 
 
 attributes = nc.variables[options.var].ncattrs()
@@ -109,27 +292,6 @@ setattr(out, 'maud_version' , ver_maud)
 setattr(out, 'maud_processing_date', datetime.now().isoformat())
 
 
-# ==== Handling Lat & Lon variables
-# ---- First I'll guess the name of the variables
-if ('latitude' in nc.variables) and ('longitude' in nc.variables):
-    lat_var = 'latitude'
-    lon_var = 'longitude'
-elif ('lat' in nc.variables) and ('lon' in nc.variables):
-    lat_var = 'lat'
-    lon_var = 'lon'
-else:
-    print "Sorry, I couldn't guess the name of the lat lon variables."
-lat = nc.variables[lat_var]
-lon = nc.variables[lon_var]
-
-# ---- If lat & lon are 1D variables, I'll need to do a meshgrid
-if (len(lat.dimensions)==1) & (len(lon.dimensions)==1):
-    if (lat.dimensions[0] == nc.variables[options.var].dimensions[1]) & \
-            (lon.dimensions[0] == nc.variables[options.var].dimensions[2]):
-                Lon, Lat = np.meshgrid(lon[:], lat[:])
-    T, I, J = nc.variables[options.var].shape
-else:
-    import sys; sys.exit()
 
 data = nc.variables[options.var]
 
