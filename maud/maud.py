@@ -14,9 +14,6 @@ import numpy
 import numpy as np
 from numpy import ma
 
-from fluid.common.distance import distance
-from fluid.common.distance import find_closer_then
-
 #try:
 #    from maud.cwindow_func import window_func
 #except:
@@ -26,6 +23,41 @@ from window_func import window_func
 
 """
 """
+
+DEG2RAD = (2*np.pi/360)
+RAD2DEG = 1/DEG2RAD
+DEG2MIN = 60.
+DEG2NM  = 60.
+NM2M   = 1852.    # Defined in Pond & Pickard p303.
+
+def find_closer_then(lat, lon, lat_c, lon_c, llimit, method="simplest"):
+    """
+    """
+    ddeg = llimit/(DEG2NM*NM2M)
+    possible = np.nonzero((lat<(lat_c+ddeg)) & (lat>(lat_c-ddeg)) & (lon<(lon_c+ddeg)) & (lon>(lon_c-ddeg)))
+    L = _distance_1D(lat[possible], lon[possible], lat_c, lon_c)
+    ind_closer = L<llimit
+    L = L[ind_closer]
+    ind = []
+    for p in possible:
+        ind.append(p[ind_closer])
+
+    return ind, L
+
+
+def _distance_1D(lat, lon, lat_c, lon_c):
+    """
+    """
+    I = lat.shape[0]
+    scale = 0.5*np.pi/180
+    deg2m = DEG2NM*NM2M
+    L = np.zeros(I)
+    fac = np.cos((lat_c+lat)*scale)
+    L = ((lat-lat_c)**2+((lon-lon_c)*fac)**2)**.5 \
+            * deg2m
+    return L
+# ============================================================================
+
 
 def window_1Dmean(data, l, t=None, method='hann', axis=0, parallel=True):
     """ A moving window mean filter, not necessarily a regular grid.

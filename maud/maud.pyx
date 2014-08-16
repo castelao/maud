@@ -16,12 +16,24 @@ try:
 except:
     print "ProgressBar is not available"
 
-from fluid.cdistance import distance_scalar as cdistance_scalar
 
 np.import_array()
 
 DTYPE = np.float
 ctypedef np.float_t DTYPE_t
+
+cdef double DEG2NM  = 60.
+cdef double NM2M   = 1852.    # Defined in Pond & Pickard p303.
+cdef double DEG2M = DEG2NM*NM2M
+cdef double deg2rad = 0.5*np.pi/180
+
+
+def cdistance_scalar(double lat, double lon, double lat_c, double lon_c):
+    """
+    """
+    #assert lat.dtype == DTYPE and  lon.dtype == DTYPE
+    return ((lat-lat_c)**2 +
+                    ((lon-lon_c) * cos((lat_c+lat)*deg2rad))**2)**.5 * DEG2M
 
 
 def window_1Dmean(data, double l, t=None, method='hann', axis=0, parallel=True):
