@@ -184,11 +184,11 @@ def window_mean_2D_latlon(Lat, Lon, data, l, method='hamming', interp=False):
 				interp)
                 return ma.masked_array(data_smooth, mask)
             else:
-                data_smooth = apply_window_mean_2D_latlon(Lat, Lon, data.data, l,
-				method, interp)
+                data_smooth = apply_window_mean_2D_latlon(Lat, Lon, data.data,
+                        l, method)
                 return ma.array(data_smooth)
         else: # type(data) == np.ndarray:
-            return apply_window_mean_2D_latlon(Lat, Lon, data, l, method, interp)
+            return apply_window_mean_2D_latlon(Lat, Lon, data, l, method)
 
     # ==== data is a 3D array ======================================
     elif data.ndim == 3:
