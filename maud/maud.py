@@ -169,9 +169,6 @@ def window_mean_2D_latlon(Lat, Lon, data, l, method='hamming', interp='False'):
 
         Output:
 
-        !!!ATENTION!!!
-        - Might be a good idea to eliminate the dependence on
-          fluid.
     """
     assert ((type(l) == float) or (type(l) == int)), \
         "The filter scale (l) must be a float or an int"
