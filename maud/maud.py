@@ -30,32 +30,38 @@ DEG2MIN = 60.
 DEG2NM  = 60.
 NM2M   = 1852.    # Defined in Pond & Pickard p303.
 
-def find_closer_then(lat, lon, lat_c, lon_c, llimit, method="simplest"):
+def find_closer_then(lat, lon, lat_c, lon_c, llimit, method="haversine"):
     """
     """
-    ddeg = llimit/(DEG2NM*NM2M)
-    possible = np.nonzero((lat<(lat_c+ddeg)) & (lat>(lat_c-ddeg)) & (lon<(lon_c+ddeg)) & (lon>(lon_c-ddeg)))
-    L = _distance_1D(lat[possible], lon[possible], lat_c, lon_c)
+    assert lat.shape == lon.shape, "lat & lon must have same shape"
+    #assert (len(lat_c) == 1) & (len(lon_c) == 1)
+
+    deg_limit = np.rad2deg(llimit/AVG_EARTH_RADIUS)
+    possible = np.nonzero(abs(lat - lat_c) <= deg_limit)
+    L = haversine(lat[possible], lon[possible], lat_c, lon_c)
     ind_closer = L<llimit
     L = L[ind_closer]
     ind = []
+    # Repeat for each dimension.
     for p in possible:
         ind.append(p[ind_closer])
 
     return ind, L
 
+AVG_EARTH_RADIUS = 6371000  # in m
 
-def _distance_1D(lat, lon, lat_c, lon_c):
-    """
-    """
-    I = lat.shape[0]
-    scale = 0.5*np.pi/180
-    deg2m = DEG2NM*NM2M
-    L = np.zeros(I)
-    fac = np.cos((lat_c+lat)*scale)
-    L = ((lat-lat_c)**2+((lon-lon_c)*fac)**2)**.5 \
-            * deg2m
-    return L
+from numpy import radians
+def haversine(lat, lon, lat_c, lon_c):
+
+    lat, lon, lat_c, lon_c = map(radians, [lat, lon, lat_c, lon_c])
+
+    dlat = lat - lat_c
+    dlon = lon - lon_c
+    d = np.sin(dlat / 2) ** 2 + \
+            np.cos(lat) * np.cos(lat_c) * np.sin(dlon / 2) ** 2
+    h = 2 * AVG_EARTH_RADIUS * np.arcsin(np.sqrt(d))
+
+    return h
 # ============================================================================
 
 
