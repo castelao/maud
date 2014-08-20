@@ -1,4 +1,6 @@
 
+"""
+"""
 # Gui, 27-06-2012
 # Just an idea. Create a class of filtered data. A fake Masked Array object
 #   which gives the output on demand, filtered.
@@ -13,6 +15,8 @@ import numpy as N
 import numpy
 import numpy as np
 from numpy import ma
+from numpy import radians
+
 
 #try:
 #    from maud.cwindow_func import window_func
@@ -21,14 +25,8 @@ from numpy import ma
 from window_func import window_func
 
 
-"""
-"""
+AVG_EARTH_RADIUS = 6371000  # in m
 
-DEG2RAD = (2*np.pi/360)
-RAD2DEG = 1/DEG2RAD
-DEG2MIN = 60.
-DEG2NM  = 60.
-NM2M   = 1852.    # Defined in Pond & Pickard p303.
 
 def find_closer_then(lat, lon, lat_c, lon_c, llimit, method="haversine"):
     """
@@ -48,9 +46,6 @@ def find_closer_then(lat, lon, lat_c, lon_c, llimit, method="haversine"):
 
     return ind, L
 
-AVG_EARTH_RADIUS = 6371000  # in m
-
-from numpy import radians
 def haversine(lat, lon, lat_c, lon_c):
 
     lat, lon, lat_c, lon_c = map(radians, [lat, lon, lat_c, lon_c])
