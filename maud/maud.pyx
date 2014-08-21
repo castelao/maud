@@ -25,7 +25,8 @@ ctypedef np.float_t DTYPE_t
 cdef double DEG2NM  = 60.
 cdef double NM2M   = 1852.    # Defined in Pond & Pickard p303.
 cdef double DEG2M = DEG2NM*NM2M
-cdef double deg2rad = 0.5*np.pi/180
+cdef double DEG2RAD = np.pi/180
+cdef float AVG_EARTH_RADIUS = 6371000  # in m
 
 
 def cdistance_scalar(double lat, double lon, double lat_c, double lon_c):
