@@ -37,6 +37,25 @@ def cdistance_scalar(double lat, double lon, double lat_c, double lon_c):
                     ((lon-lon_c) * cos((lat_c+lat)*deg2rad))**2)**.5 * DEG2M
 
 
+cdef float haversine_scalar(double lat, double lon, double lat_c, double lon_c):
+    """ Haversine, gives the grat circle distance in a sphere
+    """
+
+    cdef double d
+    cdef double h
+
+    lat = lat * DEG2RAD
+    lon = lon * DEG2RAD
+    lat_c = lat_c * DEG2RAD
+    lon_c = lon_c * DEG2RAD
+
+    d = sin( (lat - lat_c) / 2.) ** 2 + \
+            cos(lat) * cos(lat_c) * sin( (lon - lon_c) / 2) ** 2
+    h = 2 * AVG_EARTH_RADIUS * asin(sqrt(d))
+
+    return h
+
+
 def window_1Dmean(data, double l, t=None, method='hann', axis=0, parallel=True):
     """ A moving window mean filter, not necessarily a regular grid.
 
