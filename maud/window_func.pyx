@@ -4,7 +4,7 @@ import numpy as np
 from numpy import ma
 
 cimport numpy as np
-from libc.math cimport cos
+from libc.math cimport cos, abs, M_PI
 
 DTYPE = np.float64
 ctypedef np.float64_t DTYPE_t
