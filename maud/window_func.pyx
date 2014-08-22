@@ -10,6 +10,7 @@ DTYPE = np.float64
 ctypedef np.float64_t DTYPE_t
 
 cdef double pi = np.pi
+cdef double twopi = 2*M_PI
 
 # Hamming
 def _weight_hamming(np.ndarray r, double l):
@@ -120,7 +121,8 @@ def _weight_hamming_scalar(double r, double l):
     if abs(r) > l/2.:
         return 0
 
-    return 0.54 + 0.46*cos(2*pi*r/l)
+    return 0.54 + 0.46*cos(twopi*r/l)
+
 
 # Hann
 def _weight_hann_scalar(double r, double l):
