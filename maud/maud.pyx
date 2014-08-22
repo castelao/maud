@@ -308,30 +308,34 @@ def apply_window_mean_2D_latlon_masked(np.ndarray[DTYPE_t, ndim=2] Lat,
 
     cdef unsigned int i, ii, j, jj
     cdef double r, w
-    cdef double W, D
     cdef unsigned int I = data.shape[0]
     cdef unsigned int J = data.shape[1]
+    cdef np.ndarray[DTYPE_t, ndim=2] D = np.zeros((I,J))
+    cdef np.ndarray[DTYPE_t, ndim=2] W = np.zeros((I,J))
     cdef np.ndarray[DTYPE_t, ndim=2] data_smooth = np.empty((I,J))
     cdef np.ndarray[np.int8_t, ndim=2] mask_smooth = \
 		    np.ones((I,J), dtype=np.int8)
 
-    for i in range(I):
-        for j in range(J):
+    for i in xrange(I):
+        for j in xrange(J):
             if (interp is True) or (mask[i, j] == 0):
-                W = 0
-                D = 0
-                for ii in range(I):
-                    for jj in range(J):
+                for ii in xrange(i, I):
+                    for jj in xrange(j, J):
                         if mask[ii, jj] == 0:
-                            r = cdistance_scalar(Lat[i,j], Lon[i,j],
-					    Lat[ii,jj], Lon[ii,jj])
+                            r = haversine_scalar(Lat[i,j], Lon[i,j],
+                                    Lat[ii,jj], Lon[ii,jj])
                             if r <= l:
                                 w = weight_func(r, l)
                                 if w != 0:
-                                    D += data[ii, jj] * w
-                                    W += w
-                if W != 0:
-                    data_smooth[i, j] = D/W
-                    mask_smooth[i, j] = 0
+                                    D[i, j] += data[ii, jj] * w
+                                    W[i, j] += w
+
+                                    D[ii, jj] += data[i, j] * w
+                                    W[ii, jj] += w
+    for i in xrange(I):
+        for j in xrange(J):
+            if W != 0:
+                data_smooth[i, j] = D/W
+                mask_smooth[i, j] = 0
 
     return data_smooth, mask_smooth
