@@ -37,7 +37,7 @@ def cdistance_scalar(double lat, double lon, double lat_c, double lon_c):
                     ((lon-lon_c) * cos((lat_c+lat)*deg2rad))**2)**.5 * DEG2M
 
 
-cdef float haversine_scalar(double lat, double lon, double lat_c, double lon_c):
+cdef double haversine_scalar(double lat, double lon, double lat_c, double lon_c):
     """ Haversine, gives the grat circle distance in a sphere
     """
 
