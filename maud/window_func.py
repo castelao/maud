@@ -40,6 +40,7 @@ def _weight_blackman(r,l):
     w[np.absolute(r)>l/2.]=0
     return w
 
+
 # boxcar or rectangular
 def _weight_boxcar(r, l):
     """
@@ -60,7 +61,8 @@ def _weight_triangular(r,l):
     w[ind2] = 0
     return w
 
-def _weight_hamming(r,l):
+
+def _weight_hamming(r, l):
     """ Hamming weight
 
         w = 0.54 - 0.46*cos(2*pi*n/(N-1))
@@ -74,6 +76,7 @@ def _weight_hamming(r,l):
     w = 0.54 + 0.46*np.cos(2*pi*r/l)
     w[np.absolute(r)>l/2.]=0
     return w
+
 
 # hamming 2D
 def _weight_hamming_2D(x, y, l):
@@ -111,6 +114,7 @@ def _weight_hann_2D(x,y,l):
     w=0.5*(1+np.cos(2*pi*r/l))
     w[r>l]=0
     return w
+
 
 # hann 1D bandpass
 def _weight_hann_band(r,l1,l2):
