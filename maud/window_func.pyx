@@ -131,4 +131,36 @@ def _weight_hann_scalar(double r, double l):
     if abs(r) > l/2.:
         return 0
 
-    return 0.5*(1 + cos(2*pi*r/l))
+    return 0.5*(1 + cos(twopi*r/l))
+
+
+# blackman
+def _weight_blackman_scalar(double r, double l):
+    """ Need to double check and create a test
+    """
+    if abs(r) > l/2.:
+        return 0
+
+    cdef double theta = twopi*r/l
+    # fase lag-> sign change
+    return 0.42 +  0.5*cos(theta) + 0.08*cos(2*theta)
+
+
+# triangular
+#def _weight_triangular_scalar(double r, double l):
+#    """ Need to double check and create a test
+#    """
+#    if abs(r) > l/2.:
+#        return 0
+#
+#    return 1 - abs(2*r/l)
+
+
+# boxcar or rectangular
+def _weight_boxcar_scalar(double r, double l):
+    """ Need to double check and create a test
+    """
+    if abs(r) > l/2.:
+        return 0
+
+    return 1
