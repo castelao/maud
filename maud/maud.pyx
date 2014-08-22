@@ -37,7 +37,8 @@ def cdistance_scalar(double lat, double lon, double lat_c, double lon_c):
                     ((lon-lon_c) * cos((lat_c+lat)*deg2rad))**2)**.5 * DEG2M
 
 
-cdef double haversine_scalar(double lat, double lon, double lat_c, double lon_c):
+cdef double _haversine_scalar(double lat, double lon, double lat_c,
+        double lon_c):
     """ Haversine, gives the grat circle distance in a sphere
     """
 
@@ -54,6 +55,12 @@ cdef double haversine_scalar(double lat, double lon, double lat_c, double lon_c)
     h = 2 * AVG_EARTH_RADIUS * asin(sqrt(d))
 
     return h
+
+
+def haversine_scalar(lat, lon, lat_c, lon_c):
+    """ Python wrapper for _haversine_scalar()
+    """
+    return _haversine_scalar(lat, lon, lat_c, lon_c)
 
 
 def window_1Dmean(data, double l, t=None, method='hann', axis=0, parallel=True):
@@ -284,7 +291,7 @@ def apply_window_mean_2D_latlon(np.ndarray[DTYPE_t, ndim=2] Lat,
         for j in xrange(J):
             for ii in xrange(i, I):
                 for jj in xrange(j, J):
-                    r = haversine_scalar(Lat[i,j], Lon[i,j],
+                    r = _haversine_scalar(Lat[i,j], Lon[i,j],
                             Lat[ii,jj], Lon[ii,jj])
                     if r <= l:
                         w = weight_func(r, l)
@@ -322,7 +329,7 @@ def apply_window_mean_2D_latlon_masked(np.ndarray[DTYPE_t, ndim=2] Lat,
                 for ii in xrange(i, I):
                     for jj in xrange(j, J):
                         if mask[ii, jj] == 0:
-                            r = haversine_scalar(Lat[i,j], Lon[i,j],
+                            r = _haversine_scalar(Lat[i,j], Lon[i,j],
                                     Lat[ii,jj], Lon[ii,jj])
                             if r <= l:
                                 w = weight_func(r, l)
