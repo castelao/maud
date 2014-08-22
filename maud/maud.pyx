@@ -341,8 +341,8 @@ def apply_window_mean_2D_latlon_masked(np.ndarray[DTYPE_t, ndim=2] Lat,
                                     W[ii, jj] += w
     for i in xrange(I):
         for j in xrange(J):
-            if W != 0:
-                data_smooth[i, j] = D/W
+            if W[i, j] != 0:
+                data_smooth[i, j] = D[i,j]/W[i,j]
                 mask_smooth[i, j] = 0
 
     return data_smooth, mask_smooth
