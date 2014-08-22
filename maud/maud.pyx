@@ -7,7 +7,7 @@ from numpy import ma
 import multiprocessing as mp
 
 cimport numpy as np
-from libc.math cimport cos, sin, asin, sqrt
+from libc.math cimport cos, sin, asin, sqrt, M_PI
 
 from maud.cwindow_func import window_func, window_func_scalar
 
@@ -25,7 +25,7 @@ ctypedef np.float_t DTYPE_t
 cdef double DEG2NM  = 60.
 cdef double NM2M   = 1852.    # Defined in Pond & Pickard p303.
 cdef double DEG2M = DEG2NM*NM2M
-cdef double DEG2RAD = np.pi/180
+cdef double DEG2RAD = M_PI/180.
 cdef float AVG_EARTH_RADIUS = 6371000  # in m
 
 
