@@ -334,11 +334,12 @@ def apply_window_mean_2D_latlon_masked(np.ndarray[DTYPE_t, ndim=2] Lat,
                             if r <= l:
                                 w = weight_func(r, l)
                                 if w != 0:
-                                    D[i, j] += data[ii, jj] * w
-                                    W[i, j] += w
-
-                                    D[ii, jj] += data[i, j] * w
-                                    W[ii, jj] += w
+                                    if mask[ii, jj] == 0:
+                                        D[i, j] += data[ii, jj] * w
+                                        W[i, j] += w
+                                    if mask[i, j] == 0:
+                                        D[ii, jj] += data[i, j] * w
+                                        W[ii, jj] += w
     for i in xrange(I):
         for j in xrange(J):
             if W[i, j] != 0:
