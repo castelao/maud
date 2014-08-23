@@ -12,6 +12,29 @@ ctypedef np.float64_t DTYPE_t
 cdef double pi = np.pi
 cdef double twopi = 2*M_PI
 
+
+
+def window_func(method='hamming'):
+    """ Select the weight function
+    """
+    if method == 'hamming':
+        winfunc = _weight_hamming
+
+    elif method == 'hann':
+        winfunc = _weight_hann
+
+    #elif method == 'blackman':
+    #    winfunc = _weight_blackman
+
+    else:
+        raise Exception("%s is not available" % method)
+
+    #elif method == 'triangular':
+    #    winfunc = _weight_triangular
+
+    return winfunc
+
+
 # Hamming
 def _weight_hamming(np.ndarray r, double l):
     """ Cython hamming weight
@@ -71,96 +94,3 @@ def _weight_hann(np.ndarray r, double l):
         if abs(r[n])<=lhalf:
             w[n] = 0.5*(1 + cos(scale*r[n]))
     return w
-
-
-def window_func(method='hamming'):
-    """ Select the weight function
-    """
-    if method == 'hamming':
-        winfunc = _weight_hamming
-
-    elif method == 'hann':
-        winfunc = _weight_hann
-
-    else:
-        print "Filter %s is not available" % method
-        return
-
-    #elif method == 'blackman':
-    #    winfunc = _weight_blackman
-
-    #elif method == 'triangular':
-    #    winfunc = _weight_triangular
-
-    return winfunc
-
-def window_func_scalar(method='hamming'):
-    """ Select the weight function
-    """
-    if method == 'hamming':
-        winfunc = _weight_hamming_scalar
-
-    elif method == 'hann':
-        winfunc = _weight_hann_scalar
-
-    else:
-        print "Filter %s is not available" % method
-        return
-
-    #elif method == 'blackman':
-    #    winfunc = _weight_blackman
-
-    #elif method == 'triangular':
-    #    winfunc = _weight_triangular
-
-    return winfunc
-
-# Hamming
-def _weight_hamming_scalar(double r, double l):
-
-    if abs(r) > l/2.:
-        return 0
-
-    return 0.54 + 0.46*cos(twopi*r/l)
-
-
-# Hann
-def _weight_hann_scalar(double r, double l):
-    """ Need to double check and create a test
-    """
-    if abs(r) > l/2.:
-        return 0
-
-    return 0.5*(1 + cos(twopi*r/l))
-
-
-# blackman
-def _weight_blackman_scalar(double r, double l):
-    """ Need to double check and create a test
-    """
-    if abs(r) > l/2.:
-        return 0
-
-    cdef double theta = twopi*r/l
-    # fase lag-> sign change
-    return 0.42 +  0.5*cos(theta) + 0.08*cos(2*theta)
-
-
-# triangular
-#def _weight_triangular_scalar(double r, double l):
-#    """ Need to double check and create a test
-#    """
-#    if abs(r) > l/2.:
-#        return 0
-#
-#    return 1 - abs(2*r/l)
-
-
-# boxcar or rectangular
-def _weight_boxcar_scalar(double r, double l):
-    """ Need to double check and create a test
-    """
-    if abs(r) > l/2.:
-        return 0
-
-    return 1
