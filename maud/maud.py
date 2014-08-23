@@ -6,7 +6,6 @@
 #   which gives the output on demand, filtered.
 
 try:
-    import multiprocessing
     import multiprocessing as mp
 except:
     print "I couldn't import multiprocessing"
@@ -22,6 +21,7 @@ from numpy import radians
 #    from maud.cwindow_func import window_func
 #except:
 #    from window_func import window_func
+
 from window_func import window_func
 
 
@@ -115,7 +115,6 @@ def window_1Dmean(data, l, t=None, method='hann', axis=0, parallel=True):
             data_smooth[i] = _apply_window_1Dmean(i, t, l, winfunc, data)
 
     elif parallel is True:
-        import multiprocessing as mp
         npes = 2 * mp.cpu_count()
         pool = mp.Pool(npes)
         results = []
