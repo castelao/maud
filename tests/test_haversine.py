@@ -3,8 +3,8 @@
 
 import numpy as np
 from numpy.random import random
-from maud import haversine
-from cmaud import haversine_scalar
+from maud.distance import haversine
+from maud.cdistance import haversine_scalar
 
 def test_zerodistance():
     """ Distance from one point to itself
