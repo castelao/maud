@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+# cython: profile=False
 # http://docs.cython.org/src/userguide/numpy_tutorial.html#numpy-tutorial
 
 import numpy as np
