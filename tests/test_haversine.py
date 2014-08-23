@@ -4,6 +4,7 @@
 import numpy as np
 from numpy.random import random
 from maud.distance import haversine
+from maud.cdistance import haversine as c_haversine
 from maud.cdistance import haversine_scalar
 
 def test_zerodistance(N=25):
@@ -30,7 +31,7 @@ def test_360offset(N=25):
         assert (c_d<1e-3) # Less then a milimiter
 
 
-def test_PxC(N=100):
+def test_PxC(N=25):
     """ Python and Cython should give the same answer
     """
     lon0 = 10
@@ -38,13 +39,34 @@ def test_PxC(N=100):
     Lon = 400*(2*random(N)-1)
     Lat = 90*(2*random(N)-1)
 
-    for lon, lat in zip(Lon, Lat):
-        d = haversine(lat, lon, lat0, lon0)
-        c_d = haversine_scalar(lat, lon, lat0, lon0)
-        # assert returns np.float64, while haversine_scalar returns float
-        # Should they return the same type? So which one?
-        #assert type(d) == type(c_d)
-        assert abs(d - c_d) < 1e-6
+    Lon, Lat = np.meshgrid(Lon, Lat)
+
+    #print("Testing scalar")
+    #d = haversine(Lat[0, 0], Lon[0, 0], lat0, lon0)
+    #c_d = c_haversine(Lat[0, 0], Lon[0, 0], lat0, lon0)
+    #assert abs(d - c_d).max() < 1e-6
+
+    print("Testing 1D array")
+    for n in range(N):
+        d = haversine(Lat[n], Lon[n], lat0, lon0)
+        c_d = c_haversine(Lat[n], Lon[n], lat0, lon0)
+        assert abs(d - c_d).max() < 1e-6
+
+    print("Testing 2D array")
+    d = haversine(Lat, Lon, lat0, lon0)
+    c_d = c_haversine(Lat, Lon, lat0, lon0)
+    assert abs(d - c_d).max() < 1e-6
+
+
+#def test_haversine_scalar(N=25)
+#
+#    for lon, lat in zip(Lon, Lat):
+#        d = haversine(lat, lon, lat0, lon0)
+#        c_d = haversine_scalar(lat, lon, lat0, lon0)
+#        # assert returns np.float64, while haversine_scalar returns float
+#        # Should they return the same type? So which one?
+#        #assert type(d) == type(c_d)
+#        assert abs(d - c_d) < 1e-6
 
 
 def  test_onedegreedistance(N=25):
