@@ -26,42 +26,13 @@ def window_func(method='hamming'):
     elif method == 'boxcar':
         winfunc = _weight_boxcar
 
+    else:
+        return
+
     return winfunc
 
 
-
-# blackman
-def _weight_blackman(r,l):
-    """ 
-    using values from wikipedia 'exact blackman'
-    
-    """
-    w = 0.42 +  0.5*np.cos(2*pi*r/l) + 0.08*np.cos(4*pi*r/l) # fase lag-> sign change
-    w[np.absolute(r)>l/2.]=0
-    return w
-
-
-# boxcar or rectangular
-def _weight_boxcar(r, l):
-    """
-    """
-    w = np.zeros(r.shape)
-    w[np.abs(r)<=l/2.] = 1
-    return w
-
-
-# triangular
-def _weight_triangular(r,l):
-    """
-    """
-    w = ma.masked_all(r.shape)
-    ind = np.abs(r)<l/2.
-    ind2 = np.abs(r)>l/2.
-    w[ind] = 1-np.abs(2*r[ind]/l)
-    w[ind2] = 0
-    return w
-
-
+# Hamming
 def _weight_hamming(r, l):
     """ Hamming weight
 
@@ -78,6 +49,58 @@ def _weight_hamming(r, l):
     return w
 
 
+# hann
+def _weight_hann(r,l):
+    """ Hann weight
+
+        from the definition of the Hann window centered in n = (N-1)/2:
+        w = 0.5*(1 + np.cos(2*pi*n/(N-1))),
+        where n is the element index of a toal of N elements.
+        To make it symmetrical, i.e centered in n=0, we should add a
+        phase of pi in the cosine argument. So,
+        w = 0.5*(1 - np.cos(2*pi*r/l)),
+        where r is the distance to the center of teh window
+        and l is the total width of the window.
+    """
+    w = 0.5 * (1 + np.cos(2*pi*r/l))
+    w[np.absolute(r) > l/2.] = 0
+    return w
+
+
+# blackman
+def _weight_blackman(r,l):
+    """ 
+    using values from wikipedia 'exact blackman'
+    
+    """
+    w = 0.42 +  0.5*np.cos(2*pi*r/l) + 0.08*np.cos(4*pi*r/l) # fase lag-> sign change
+    w[np.absolute(r)>l/2.]=0
+    return w
+
+
+# triangular
+def _weight_triangular(r,l):
+    """
+    """
+    w = ma.masked_all(r.shape)
+    ind = np.absolute(r)<l/2.
+    ind2 = np.absolute(r)>l/2.
+    w[ind] = 1-np.absolute(2*r[ind]/l)
+    w[ind2] = 0
+    return w
+
+
+# boxcar or rectangular
+def _weight_boxcar(r, l):
+    """
+    """
+    w = np.zeros(r.shape)
+    w[np.abs(r)<=l/2.] = 1
+    return w
+
+
+# 2D functions
+
 # hamming 2D
 def _weight_hamming_2D(x, y, l):
     """
@@ -86,23 +109,6 @@ def _weight_hamming_2D(x, y, l):
     r = (x**2+y**2)**0.5
     w = 0.54 + 0.46*np.cos(2*pi*r/l)
     w[np.absolute(r)>l/2.] = 0
-    return w
-
-# hann
-def _weight_hann(r,l):
-    """ Hann weight 
-        
-        from the definition of the Hann window centered in n = (N-1)/2:
-        w = 0.5*(1 + np.cos(2*pi*n/(N-1))),
-        where n is the element index of a toal of N elements.
-        To make it symmetrical, i.e centered in n=0, we should add a 
-        phase of pi in the cosine argument. So,
-        w = 0.5*(1 - np.cos(2*pi*r/l)),
-        where r is the distance to the center of teh window
-        and l is the total width of the window.
-    """
-    w=0.5*(1+np.cos(2*pi*r/l))
-    w[np.absolute(r)>l/2.]=0
     return w
 
 # hann 2D
