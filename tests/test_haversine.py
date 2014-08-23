@@ -6,27 +6,31 @@ from numpy.random import random
 from maud.distance import haversine
 from maud.cdistance import haversine_scalar
 
-def test_zerodistance():
+def test_zerodistance(N=25):
     """ Distance from one point to itself
     """
-    x, y = random(2)
-    assert (haversine(x, y, x, y) == 0.0)
-    assert (haversine_scalar(x, y, x, y) == 0.0)
+    for n in range(N):
+        lon = 560*random() - 180
+        lat = 180*random() - 90
+        assert (haversine(lon, lat, lon, lat) == 0.0)
+        assert (haversine_scalar(lon, lat, lon, lat) == 0.0)
 
 
-def test_360(N=25):
+def test_360offset(N=25):
     """ Distance from itself around a full circle
     """
+    X = -180 * random(N) # N values from [-180, 0]
+    X = np.append([-180, 0], X) # Add the two limits -180 and 0
     Y = 90*(2*random(N)-1)
     Y = np.append([-90, 0, 90], Y)
-    for y in Y:
-        d = haversine(0, y, 360, y)
-        c_d = haversine_scalar(0, y, 360, y)
+    for x, y in zip(X, Y):
+        d = haversine(x, y, x+360, y)
+        c_d = haversine_scalar(x, y, x+360, y)
         assert (d<1e-3) # Less then a milimiter
         assert (c_d<1e-3) # Less then a milimiter
 
 
-def test_PxC(N=500):
+def test_PxC(N=100):
     """ Python and Cython should give the same answer
     """
     lon0 = 10
