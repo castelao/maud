@@ -7,7 +7,9 @@
 *.so
 dist
 build
+_build
 eggs
 parts
 sdist
 develop-eggs
+*Profile.prof
