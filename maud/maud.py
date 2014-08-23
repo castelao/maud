@@ -16,12 +16,6 @@ import numpy as np
 from numpy import ma
 from numpy import radians
 
-
-#try:
-#    from maud.cwindow_func import window_func
-#except:
-#    from window_func import window_func
-
 from window_func import window_func
 
 
