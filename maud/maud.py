@@ -19,7 +19,7 @@ from window_func import window_func
 from distance import haversine
 
 
-def window_1Dmean(data, l, t=None, method='hann', axis=0, parallel=True):
+def wmean_1D(data, l, t=None, method='hann', axis=0, parallel=True):
     """ A moving window mean filter, not necessarily a regular grid.
 
         1D means that the filter is applied to along only one
