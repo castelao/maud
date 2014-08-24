@@ -46,7 +46,7 @@ def wmean_1D(data, l, t=None, method='hann', axis=0, parallel=True):
 
     # If necessary, move the axis to be filtered for the first axis
     if axis != 0:
-        data_smooth = window_1Dmean(data.swapaxes(0, axis),
+        data_smooth = wmean_1D(data.swapaxes(0, axis),
             l = l,
             t = t,
             method = method,
@@ -71,7 +71,7 @@ def wmean_1D(data, l, t=None, method='hann', axis=0, parallel=True):
     if data.ndim==1:
         (I,) = np.nonzero(~ma.getmaskarray(data))
         for i in I:
-            data_smooth[i] = _apply_window_1Dmean(i, t, l, winfunc, data)
+            data_smooth[i] = _apply_wmean_1D(i, t, l, winfunc, data)
 
     elif parallel is True:
         npes = 2 * mp.cpu_count()
@@ -79,7 +79,7 @@ def wmean_1D(data, l, t=None, method='hann', axis=0, parallel=True):
         results = []
         I = data.shape[1]
         for i in range(I):
-            results.append(pool.apply_async(window_1Dmean, \
+            results.append(pool.apply_async(wmean_1D, \
                     (data[:,i], l, t, method, 0, False)))
         pool.close()
         for i, r in enumerate(results):
@@ -89,7 +89,7 @@ def wmean_1D(data, l, t=None, method='hann', axis=0, parallel=True):
     else:
         I = data.shape[1]
         for i in range(I):
-            data_smooth[:,i] = window_1Dmean(data[:,i],
+            data_smooth[:,i] = wmean_1D(data[:,i],
                     l = l,
                     t = t,
                     method = method,
@@ -99,9 +99,9 @@ def wmean_1D(data, l, t=None, method='hann', axis=0, parallel=True):
     return data_smooth
 
 
-def _apply_window_1Dmean(i, t, l, winfunc, data):
+def _apply_wmean_1D(i, t, l, winfunc, data):
     """ Effectively apply 1D moving mean along 1D array
-        Support function to window_1Dmean
+        Support function to wmean_1D
     """
     dt = t - t[i]
     ind = np.nonzero( (np.absolute(dt) < l) )
@@ -280,13 +280,13 @@ def window_1Dbandpass(data, lshorterpass, llongerpass, t=None, method='hann', ax
         return 
     # ----
     #data_smooth = ma.masked_all(data.shape)
-    data_smooth = window_1Dmean(data,
+    data_smooth = wmean_1D(data,
                         t = t,
                         l = llongerpass,
                         axis = axis,
                         parallel = False)
 
-    data_smooth = data_smooth - window_1Dmean(data_smooth,
+    data_smooth = data_smooth - wmean_1D(data_smooth,
                         t = t,
                         l = lshorterpass,
                         axis = axis,
