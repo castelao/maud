@@ -136,7 +136,7 @@ def wmean_2D(x, y, data, l, method='hamming'):
         return data_smooth
 
 
-def window_mean_2D_latlon(Lat, Lon, data, l, method='hamming', interp='False'):
+def wmean_2D_latlon(Lat, Lon, data, l, method='hamming', interp='False'):
     """
         Right now I'm doing for Masked Arrays only.
         data should be a dictionary with 2D arrays
