@@ -12,25 +12,21 @@ def window_func(method='hamming'):
     assert type(method) == str, 'method must be a string'
 
     if method == 'hamming':
-        winfunc = _weight_hamming
+        return _weight_hamming
 
     elif method == 'hann':
-        winfunc = _weight_hann
+        return _weight_hann
 
     elif method == 'blackman':
-        winfunc = _weight_blackman
+        return _weight_blackman
 
     elif method == 'triangular':
-        winfunc = _weight_triangular
+        return _weight_triangular
 
     elif method == 'boxcar':
-        winfunc = _weight_boxcar
+        return _weight_boxcar
 
-    else:
-        return
-
-    return winfunc
-
+    raise Exception('%s is not available' % method)
 
 # Hamming
 def _weight_hamming(r, l):
