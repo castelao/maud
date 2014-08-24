@@ -46,7 +46,7 @@ def test_pass_all():
     assert abs(err).mean() < 1e-10
 
 
-def test_pass_all():
+def test_sin_diff():
     """
 
     """
