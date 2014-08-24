@@ -54,7 +54,7 @@ def wmean_1D(data, l, t=None, method='hann', axis=0, parallel=True):
             parallel = parallel)
 
         return data_smooth.swapaxes(0, axis)
-    # Bellow here, the filter will be always applied on axis=0
+    # Below here, the filter will be always applied on axis=0
 
     # If t is not given, creates a regularly spaced t
     if t == None:
