@@ -19,33 +19,6 @@ from window_func import window_func
 from distance import haversine
 
 
-def wmean_2D(x, y, data, l, method='hamming'):
-    """
-        - parallel, interp
-        - split in two solutions, array and masked array
-    """
-    assert type(data) in [np.ndarray, ma.MaskedArray], \
-            "data must be an array or masked_array"
-    assert data.ndim == 2, "The input data must be 2D arrays"
-
-    weight_func = window_func(method)
-
-    data_smooth = ma.masked_all(data.shape)
-
-    I, J = data.shape()
-    for i in xrange(I):
-        for j in xrange(J):
-            r = ( (x-x[i,j])**2 + (y-y[i,j])**2 )**0.5
-            if len(r) > 0:
-                w = weight_func(r, l)
-                tmp = data*w
-                wsum = w[ma.getmaskarray(tmp)].sum()
-                if wsum != 0:
-                    data_smooth[i,j] = (tmp).sum()/wsum
-
-        return data_smooth
-
-
 def wmean_2D_latlon(Lat, Lon, data, l, method='hamming', interp='False'):
     """
         Right now I'm doing for Masked Arrays only.
