@@ -155,6 +155,67 @@ def _convolve_1D(t0, t, l, winfunc, data):
     return (data[ind] * w).sum() / (w.sum())
 
 
+def wmean_bandpass_1D_serial(data, lshorterpass, llongerpass, t=None,
+        method='hann', axis=0):
+    """ Equivalent to wmean_1D_serial, but it is a bandpass
+
+        Input:
+            - data: np.array or ma.maked_array, nD
+            - lshorterpass: The size of the highpass filter, i.e. shorter
+                wavelenghts are preserved. It is in the same unit of t.
+            - llongerpass: The size of the lowpass filter, i.e.longer
+                wavelenghts are preserved. It is in the same unit of t.
+	    - t: is the scale of the choosed axis, 1D. If not
+                defined, it will be considered a sequence.
+            - method: ['hann', 'hamming', 'blackman']
+                Defines the weight function type
+            - axis: Dimension which the filter will be applied
+    """
+
+    assert axis <= data.ndim, "Invalid axis!"
+
+    # If necessary, move the axis to be filtered for the first axis
+    if axis != 0:
+        data_smooth = wmean_bandpass_1D_serial(data.swapaxes(0, axis),
+                lshorterpass = lshorterpass,
+                llongerpass = llongerpass,
+                t = t,
+                method = method,
+                axis = 0)
+
+        return data_smooth.swapaxes(0, axis)
+    # Below here, the filter will be always applied on axis=0
+
+    # If t is not given, creates a regularly spaced t
+    if t == None:
+        print "The scale along the choosed axis weren't defined. I'll consider a constant sequence."
+	t = np.arange(data.shape[axis])
+
+    assert t.shape == (data.shape[axis],), "Invalid size of t."
+
+    # ----
+    winfunc = window_func(method)
+
+    data_smooth = ma.masked_all(data.shape)
+
+    if data.ndim==1:
+        (I,) = np.nonzero(~ma.getmaskarray(data))
+        for i in I:
+            # First remove the high frequency
+            tmp = _convolve_1D(t[i], t, llongerpass, winfunc, data)
+            # Then remove the low frequency
+            data_smooth[i] = tmp - \
+                    _convolve_1D(t[i], t, lshorterpass, winfunc, tmp)
+
+    else:
+        I = data.shape[1]
+        for i in range(I):
+            data_smooth[:,i] = wmean_bandpass_1D_serial(datai[:,i],
+                    lshorterpass, llongerpass, t, method, axis)
+
+    return data_smooth
+
+
 def wmean_2D(x, y, data, l, method='hamming'):
     """
         - parallel, interp
@@ -300,40 +361,6 @@ def window_mean(y,x=None,x_out=None,method="rectangular",boxsize=None):
     return y_out
 
 # To improve, the right to way to implement these filters are to define the halfpower cutoff, instead of an l dimension. Then the l dimension is defined on the function according to the weightning system for the adequate l.
-
-def window_1Dbandpass(data, lshorterpass, llongerpass, t=None, method='hann', axis=0, parallel=True):
-    """
-
-        Input:
-            lshorterpass: shorter wavelenghts are preserved
-            llongerpass: longer wavelengths are preserved
-    """
-    if axis > len(data.shape):
-        print "The data array don't contain so many dimensions. Choose another axis"
-	return
-
-    if t == None:
-        print "The scale along the choosed axis weren't defined. I'll consider a constant sequence."
-	t = numpy.arange(data.shape[axis])
-
-    elif t.shape != (data.shape[axis],):
-        print "The scale variable t don't have the same size of the choosed axis of the data array"
-        return 
-    # ----
-    #data_smooth = ma.masked_all(data.shape)
-    data_smooth = wmean_1D(data,
-                        t = t,
-                        l = llongerpass,
-                        axis = axis,
-                        parallel = False)
-
-    data_smooth = data_smooth - wmean_1D(data_smooth,
-                        t = t,
-                        l = lshorterpass,
-                        axis = axis,
-                        parallel=False)
-
-    return data_smooth
 
 def window_1Dmean_grid(data, l, method='hann', axis=0, parallel=False):
     """ A moving window mean filter applied to a regular grid.
