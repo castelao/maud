@@ -71,7 +71,7 @@ def wmean_1D(data, l, t=None, method='hann', axis=0, parallel=True):
     if data.ndim==1:
         (I,) = np.nonzero(~ma.getmaskarray(data))
         for i in I:
-            data_smooth[i] = _apply_wmean_1D(i, t, l, winfunc, data)
+            data_smooth[i] = _convolve_1D(t0, t, l, winfunc, data)
 
     elif parallel is True:
         npes = 2 * mp.cpu_count()
@@ -99,11 +99,14 @@ def wmean_1D(data, l, t=None, method='hann', axis=0, parallel=True):
     return data_smooth
 
 
-def _apply_wmean_1D(i, t, l, winfunc, data):
+def _convolve_1D(t0, t, l, winfunc, data):
     """ Effectively apply 1D moving mean along 1D array
+
+        This is not exactly a convolution.
+
         Support function to wmean_1D
     """
-    dt = t - t[i]
+    dt = t - t0
     ind = np.nonzero( (np.absolute(dt) < l) )
     w = winfunc(dt[ind], l)
     return (data[ind] * w).sum() / (w.sum())
@@ -254,11 +257,6 @@ def window_mean(y,x=None,x_out=None,method="rectangular",boxsize=None):
     return y_out
 
 # To improve, the right to way to implement these filters are to define the halfpower cutoff, instead of an l dimension. Then the l dimension is defined on the function according to the weightning system for the adequate l.
-
-def _convolve(x, dt, l, winfunc):
-    w = winfunc(dt, l)
-    y = (x*w).sum()/(w[x.mask==False].sum())
-    return y
 
 def window_1Dbandpass(data, lshorterpass, llongerpass, t=None, method='hann', axis=0, parallel=True):
     """
