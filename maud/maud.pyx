@@ -167,7 +167,7 @@ def window_mean_2D_latlon(Lat, Lon, data, l, method='hamming', interp=False):
     # ==== data is a 2D array ======================================
     if data.ndim == 2:
         if hasattr(data, 'mask'):
-            if (data.mask==True).any():
+            if (data.mask == True).any():
                 data_smooth, mask = apply_window_mean_2D_latlon_masked(Lat,
                         Lon, data.data, data.mask.astype('int8'), l, method,
                         interp)
