@@ -97,14 +97,15 @@ def window_1Dmean(data, l, t=None, method='hann', axis=0, parallel=True):
 
     return data_smooth
 
+
 def _apply_window_1Dmean(i, t, l, winfunc, data):
     """ Effectively apply 1D moving mean along 1D array
         Support function to window_1Dmean
     """
-    dt = t-t[i]
-    ind = np.nonzero((np.absolute(dt)<l))
-    w = winfunc(dt[ind],l)
-    return (data[ind]*w).sum()/(w.sum())
+    dt = t - t[i]
+    ind = np.nonzero( (np.absolute(dt) < l) )
+    w = winfunc(dt[ind], l)
+    return (data[ind] * w).sum() / (w.sum())
 
 
 def window_mean_2D_latlon(Lat, Lon, data, l, method='hamming', interp='False'):
