@@ -52,7 +52,7 @@ setup(
     author_email='guilherme@castelao.net, bia@melovillasboas.com, luiz.irber@gmail.com',
     description='Moving Average for Uneven Data',
     long_description=README + '\n\n' + NEWS,
-    #zip_safe=True,
+    zip_safe=False,
     classifiers=[
         'Development Status :: 3 - Alpha',
         'Intended Audience :: Developers',
