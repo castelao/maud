@@ -105,9 +105,14 @@ def _convolve_1D(t0, t, l, winfunc, data):
         This is not exactly a convolution.
 
         Support function to wmean_1D
+
+        ATENTION, in the future I should use l/2. in the index for most of
+          the weighting windows types.
     """
     dt = t - t0
-    ind = np.nonzero( (np.absolute(dt) < l) )
+    # Index only the valid data that is inside the window
+    ind = (np.absolute(dt) < l) & (~ma.getmaskarray(data))
+    ind = np.nonzero( ind )
     w = winfunc(dt[ind], l)
     return (data[ind] * w).sum() / (w.sum())
 
