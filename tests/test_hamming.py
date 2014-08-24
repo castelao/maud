@@ -33,5 +33,16 @@ def test_cython_scalar():
         d = w - w2
         assert absolute(d) < 1e-8
 
+
+def out_of_window():
+    r = 5*(2*random(10)-1)
+    l = 10*random()
+    w = _weight_hamming(r,l)
+    cw = c_weight_hamming(r,l)
+    ind = r>l/2
+    assert (w[ind]==0).all()
+    assert (cw[ind]==0).all()
+
+
 # Question: _weight_hann(ma.masked_all(3), 5) should return a masked array?
 # _weight_hann(ma.masked_all(4),5)
