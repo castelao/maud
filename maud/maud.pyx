@@ -261,10 +261,12 @@ def apply_window_mean_2D_latlon(np.ndarray[DTYPE_t, ndim=2] Lat,
                             D[i, j] += data[ii, jj] * w
                             W[i, j] += w
 
-                            D[ii, jj] += data[i, j] * w
-                            W[ii, jj] += w
+                            if (i != ii) & (j != jj):
+                                D[ii, jj] += data[i, j] * w
+                                W[ii, jj] += w
 
     return D/W
+
 
 def apply_window_mean_2D_latlon_masked(np.ndarray[DTYPE_t, ndim=2] Lat,
 		np.ndarray[DTYPE_t, ndim=2] Lon,
