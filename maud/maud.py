@@ -71,7 +71,7 @@ def wmean_1D(data, l, t=None, method='hann', axis=0, parallel=True):
     if data.ndim==1:
         (I,) = np.nonzero(~ma.getmaskarray(data))
         for i in I:
-            data_smooth[i] = _convolve_1D(t0, t, l, winfunc, data)
+            data_smooth[i] = _convolve_1D(t[i], t, l, winfunc, data)
 
     elif parallel is True:
         npes = 2 * mp.cpu_count()
