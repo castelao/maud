@@ -19,7 +19,7 @@ from window_func import window_func
 from distance import haversine
 
 
-def window_1Dmean(data, l, t=None, method='hann', axis=0, parallel=True):
+def wmean_1D(data, l, t=None, method='hann', axis=0, parallel=True):
     """ A moving window mean filter, not necessarily a regular grid.
 
         1D means that the filter is applied to along only one
@@ -41,11 +41,12 @@ def window_1Dmean(data, l, t=None, method='hann', axis=0, parallel=True):
             - parallel: [True] Will apply the filter with
                 multiple processors.
     """
+    #assert type(data)) in [np.ndarray, ma.MaskedArray]
     assert axis <= data.ndim, "Invalid axis!"
 
     # If necessary, move the axis to be filtered for the first axis
     if axis != 0:
-        data_smooth = window_1Dmean(data.swapaxes(0, axis),
+        data_smooth = wmean_1D(data.swapaxes(0, axis),
             l = l,
             t = t,
             method = method,
@@ -70,7 +71,7 @@ def window_1Dmean(data, l, t=None, method='hann', axis=0, parallel=True):
     if data.ndim==1:
         (I,) = np.nonzero(~ma.getmaskarray(data))
         for i in I:
-            data_smooth[i] = _apply_window_1Dmean(i, t, l, winfunc, data)
+            data_smooth[i] = _convolve_1D(t[i], t, l, winfunc, data)
 
     elif parallel is True:
         npes = 2 * mp.cpu_count()
@@ -78,7 +79,7 @@ def window_1Dmean(data, l, t=None, method='hann', axis=0, parallel=True):
         results = []
         I = data.shape[1]
         for i in range(I):
-            results.append(pool.apply_async(window_1Dmean, \
+            results.append(pool.apply_async(wmean_1D, \
                     (data[:,i], l, t, method, 0, False)))
         pool.close()
         for i, r in enumerate(results):
@@ -88,7 +89,7 @@ def window_1Dmean(data, l, t=None, method='hann', axis=0, parallel=True):
     else:
         I = data.shape[1]
         for i in range(I):
-            data_smooth[:,i] = window_1Dmean(data[:,i],
+            data_smooth[:,i] = wmean_1D(data[:,i],
                     l = l,
                     t = t,
                     method = method,
@@ -98,12 +99,20 @@ def window_1Dmean(data, l, t=None, method='hann', axis=0, parallel=True):
     return data_smooth
 
 
-def _apply_window_1Dmean(i, t, l, winfunc, data):
+def _convolve_1D(t0, t, l, winfunc, data):
     """ Effectively apply 1D moving mean along 1D array
-        Support function to window_1Dmean
+
+        This is not exactly a convolution.
+
+        Support function to wmean_1D
+
+        ATENTION, in the future I should use l/2. in the index for most of
+          the weighting windows types.
     """
-    dt = t - t[i]
-    ind = np.nonzero( (np.absolute(dt) < l) )
+    dt = t - t0
+    # Index only the valid data that is inside the window
+    ind = (np.absolute(dt) < l) & (~ma.getmaskarray(data))
+    ind = np.nonzero( ind )
     w = winfunc(dt[ind], l)
     return (data[ind] * w).sum() / (w.sum())
 
@@ -135,7 +144,7 @@ def wmean_2D(x, y, data, l, method='hamming'):
         return data_smooth
 
 
-def window_mean_2D_latlon(Lat, Lon, data, l, method='hamming', interp='False'):
+def wmean_2D_latlon(Lat, Lon, data, l, method='hamming', interp='False'):
     """
         Right now I'm doing for Masked Arrays only.
         data should be a dictionary with 2D arrays
@@ -156,8 +165,8 @@ def window_mean_2D_latlon(Lat, Lon, data, l, method='hamming', interp='False'):
         Output:
 
     """
-    assert ((type(l) == float) or (type(l) == int)), \
-        "The filter scale (l) must be a float or an int"
+    #assert ((type(l) == float) or (type(l) == int)), \
+    #    "The filter scale (l) must be a float or an int"
 
     if type(data) == dict:
         output = {}
@@ -165,7 +174,7 @@ def window_mean_2D_latlon(Lat, Lon, data, l, method='hamming', interp='False'):
             output[k] = window_mean_2D_latlon(Lat, Lon, data[k], l, method)
         return output
 
-    assert data.ndim == 2, "Sorry, for now I'm only handeling 2D arrays"
+    assert data.ndim == 2, "The input data must be 2D arrays"
 
     weight_func = window_func(method)
 
@@ -254,11 +263,6 @@ def window_mean(y,x=None,x_out=None,method="rectangular",boxsize=None):
 
 # To improve, the right to way to implement these filters are to define the halfpower cutoff, instead of an l dimension. Then the l dimension is defined on the function according to the weightning system for the adequate l.
 
-def _convolve(x, dt, l, winfunc):
-    w = winfunc(dt, l)
-    y = (x*w).sum()/(w[x.mask==False].sum())
-    return y
-
 def window_1Dbandpass(data, lshorterpass, llongerpass, t=None, method='hann', axis=0, parallel=True):
     """
 
@@ -279,13 +283,13 @@ def window_1Dbandpass(data, lshorterpass, llongerpass, t=None, method='hann', ax
         return 
     # ----
     #data_smooth = ma.masked_all(data.shape)
-    data_smooth = window_1Dmean(data,
+    data_smooth = wmean_1D(data,
                         t = t,
                         l = llongerpass,
                         axis = axis,
                         parallel = False)
 
-    data_smooth = data_smooth - window_1Dmean(data_smooth,
+    data_smooth = data_smooth - wmean_1D(data_smooth,
                         t = t,
                         l = lshorterpass,
                         axis = axis,
@@ -354,15 +358,15 @@ def window_1Dmean_grid(data, l, method='hann', axis=0, parallel=False):
 
 
 # ----
-def get_halfpower_period(data, filtered):
+def get_halfpower_period(data, filtered, dt):
     """ Returns the gain per frequency
     """
-    nt,ni,nj = data.shape
-    gain = ma.masked_all((nt,ni,nj))
+    nt, ni, nj = data.shape
+    gain = ma.masked_all((nt, ni, nj))
     for i in range(ni):
         for j in range(nj):
 	    if ~filtered[:,i,j].mask.all():
-	        gain[:,i,j] = numpy.absolute(numpy.fft.fft(filtered[:,i,j]-filtered[:,i,j].mean())) / numpy.absolute(numpy.fft.fft(data[:,i,j]-data[:,i,j].mean()))
+	        gain[:,i,j] = np.absolute(np.fft.fft(filtered[:,i,j]-filtered[:,i,j].mean())) / np.absolute(np.fft.fft(data[:,i,j]-data[:,i,j].mean()))
     gain_median = ma.masked_all(nt)
     gain_25 = ma.masked_all(nt)
     gain_75 = ma.masked_all(nt)
@@ -370,23 +374,28 @@ def get_halfpower_period(data, filtered):
     from scipy.stats import scoreatpercentile
     for t in range(nt):
         #gain_median[t] = numpy.median(gain[t,:,:].compressed()[numpy.isfinite(gain[t,:,:].compressed())])
-        tmp = gain[t,:,:].compressed()[numpy.isfinite(gain[t,:,:].compressed())]
-        gain_median[t] = scoreatpercentile(tmp,50)
-        gain_25[t] = scoreatpercentile(tmp,25)
-        gain_75[t] = scoreatpercentile(tmp,75)
+        #tmp = gain[t,:,:].compressed()[numpy.isfinite(gain[t,:,:].compressed())]
+        #gain_median[t] = scoreatpercentile(tmp,50)
+        gain_median[t] = ma.median(gain[t])
+        #gain_25[t] = scoreatpercentile(tmp,25)
+        #gain_75[t] = scoreatpercentile(tmp,75)
 
-    freq=numpy.fft.fftfreq(nt)/dt.days
+    freq = np.fft.fftfreq(nt)/dt.days
+
+    halfpower_period = 1./freq[np.absolute(gain_median-0.5).argmin()]
+
 
     #from scipy.interpolate import UnivariateSpline
     #s = UnivariateSpline(gain_median[numpy.ceil(nt/2.):], -freq[numpy.ceil(nt/2.):], s=1)
     #xs = -freq[numpy.ceil(nt/2.):]
     #ys = s(xs)
 
-    import rpy2.robjects as robjects
-    smooth = robjects.r['smooth.spline'](robjects.FloatVector(gain_median[numpy.ceil(nt/2.):]),robjects.FloatVector(-freq[numpy.ceil(nt/2.):]),spar=.4)
-    #smooth = robjects.r['smooth.spline'](robjects.FloatVector(-freq[numpy.ceil(nt/2.):]),robjects.FloatVector(gain_median[numpy.ceil(nt/2.):]),spar=.4)
-    s_interp = robjects.r['predict'](smooth,x=0.5)
-    halfpower_period = 1./s_interp.rx2['y'][0]
+    #import rpy2.robjects as robjects
+    #smooth = robjects.r['smooth.spline'](robjects.FloatVector(gain_median[numpy.ceil(nt/2.):]),robjects.FloatVector(-freq[numpy.ceil(nt/2.):]),spar=.4)
+    ##smooth = robjects.r['smooth.spline'](robjects.FloatVector(-freq[numpy.ceil(nt/2.):]),robjects.FloatVector(gain_median[numpy.ceil(nt/2.):]),spar=.4)
+    #s_interp = robjects.r['predict'](smooth,x=0.5)
+    ##halfpower_period = 1./s_interp.rx2['y'][0]
+    #halfpower_period = 1./s_interp.rx2(2)[0]
 
     #smooth = robjects.r['smooth.spline'](robjects.FloatVector(-freq[numpy.ceil(nt/2.):]),robjects.FloatVector(gain_median[numpy.ceil(nt/2.):]),spar=.4)
     #s_interp = robjects.r['predict'](smooth, x = robjects.FloatVector(-freq[numpy.ceil(nt/2.):]))

@@ -1,5 +1,13 @@
 # -*- coding: utf-8 -*-
+# cython: profile=False
 # vim: tabstop=4 shiftwidth=4 softtabstop=4 expandtab
+
+"""
+
+    Wasn't this below supposed to be faster than from i in xrange()?
+    #for i from 0 < = i < I:
+    #    for j from 0 < = j < J:
+"""
 
 import numpy as np
 from numpy import ma
@@ -167,7 +175,7 @@ def window_mean_2D_latlon(Lat, Lon, data, l, method='hamming', interp=False):
     # ==== data is a 2D array ======================================
     if data.ndim == 2:
         if hasattr(data, 'mask'):
-            if (data.mask==True).any():
+            if (data.mask == True).any():
                 data_smooth, mask = apply_window_mean_2D_latlon_masked(Lat,
                         Lon, data.data, data.mask.astype('int8'), l, method,
                         interp)
@@ -261,10 +269,12 @@ def apply_window_mean_2D_latlon(np.ndarray[DTYPE_t, ndim=2] Lat,
                             D[i, j] += data[ii, jj] * w
                             W[i, j] += w
 
-                            D[ii, jj] += data[i, j] * w
-                            W[ii, jj] += w
+                            if (i != ii) & (j != jj):
+                                D[ii, jj] += data[i, j] * w
+                                W[ii, jj] += w
 
     return D/W
+
 
 def apply_window_mean_2D_latlon_masked(np.ndarray[DTYPE_t, ndim=2] Lat,
 		np.ndarray[DTYPE_t, ndim=2] Lon,

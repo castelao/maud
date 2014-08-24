@@ -21,8 +21,8 @@ def test_answer():
     #X, Y = np.meshgrid(x, x)
     Z = ma.array(np.random.random((N, N, Nt)))
 
-    y1 = maud.window_1Dmean(Z, l=l, axis=2, method='hamming')
-    y2 = cmaud.window_1Dmean(Z, l=l, axis=2, method='hamming')
+    y1 = maud.wmean_1D(Z, l=l, axis=2, method='hamming')
+    y2 = cmaud.wmean_1D(Z, l=l, axis=2, method='hamming')
 
     err = y1 - y2
     assert abs(err).mean() < 1e-6
