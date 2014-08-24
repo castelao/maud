@@ -355,15 +355,15 @@ def window_1Dmean_grid(data, l, method='hann', axis=0, parallel=False):
 
 
 # ----
-def get_halfpower_period(data, filtered):
+def get_halfpower_period(data, filtered, dt):
     """ Returns the gain per frequency
     """
-    nt,ni,nj = data.shape
-    gain = ma.masked_all((nt,ni,nj))
+    nt, ni, nj = data.shape
+    gain = ma.masked_all((nt, ni, nj))
     for i in range(ni):
         for j in range(nj):
 	    if ~filtered[:,i,j].mask.all():
-	        gain[:,i,j] = numpy.absolute(numpy.fft.fft(filtered[:,i,j]-filtered[:,i,j].mean())) / numpy.absolute(numpy.fft.fft(data[:,i,j]-data[:,i,j].mean()))
+	        gain[:,i,j] = np.absolute(np.fft.fft(filtered[:,i,j]-filtered[:,i,j].mean())) / np.absolute(np.fft.fft(data[:,i,j]-data[:,i,j].mean()))
     gain_median = ma.masked_all(nt)
     gain_25 = ma.masked_all(nt)
     gain_75 = ma.masked_all(nt)
@@ -371,23 +371,28 @@ def get_halfpower_period(data, filtered):
     from scipy.stats import scoreatpercentile
     for t in range(nt):
         #gain_median[t] = numpy.median(gain[t,:,:].compressed()[numpy.isfinite(gain[t,:,:].compressed())])
-        tmp = gain[t,:,:].compressed()[numpy.isfinite(gain[t,:,:].compressed())]
-        gain_median[t] = scoreatpercentile(tmp,50)
-        gain_25[t] = scoreatpercentile(tmp,25)
-        gain_75[t] = scoreatpercentile(tmp,75)
+        #tmp = gain[t,:,:].compressed()[numpy.isfinite(gain[t,:,:].compressed())]
+        #gain_median[t] = scoreatpercentile(tmp,50)
+        gain_median[t] = ma.median(gain[t])
+        #gain_25[t] = scoreatpercentile(tmp,25)
+        #gain_75[t] = scoreatpercentile(tmp,75)
 
-    freq=numpy.fft.fftfreq(nt)/dt.days
+    freq = np.fft.fftfreq(nt)/dt.days
+
+    halfpower_period = 1./freq[np.absolute(gain_median-0.5).argmin()]
+
 
     #from scipy.interpolate import UnivariateSpline
     #s = UnivariateSpline(gain_median[numpy.ceil(nt/2.):], -freq[numpy.ceil(nt/2.):], s=1)
     #xs = -freq[numpy.ceil(nt/2.):]
     #ys = s(xs)
 
-    import rpy2.robjects as robjects
-    smooth = robjects.r['smooth.spline'](robjects.FloatVector(gain_median[numpy.ceil(nt/2.):]),robjects.FloatVector(-freq[numpy.ceil(nt/2.):]),spar=.4)
-    #smooth = robjects.r['smooth.spline'](robjects.FloatVector(-freq[numpy.ceil(nt/2.):]),robjects.FloatVector(gain_median[numpy.ceil(nt/2.):]),spar=.4)
-    s_interp = robjects.r['predict'](smooth,x=0.5)
-    halfpower_period = 1./s_interp.rx2['y'][0]
+    #import rpy2.robjects as robjects
+    #smooth = robjects.r['smooth.spline'](robjects.FloatVector(gain_median[numpy.ceil(nt/2.):]),robjects.FloatVector(-freq[numpy.ceil(nt/2.):]),spar=.4)
+    ##smooth = robjects.r['smooth.spline'](robjects.FloatVector(-freq[numpy.ceil(nt/2.):]),robjects.FloatVector(gain_median[numpy.ceil(nt/2.):]),spar=.4)
+    #s_interp = robjects.r['predict'](smooth,x=0.5)
+    ##halfpower_period = 1./s_interp.rx2['y'][0]
+    #halfpower_period = 1./s_interp.rx2(2)[0]
 
     #smooth = robjects.r['smooth.spline'](robjects.FloatVector(-freq[numpy.ceil(nt/2.):]),robjects.FloatVector(gain_median[numpy.ceil(nt/2.):]),spar=.4)
     #s_interp = robjects.r['predict'](smooth, x = robjects.FloatVector(-freq[numpy.ceil(nt/2.):]))
