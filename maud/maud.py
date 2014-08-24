@@ -108,6 +108,33 @@ def _apply_window_1Dmean(i, t, l, winfunc, data):
     return (data[ind] * w).sum() / (w.sum())
 
 
+def wmean_2D(x, y, data, l, method='hamming'):
+    """
+        - parallel, interp
+        - split in two solutions, array and masked array
+    """
+    assert type(data) in [np.ndarray, ma.MaskedArray], \
+            "data must be an array or masked_array"
+    assert data.ndim == 2, "The input data must be 2D arrays"
+
+    weight_func = window_func(method)
+
+    data_smooth = ma.masked_all(data.shape)
+
+    I, J = data.shape()
+    for i in xrange(I):
+        for j in xrange(J):
+            r = ( (x-x[i,j])**2 + (y-y[i,j])**2 )**0.5
+            if len(r) > 0:
+                w = weight_func(r, l)
+                tmp = data*w
+                wsum = w[ma.getmaskarray(tmp)].sum()
+                if wsum != 0:
+                    data_smooth[i,j] = (tmp).sum()/wsum
+
+        return data_smooth
+
+
 def window_mean_2D_latlon(Lat, Lon, data, l, method='hamming', interp='False'):
     """
         Right now I'm doing for Masked Arrays only.
@@ -152,49 +179,18 @@ def window_mean_2D_latlon(Lat, Lon, data, l, method='hamming', interp='False'):
         I, J = np.nonzero(np.isfinite(data))
 
     for i, j in zip(I, J):
-            ind, r = find_closer_then(Lat, Lon, Lat[i,j], Lon[i,j], llimit=l)
+            r = haversine(Lat, Lon, Lat[i, j], Lon[i, j])
             if len(r) > 0:
                 w = weight_func(r, l)
-                if data.ndim == 2:
-                        #good = np.nonzero(data[ind])
-                        tmp = data[ind]*w
-                        # There is a problem here. In the case of valid
-                        #   but zero value, should be used anyways.
-                        wsum = w[np.nonzero(tmp)].sum()
-                        if wsum != 0:
-                            data_smooth[i,j] = (tmp).sum()/wsum
-                #elif data.ndim == 3:
-                #    for k in range(data.shape[0]):
-                #        data_smooth[k,i,j] = (data[k][ind]*w).sum()/w[good].sum()
-                #    else:
-                #        data_smooth[k,i,j] = (data[k][ind]*w).sum()/w[good].sum()
+                tmp = data*w
+                # Sum the weights only at the valid data positions.
+                wsum = w[ma.getmaskarray(tmp)].sum()
+                if wsum != 0:
+                    data_smooth[i,j] = (tmp).sum()/wsum
+
     return data_smooth
 
 # ==== Bellow here, I need to do some serious work on ====
-
-def window_mean_2D(x, y, z, l, method='hamming'):
-    """
-    """
-    if method == 'hamming':
-        weight_func = _weight_hamming_2D
-
-    if len(z.shape) < 2:
-        print "At least 2D"
-
-    output = ma.masked_all(z.shape)
-    if len(z.shape) > 2:
-        for i in range(z.shape[0]):
-            output[i] = window_mean_2D(x, y, z[i], method)
-
-    elif len(z.shape) == 2:
-        I,J = z.shape
-        for i in range(I):
-            for j in range(J):
-	        w = weight_func((x-x[i,j]), (y-y[i,j]), l)
-	        output[i,j] = (z*w).sum()/(w.sum())
-        return output
-
-
 
 def window_mean(y,x=None,x_out=None,method="rectangular",boxsize=None):
     """Windowed means along 1-D array
