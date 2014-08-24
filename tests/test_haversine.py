@@ -11,7 +11,7 @@ def test_zerodistance(N=25):
     """ Distance from one point to itself
     """
     for n in range(N):
-        lon = 560*random() - 180
+        lon = 540*random() - 180
         lat = 180*random() - 90
         assert (haversine(lon, lat, lon, lat) == 0.0)
         assert (haversine_scalar(lon, lat, lon, lat) == 0.0)
@@ -36,7 +36,7 @@ def test_PxC(N=25):
     """
     lon0 = 10
     lat0 = -25
-    Lon = 400*(2*random(N)-1)
+    Lon = 540*random(N) - 180
     Lat = 90*(2*random(N)-1)
 
     Lon, Lat = np.meshgrid(Lon, Lat)
@@ -73,8 +73,8 @@ def  test_onedegreedistance(N=25):
     """
     """
     Lon, Lat = random((2, N))
-    Lon = 400*(2*Lon-1)
-    Lat = 89*(2*Lat-1)
+    Lon = 540*Lon- 180
+    Lat = 89.5*(2*Lat-1)
     for lon, lat in zip(Lon, Lat):
         d = haversine(lat-0.5, lon, lat+0.5, lon)
         c_d = haversine_scalar(lat-0.5, lon, lat+0.5, lon)

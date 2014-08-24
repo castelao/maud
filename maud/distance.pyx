@@ -62,7 +62,7 @@ cdef double _haversine_scalar(double lat, double lon, double lat_c,
 
     d = sin( (lat - lat_c) / 2.) ** 2 + \
             cos(lat) * cos(lat_c) * sin( (lon - lon_c) / 2) ** 2
-    h = 2 * AVG_EARTH_RADIUS * asin(sqrt(d))
+    h = TWO_AVG_EARTH_RADIUS * asin(sqrt(d))
 
     return h
 
