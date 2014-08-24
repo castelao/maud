@@ -11,12 +11,12 @@ def wmean_2D_serial(x, y, data, l, method='hamming'):
         - split in two solutions, array and masked array
         - Allow nD input arrays
     """
+    assert data.ndim >= 2, "The input data must has at leas 2 dimensions"
     assert (x.shape == y.shape), "x and y must have the same shape."
     assert (data.shape[-2:] == x.shape), \
             "The last 2 dimensions of data mush be equal to x & y shape"
     assert type(data) in [np.ndarray, ma.MaskedArray], \
             "data must be an array or masked_array"
-    #assert data.ndim == 2, "The input data must be 2D arrays"
 
     winfunc = window_func(method)
 
