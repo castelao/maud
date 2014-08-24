@@ -67,7 +67,12 @@ setup(
     packages=find_packages(),
     install_requires=requires,
     cmdclass = {'build_ext': build_ext, 'test': PyTest},
-    ext_modules = [Extension("maud.cwindow_func", ["maud/window_func.pyx"]), Extension("cmaud", ["maud/maud.pyx"])],
+    ext_modules = [
+        Extension("cmaud", ["maud/maud.pyx"]),
+        Extension("maud.cwindow_func", ["maud/window_func.pyx"]),
+        Extension("maud.cwindow_func_scalar", ["maud/window_func_scalar.pyx"]),
+        Extension("maud.cdistance", ["maud/distance.pyx"]),
+        ],
     include_dirs = [np.get_include()],
     #ext_modules = [
     #    Extension("maud.cwindow_func", ["window_func.pyx"],
