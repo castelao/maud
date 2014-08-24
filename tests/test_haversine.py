@@ -73,8 +73,8 @@ def  test_onedegreedistance(N=25):
     """
     """
     Lon, Lat = random((2, N))
-    Lon = 400*(2*Lon-1)
-    Lat = 89*(2*Lat-1)
+    Lon = 540*Lon- 180
+    Lat = 89.5*(2*Lat-1)
     for lon, lat in zip(Lon, Lat):
         d = haversine(lat-0.5, lon, lat+0.5, lon)
         c_d = haversine_scalar(lat-0.5, lon, lat+0.5, lon)
