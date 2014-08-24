@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+# cython: profile=False
 # vim: tabstop=4 shiftwidth=4 softtabstop=4 expandtab
 
 import numpy as np
