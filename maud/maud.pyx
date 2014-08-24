@@ -2,6 +2,13 @@
 # cython: profile=False
 # vim: tabstop=4 shiftwidth=4 softtabstop=4 expandtab
 
+"""
+
+    Wasn't this below supposed to be faster than from i in xrange()?
+    #for i from 0 < = i < I:
+    #    for j from 0 < = j < J:
+"""
+
 import numpy as np
 from numpy import ma
 
