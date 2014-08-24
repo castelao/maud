@@ -9,7 +9,8 @@ import multiprocessing as mp
 cimport numpy as np
 from libc.math cimport cos, sin, asin, sqrt, M_PI
 
-from maud.cwindow_func import window_func, window_func_scalar
+from maud.cwindow_func_scalar import window_func_scalar
+from maud.cdistance import haversine_scalar as _haversine_scalar
 
 try:
     from progressbar import ProgressBar
