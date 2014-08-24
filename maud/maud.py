@@ -19,7 +19,7 @@ from window_func import window_func
 from distance import haversine
 
 
-def wmean_1D(data, l, t=None, method='hann', axis=0, parallel=True):
+def wmean_1D_serial(data, l, t=None, method='hann', axis=0):
     """ A moving window mean filter, not necessarily a regular grid.
 
         1D means that the filter is applied to along only one
@@ -38,20 +38,17 @@ def wmean_1D(data, l, t=None, method='hann', axis=0, parallel=True):
             - method: ['hann', 'hamming', 'blackman']
                 Defines the weight function type
             - axis: Dimension which the filter will be applied
-            - parallel: [True] Will apply the filter with
-                multiple processors.
     """
     #assert type(data)) in [np.ndarray, ma.MaskedArray]
     assert axis <= data.ndim, "Invalid axis!"
 
     # If necessary, move the axis to be filtered for the first axis
     if axis != 0:
-        data_smooth = wmean_1D(data.swapaxes(0, axis),
+        data_smooth = wmean_1D_serial(data.swapaxes(0, axis),
             l = l,
             t = t,
             method = method,
-            axis = 0,
-            parallel = parallel)
+            axis = 0)
 
         return data_smooth.swapaxes(0, axis)
     # Below here, the filter will be always applied on axis=0
@@ -73,28 +70,71 @@ def wmean_1D(data, l, t=None, method='hann', axis=0, parallel=True):
         for i in I:
             data_smooth[i] = _convolve_1D(t[i], t, l, winfunc, data)
 
-    elif parallel is True:
+    else:
+        I = data.shape[1]
+        for i in range(I):
+            data_smooth[:,i] = wmean_1D_serial(data[:,i],
+                    l = l,
+                    t = t,
+                    method = method,
+                    axis = 0)
+
+    return data_smooth
+
+
+def wmean_1D(data, l, t=None, method='hann', axis=0):
+    """ A moving window mean filter, not necessarily a regular grid.
+
+        It is equivalent to wmean_1D_serial but run in parallel with
+          multiprocesing for higher efficiency.
+
+        Check wmean_1D_serial documentation for the inputs and other
+          details.
+    """
+    #assert type(data)) in [np.ndarray, ma.MaskedArray]
+    assert axis <= data.ndim, "Invalid axis!"
+
+    # If necessary, move the axis to be filtered for the first axis
+    if axis != 0:
+        data_smooth = wmean_1D(data.swapaxes(0, axis),
+            l = l,
+            t = t,
+            method = method,
+            axis = 0)
+
+        return data_smooth.swapaxes(0, axis)
+    # Below here, the filter will be always applied on axis=0
+
+    # If t is not given, creates a regularly spaced t
+    if t == None:
+        print "The scale along the choosed axis weren't defined. I'll consider a constant sequence."
+	t = np.arange(data.shape[axis])
+
+    assert t.shape == (data.shape[axis],), "Invalid size of t."
+
+    # ----
+    winfunc = window_func(method)
+
+    data_smooth = ma.masked_all(data.shape)
+
+    if data.ndim==1:
+        (I,) = np.nonzero(~ma.getmaskarray(data))
+        for i in I:
+            data_smooth[i] = _convolve_1D(t[i], t, l, winfunc, data)
+
+    else:
         npes = 2 * mp.cpu_count()
         pool = mp.Pool(npes)
         results = []
         I = data.shape[1]
         for i in range(I):
-            results.append(pool.apply_async(wmean_1D, \
-                    (data[:,i], l, t, method, 0, False)))
+            results.append(pool.apply_async(wmean_1D_serial, \
+                    (data[:,i], l, t, method, 0)))
         pool.close()
         for i, r in enumerate(results):
             data_smooth[:,i] = r.get()
         pool.terminate()
 
-    else:
-        I = data.shape[1]
-        for i in range(I):
-            data_smooth[:,i] = wmean_1D(data[:,i],
-                    l = l,
-                    t = t,
-                    method = method,
-                    axis = 0,
-                    parallel=parallel)
 
     return data_smooth
 
