@@ -41,6 +41,7 @@ def wmean_1D(data, l, t=None, method='hann', axis=0, parallel=True):
             - parallel: [True] Will apply the filter with
                 multiple processors.
     """
+    #assert type(data)) in [np.ndarray, ma.MaskedArray]
     assert axis <= data.ndim, "Invalid axis!"
 
     # If necessary, move the axis to be filtered for the first axis
@@ -156,8 +157,8 @@ def window_mean_2D_latlon(Lat, Lon, data, l, method='hamming', interp='False'):
         Output:
 
     """
-    assert ((type(l) == float) or (type(l) == int)), \
-        "The filter scale (l) must be a float or an int"
+    #assert ((type(l) == float) or (type(l) == int)), \
+    #    "The filter scale (l) must be a float or an int"
 
     if type(data) == dict:
         output = {}
