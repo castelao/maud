@@ -36,7 +36,7 @@ def test_PxC(N=25):
     """
     lon0 = 10
     lat0 = -25
-    Lon = 400*(2*random(N)-1)
+    Lon = 540*random(N) - 180
     Lat = 90*(2*random(N)-1)
 
     Lon, Lat = np.meshgrid(Lon, Lat)
