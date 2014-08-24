@@ -165,7 +165,7 @@ def window_mean_2D_latlon(Lat, Lon, data, l, method='hamming', interp='False'):
             output[k] = window_mean_2D_latlon(Lat, Lon, data[k], l, method)
         return output
 
-    assert data.ndim == 2, "Sorry, for now I'm only handeling 2D arrays"
+    assert data.ndim == 2, "The input data must be 2D arrays"
 
     weight_func = window_func(method)
 
