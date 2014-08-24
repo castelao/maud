@@ -11,7 +11,7 @@ def test_zerodistance(N=25):
     """ Distance from one point to itself
     """
     for n in range(N):
-        lon = 560*random() - 180
+        lon = 540*random() - 180
         lat = 180*random() - 90
         assert (haversine(lon, lat, lon, lat) == 0.0)
         assert (haversine_scalar(lon, lat, lon, lat) == 0.0)
