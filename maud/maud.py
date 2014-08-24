@@ -216,6 +216,64 @@ def wmean_bandpass_1D_serial(data, lshorterpass, llongerpass, t=None,
     return data_smooth
 
 
+def wmean_bandpass_1D(data, lshorterpass, llongerpass, t=None,
+        method='hann', axis=0):
+    """ A bandpass moving window filter, for not necessarily regular grids.
+
+        Equivalent to wmean_bandpass_1D_serial, but it runs in parallel
+          with multiprocessing for higher efficiency.
+
+        Check wmean_bandpass_1D_serial documentation for the inputs and
+            other details.
+    """
+
+    assert axis <= data.ndim, "Invalid axis!"
+
+    # If necessary, move the axis to be filtered for the first axis
+    if axis != 0:
+        data_smooth = wmean_bandpass_1D(data.swapaxes(0, axis),
+                lshorterpass = lshorterpass,
+                llongerpass = llongerpass,
+                t = t,
+                method = method,
+                axis = 0)
+
+        return data_smooth.swapaxes(0, axis)
+    # Below here, the filter will be always applied on axis=0
+
+    # If t is not given, creates a regularly spaced t
+    if t == None:
+        print "The scale along the choosed axis weren't defined. I'll consider a constant sequence."
+	t = np.arange(data.shape[axis])
+
+    assert t.shape == (data.shape[axis],), "Invalid size of t."
+
+    # ----
+    # Only one dimensions usually means overhead to run in parallel.
+    if data.ndim==1:
+        data_smooth = wmean_bandpass_1D_serial(data, lshorterpass,
+                llongerpass, t, method, axis)
+        return data_smooth
+    # ----
+
+    npes = 2 * mp.cpu_count()
+    pool = mp.Pool(npes)
+    results = []
+    I = data.shape[1]
+    for i in range(I):
+        results.append(pool.apply_async(wmean_bandpass_1D_serial, \
+                (data[:,i], lshorterpass, llongerpass, t, method, axis)))
+    pool.close()
+
+    # Collecting the results.
+    data_smooth = ma.masked_all(data.shape)
+    for i, r in enumerate(results):
+        data_smooth[:,i] = r.get()
+    pool.terminate()
+
+    return data_smooth
+
+
 def wmean_2D(x, y, data, l, method='hamming'):
     """
         - parallel, interp
