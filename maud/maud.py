@@ -113,28 +113,26 @@ def wmean_1D(data, l, t=None, method='hann', axis=0):
     assert t.shape == (data.shape[axis],), "Invalid size of t."
 
     # ----
-    winfunc = window_func(method)
-
-    data_smooth = ma.masked_all(data.shape)
-
+    # Only one dimensions usually means overhead to run in parallel.
     if data.ndim==1:
-        (I,) = np.nonzero(~ma.getmaskarray(data))
-        for i in I:
-            data_smooth[i] = _convolve_1D(t[i], t, l, winfunc, data)
+        data_smooth = wmean_1D_serial(data, l, t=t, method=method, axis=axis)
+        return data_smooth
+    # ----
 
-    else:
-        npes = 2 * mp.cpu_count()
-        pool = mp.Pool(npes)
-        results = []
-        I = data.shape[1]
-        for i in range(I):
-            results.append(pool.apply_async(wmean_1D_serial, \
-                    (data[:,i], l, t, method, 0)))
-        pool.close()
-        for i, r in enumerate(results):
-            data_smooth[:,i] = r.get()
-        pool.terminate()
+    npes = 2 * mp.cpu_count()
+    pool = mp.Pool(npes)
+    results = []
+    I = data.shape[1]
+    for i in range(I):
+        results.append(pool.apply_async(wmean_1D_serial, \
+                (data[:,i], l, t, method, 0)))
+    pool.close()
 
+    # Collecting the results.
+    data_smooth = ma.masked_all(data.shape)
+    for i, r in enumerate(results):
+        data_smooth[:,i] = r.get()
+    pool.terminate()
 
     return data_smooth
 
