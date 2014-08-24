@@ -3,6 +3,7 @@
 
 import numpy as np
 from numpy import ma
+from numpy import pi
 import maud
 import cmaud
 
@@ -28,3 +29,34 @@ def test_answer():
     assert abs(err).mean() < 1e-10
     assert abs(err).var() < 1e-10
     assert abs(err).max() < 1e-10
+
+def test_pass_all():
+    """
+
+    """
+
+    T1 = 50*np.random.random()
+    l = T1/50
+    t = np.arange(-50,50.5,.5)
+    Z = ma.array(np.random.random(t.size))
+    S1 = np.sin(2*pi*t/T1) + 10
+    y = S1 + Z
+    h = maud.wmean_1D(y, l=l, axis=0, method='hamming')
+    err = y - h
+    assert abs(err).mean() < 1e-10
+
+
+def test_sin_diff():
+    """
+
+    """
+
+    T1 = 100
+    l = T1/2
+    t = np.arange(-50,50.5,.5)
+    Z = ma.array(np.random.random(t.size))
+    S1 = np.sin(2*pi*t/T1)
+    y = S1 + Z
+    h = maud.wmean_1D(y, l=l, axis=0, method='hamming')
+    err = S1 - h
+    assert (abs(err).mean() < Z).all
