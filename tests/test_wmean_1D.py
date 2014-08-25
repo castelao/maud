@@ -96,7 +96,7 @@ def test_ones(N=25):
     assert (h == 1).all()
 
     # Ones masked array with random masked positions
-    tmp = random(N)
+    tmp = random(y.shape)
     # Select the top 1 third of the positions
     thr = tmp[tmp.argsort()[-round(N/3.)]]
 
@@ -105,8 +105,8 @@ def test_ones(N=25):
     assert (h == 1).all()
 
     # With interp, the energy should also be preserved
-    h = maud.wmean_1D(y, t=t, l=l, interp=True)
-    assert (h == 1).all()
+    #h = maud.wmean_1D(y, t=t, l=l, interp=True)
+    #assert (h == 1).all()
 
     # Masked values should not interfere in the filtered output.
     y.data[y.mask==True] = 1e10
@@ -125,3 +125,12 @@ def Serial_x_Parallel(N=10):
     h_serial = maud.wmean_1D_serial(y, t=t, l=l)
     h = maud.wmean_1D(y, t=t, l=l)
     assert (h_serial == h).all()
+
+def test_Python_x_Cython(N=10):
+    l = 5
+    # ATENTION, in the future I should not force t to be np.float.
+    t = np.arange(N, dtype=np.float)
+    y = random((N, 3))
+    h = maud.wmean_1D_serial(y, t=t, l=l)
+    ch = cmaud.wmean_1D(y, t=t, l=l)
+    assert (h == ch).all()

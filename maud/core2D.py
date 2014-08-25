@@ -42,12 +42,22 @@ def _convolve_2D(x0, y0, x, y, l, winfunc, data):
 
 
 def _apply_convolve_2D(data, w):
+    """ Apply weights w into data
+
+        This functions is usefull for arrays with more than 2D, so that the
+          r and w are estimated the minimum ammount of times. It assumes that
+          the weights (w) are applicable at the last 2 dimensions, and repeat
+          the procedure to any number of previous dimensions. I.e., a 2D
+          array is straight forward, while a 3D array, the procedure is
+          repeated along the first dimension as n 2D arrays.
+    """
     if data.ndim > 2:
         output = ma.masked_all(data.shape[:-2])
         I = data.shape[0]
         for i in xrange(I):
             output[i] = _apply_convolve_2D(data[i], w)
         return output
+
     #tmp = data[ind]*w
     tmp = data*w
     wsum = w.sum()
