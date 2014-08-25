@@ -125,3 +125,11 @@ def Serial_x_Parallel(N=10):
     h_serial = maud.wmean_1D_serial(y, t=t, l=l)
     h = maud.wmean_1D(y, t=t, l=l)
     assert (h_serial == h).all()
+
+def test_Python_x_Cython(N=10):
+    l = 5
+    t = np.arange(N)
+    y = random((N, 3))
+    h = maud.wmean_1D_serial(y, t=t, l=l)
+    ch = cmaud.wmean_1D(y, t=t, l=l)
+    assert (h == ch).all()
