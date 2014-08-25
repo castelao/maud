@@ -112,3 +112,16 @@ def test_ones(N=25):
     y.data[y.mask==True] = 1e10
     h = maud.wmean_1D(y, t=t, l=l)
     assert (h == 1).all()
+
+
+def Serial_x_Parallel(N=10):
+    """
+
+        Improve this. Should include more possibilities like:
+          different arrays shapes, l, input types(array x MA)
+    """
+    t = np.arange(N)
+    y = random(N)
+    h_serial = maud.wmean_1D_serial(y, t=t, l=l)
+    h = maud.wmean_1D(y, t=t, l=l)
+    assert (h_serial == h).all()
