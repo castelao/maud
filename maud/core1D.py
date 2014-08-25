@@ -59,18 +59,43 @@ def wmean_1D_serial(data, l, t=None, method='hann', axis=0, interp=False):
 
     assert t.shape == (data.shape[axis],), "Invalid size of t."
 
+
+    if type(data) is np.ndarray:
+        data_smooth = np.empty(data.shape)
+    else:
+        data_smooth = ma.masked_all(data.shape)
+
     # ----
-    winfunc = window_func(method)
+    if data.ndim > 1:
+        for i in range(data.shape[1]):
+            data_smooth[i] = wmean_1D_serial(data[:,i],
+                l = l,
+                t = t,
+                method = method,
+                axis = 0,
+                interp = interp)
 
-    data_smooth = ma.masked_all(data.shape)
+        return data_smooth
 
-    #if interp is True:
-    #    I = range(data.shape[0])
-    #else:
-    #    (I,) = np.nonzero(~ma.getmaskarray(data))
+    # ----
+    # Here on it is expected data.ndim == 1
 
-    for i in xrange(len(t)):
-        data_smooth[i] = _convolve_1D(t[i], t, l, winfunc, data)
+    wfunc = window_func(method)
+
+    if interp is True:
+        I = range(len(t))
+    else:
+        (I,) = np.nonzero(~ma.getmaskarray(data))
+
+    for i in I:
+        dt = t - t[i]
+        w = wfunc(dt, l)
+        ind = (w != 0) & (~ma.getmaskarray(data))
+        if ind.any():
+            tmp = data[ind]*w[ind]
+            wsum = w[ind].sum()
+            if wsum != 0:
+                data_smooth[i] = (tmp).sum()/wsum
 
     return data_smooth
 
