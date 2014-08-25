@@ -128,7 +128,8 @@ def Serial_x_Parallel(N=10):
 
 def test_Python_x_Cython(N=10):
     l = 5
-    t = np.arange(N)
+    # ATENTION, in the future I should not force t to be np.float.
+    t = np.arange(N, dtype=np.float)
     y = random((N, 3))
     h = maud.wmean_1D_serial(y, t=t, l=l)
     ch = cmaud.wmean_1D(y, t=t, l=l)
