@@ -17,7 +17,7 @@ from window_func import window_func
 from distance import haversine
 
 
-def wmean_1D_serial(data, l, t=None, method='hann', axis=0):
+def wmean_1D_serial(data, l, t=None, method='hann', axis=0, interp=False):
     """ A moving window mean filter, not necessarily a regular grid.
 
         1D means that the filter is applied to along only one
@@ -46,7 +46,8 @@ def wmean_1D_serial(data, l, t=None, method='hann', axis=0):
             l = l,
             t = t,
             method = method,
-            axis = 0)
+            axis = 0,
+            interp = interp)
 
         return data_smooth.swapaxes(0, axis)
     # Below here, the filter will be always applied on axis=0
@@ -64,23 +65,28 @@ def wmean_1D_serial(data, l, t=None, method='hann', axis=0):
     data_smooth = ma.masked_all(data.shape)
 
     if data.ndim==1:
-        (I,) = np.nonzero(~ma.getmaskarray(data))
+        if interp is True:
+            I = range(data.shape[0])
+        else:
+            (I,) = np.nonzero(~ma.getmaskarray(data))
+
         for i in I:
             data_smooth[i] = _convolve_1D(t[i], t, l, winfunc, data)
 
     else:
         I = data.shape[1]
-        for i in range(I):
+        for i in xrange(I):
             data_smooth[:,i] = wmean_1D_serial(data[:,i],
                     l = l,
                     t = t,
                     method = method,
-                    axis = 0)
+                    axis = 0,
+                    interp = interp)
 
     return data_smooth
 
 
-def wmean_1D(data, l, t=None, method='hann', axis=0):
+def wmean_1D(data, l, t=None, method='hann', axis=0, interp = False):
     """ A moving window mean filter, not necessarily a regular grid.
 
         It is equivalent to wmean_1D_serial but run in parallel with
@@ -98,7 +104,8 @@ def wmean_1D(data, l, t=None, method='hann', axis=0):
             l = l,
             t = t,
             method = method,
-            axis = 0)
+            axis = 0,
+            interp = interp)
 
         return data_smooth.swapaxes(0, axis)
     # Below here, the filter will be always applied on axis=0
@@ -113,7 +120,8 @@ def wmean_1D(data, l, t=None, method='hann', axis=0):
     # ----
     # Only one dimensions usually means overhead to run in parallel.
     if data.ndim==1:
-        data_smooth = wmean_1D_serial(data, l, t=t, method=method, axis=axis)
+        data_smooth = wmean_1D_serial(data, l, t=t, method=method, axis=axis,
+                interp = interp)
         return data_smooth
     # ----
 
@@ -123,7 +131,7 @@ def wmean_1D(data, l, t=None, method='hann', axis=0):
     I = data.shape[1]
     for i in range(I):
         results.append(pool.apply_async(wmean_1D_serial, \
-                (data[:,i], l, t, method, 0)))
+                (data[:,i], l, t, method, 0, interp)))
     pool.close()
 
     # Collecting the results.
