@@ -96,7 +96,7 @@ def test_ones(N=25):
     assert (h == 1).all()
 
     # Ones masked array with random masked positions
-    tmp = random(N)
+    tmp = random(y.shape)
     # Select the top 1 third of the positions
     thr = tmp[tmp.argsort()[-round(N/3.)]]
 
