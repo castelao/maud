@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# cython: profile=False
+# cython: profile=True
 # vim: tabstop=4 shiftwidth=4 softtabstop=4 expandtab
 
 """
@@ -31,6 +31,89 @@ np.import_array()
 DTYPE = np.float
 ctypedef np.float_t DTYPE_t
 
+
+from maud.window_func import window_func
+
+def wmean_1D_serial(data, l, t=None, method='hann', axis=0, interp=False):
+    """ A moving window mean filter, not necessarily a regular grid.
+
+        1D means that the filter is applied to along only one
+          of the dimensions, but in the whole array. For example
+          in a 3D array, each latXlon point is filtered along the
+          time.
+
+        It's not optimized for a regular grid.
+
+        Input:
+            - data: np.array or ma.maked_array, nD
+            - l: is the size of the filter, in the same unit
+                of the t.
+            - t: is the scale of the choosed axis, 1D. If not
+                defined, it will be considered a sequence.
+            - method: ['hann', 'hamming', 'blackman']
+                Defines the weight function type
+            - axis: Dimension which the filter will be applied
+    """
+    #assert type(data)) in [np.ndarray, ma.MaskedArray]
+    assert axis <= data.ndim, "Invalid axis!"
+
+    # If necessary, move the axis to be filtered for the first axis
+    if axis != 0:
+        print("Will temporary swapaxes")
+        data_smooth = wmean_1D_serial(data.swapaxes(0, axis),
+            l = l,
+            t = t,
+            method = method,
+            axis = 0,
+            interp = interp)
+
+        return data_smooth.swapaxes(0, axis)
+    # Below here, the filter will be always applied on axis=0
+
+    # If t is not given, creates a regularly spaced t
+    if t == None:
+        print "The scale along the choosed axis weren't defined. I'll consider a constant sequence."
+        t = np.arange(data.shape[axis])
+
+    assert t.shape == (data.shape[axis],), "Invalid size of t."
+
+    if type(data) is np.ndarray:
+        data_smooth = np.empty(data.shape)
+    else:
+        data_smooth = ma.masked_all(data.shape)
+
+    # ----
+    if data.ndim > 1:
+        for i in range(data.shape[1]):
+            data_smooth[:,i] = wmean_1D_serial(data[:,i],
+                l = l,
+                t = t,
+                method = method,
+                axis = 0,
+                interp = interp)
+
+        return data_smooth
+    # ----
+    # Here on it is expected data.ndim == 1
+
+    wfunc = window_func(method)
+
+    if interp is True:
+        I = range(len(t))
+    else:
+        (I,) = np.nonzero(~ma.getmaskarray(data))
+
+    for i in I:
+        dt = t - t[i]
+        w = wfunc(dt, l)
+        ind = (w != 0) & (~ma.getmaskarray(data))
+        if ind.any():
+            tmp = data[ind]*w[ind]
+            wsum = w[ind].sum()
+            if wsum != 0:
+                data_smooth[i] = (tmp).sum()/wsum
+
+    return data_smooth
 
 
 def window_1Dmean(data, double l, t=None, method='hann', axis=0, parallel=True):
@@ -120,7 +203,10 @@ def window_1Dmean(data, double l, t=None, method='hann', axis=0, parallel=True):
 
     return data_smooth
 
-def apply_window_1Dmean(np.ndarray[DTYPE_t, ndim=1] data, double t0, np.ndarray[DTYPE_t, ndim=1] t, double l, np.ndarray[np.int_t, ndim=1] I, weight_func):
+def apply_window_1Dmean(np.ndarray[DTYPE_t, ndim=1] data,
+        double t0, np.ndarray[DTYPE_t, ndim=1] t, double l,
+        np.ndarray[np.int_t, ndim=1] I, weight_func):
+
     cdef int i
     cdef double D, W
     cdef double dt, w
