@@ -15,7 +15,7 @@ from numpy import ma
 import multiprocessing as mp
 
 cimport numpy as np
-from libc.math cimport cos, sin, asin, sqrt, M_PI
+from libc.math cimport abs, cos, sin, asin, sqrt, M_PI
 
 from maud.cwindow_func_scalar import window_func_scalar
 from maud.cdistance import haversine_scalar as _haversine_scalar
