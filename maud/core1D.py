@@ -42,6 +42,7 @@ def wmean_1D_serial(data, l, t=None, method='hann', axis=0, interp=False):
 
     # If necessary, move the axis to be filtered for the first axis
     if axis != 0:
+        print("Will temporary swapaxes")
         data_smooth = wmean_1D_serial(data.swapaxes(0, axis),
             l = l,
             t = t,
