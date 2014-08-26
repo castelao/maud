@@ -149,7 +149,11 @@ def wmean_1D(data, l, t=None, method='hann', axis=0, interp = False):
     pool.close()
 
     # Collecting the results.
-    data_smooth = ma.masked_all(data.shape)
+    if type(data) is np.ndarray:
+        data_smooth = np.empty(data.shape)
+    else:
+        data_smooth = ma.masked_all(data.shape)
+
     for i, r in enumerate(results):
         data_smooth[:,i] = r.get()
     pool.terminate()
