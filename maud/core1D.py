@@ -68,7 +68,7 @@ def wmean_1D_serial(data, l, t=None, method='hann', axis=0, interp=False):
     # ----
     if data.ndim > 1:
         for i in range(data.shape[1]):
-            data_smooth[i] = wmean_1D_serial(data[:,i],
+            data_smooth[:,i] = wmean_1D_serial(data[:,i],
                 l = l,
                 t = t,
                 method = method,
