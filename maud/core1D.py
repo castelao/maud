@@ -59,7 +59,6 @@ def wmean_1D_serial(data, l, t=None, method='hann', axis=0, interp=False):
 
     assert t.shape == (data.shape[axis],), "Invalid size of t."
 
-
     if type(data) is np.ndarray:
         data_smooth = np.empty(data.shape)
     else:
@@ -135,7 +134,7 @@ def wmean_1D(data, l, t=None, method='hann', axis=0, interp = False):
     # Only one dimensions usually means overhead to run in parallel.
     if data.ndim==1:
         data_smooth = wmean_1D_serial(data, l, t=t, method=method, axis=axis,
-                interp = interp)
+                interp=interp)
         return data_smooth
     # ----
 
