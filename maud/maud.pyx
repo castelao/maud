@@ -75,6 +75,7 @@ def wmean_1D_serial(data, l, t=None, method='hann', axis=0, interp=False):
         print "The scale along the choosed axis weren't defined. I'll consider a constant sequence."
         t = np.arange(data.shape[axis])
 
+    t = t.astype('float64')
     assert t.shape == (data.shape[axis],), "Invalid size of t."
 
     if type(data) is np.ndarray:
