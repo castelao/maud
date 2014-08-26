@@ -18,62 +18,6 @@ from numpy import ma
 from window_func import window_func
 from distance import haversine
 
-
-def wmean_2D_latlon(Lat, Lon, data, l, method='hamming', interp='False'):
-    """
-        Right now I'm doing for Masked Arrays only.
-        data should be a dictionary with 2D arrays
-
-        Input:
-          - Lat: 2D array with latitudes
-          - Lon: 2D array with longitudes
-          - data: There are two possibilities, it can be an 
-            array of at least 2D, or a dictionary where each
-            element is an array of at least 2D.
-          - l: window filter size, in meters
-          - method: weight function type
-          - interp: if False, estimate only for the gridponits
-              of valid data, i.e. data.mask = output.mask. If
-              True, estimate for all gridpoints that has at
-              least one valida data point inside the l/2 radius 
-
-        Output:
-
-    """
-    #assert ((type(l) == float) or (type(l) == int)), \
-    #    "The filter scale (l) must be a float or an int"
-
-    if type(data) == dict:
-        output = {}
-        for k in data.keys():
-            output[k] = window_mean_2D_latlon(Lat, Lon, data[k], l, method)
-        return output
-
-    assert data.ndim == 2, "The input data must be 2D arrays"
-
-    weight_func = window_func(method)
-
-    data_smooth = ma.masked_all(data.shape)
-
-    if interp == True:
-        I, J = data.shape
-        I, J = np.meshgrid(range(I), range(J))
-        I = I.reshape(-1); J = J.reshape(-1)
-    else:
-        I, J = np.nonzero(np.isfinite(data))
-
-    for i, j in zip(I, J):
-            r = haversine(Lat, Lon, Lat[i, j], Lon[i, j])
-            if len(r) > 0:
-                w = weight_func(r, l)
-                tmp = data*w
-                # Sum the weights only at the valid data positions.
-                wsum = w[ma.getmaskarray(tmp)].sum()
-                if wsum != 0:
-                    data_smooth[i,j] = (tmp).sum()/wsum
-
-    return data_smooth
-
 # ==== Bellow here, I need to do some serious work on ====
 
 def window_mean(y,x=None,x_out=None,method="rectangular",boxsize=None):
