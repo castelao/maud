@@ -203,6 +203,69 @@ def window_1Dmean(data, double l, t=None, method='hann', axis=0, parallel=True):
 
     return data_smooth
 
+
+def convolve_1D_array(np.ndarray[DTYPE_t, ndim=1] data,
+        np.ndarray[DTYPE_t, ndim=1] t, double l, wfunc):
+
+    cdef unsigned int I = len(t)
+    cdef unsigned int i, ii
+    cdef double D, W, dt, w
+    # The ideal would be use data.shape instead of I.
+    cdef np.ndarray[DTYPE_t, ndim=1] data_smooth = np.empty(I)
+
+    #wfunc = window_func_scalar(method)
+
+    for i in xrange(I):
+        D = 0
+        W = 0
+        for ii in xrange(I):
+            dt = t[ii] - t[i]
+            if abs(dt) <= l:
+                w = wfunc(dt, l)
+                if w != 0:
+                    D += data[ii]*w
+                    W += w
+
+        assert (W != 0), "It's an array, must have at least one valid data"
+        data_smooth[i] = D/W
+
+    return data_smooth
+
+
+def convolve_1D_MA(np.ndarray[DTYPE_t, ndim=1] data,
+        np.ndarray[np.int8_t, ndim=1] mask,
+        np.ndarray[DTYPE_t, ndim=1] t, double l, method, bint interp):
+
+    cdef unsigned int I = len(t)
+    cdef unsigned int i, ii
+    cdef double D, W, dt, w
+    # The ideal would be use data.shape instead of I.
+    cdef np.ndarray[DTYPE_t, ndim=1] data_smooth = np.empty(I)
+    cdef np.ndarray[np.int8_t, ndim=1] mask_smooth = np.zeros(I, 'int8')
+
+    wfunc = window_func_scalar(method)
+
+    for i in xrange(I):
+        if (interp == 0) and (mask[i] == 1):
+            mask_smooth[i] = 1
+        else:
+            D = 0
+            W = 0
+            for ii in xrange(I):
+                if mask[ii] == 0:
+                    dt = t[ii] - t[i]
+                    if abs(dt) <= l:
+                        w = wfunc(dt, l)
+                        if w != 0:
+                            D += data[ii]*w
+                            W += w
+
+            assert (W != 0), "It's an array, must have at least one valid data"
+            data_smooth[i] = D/W
+
+    return data_smooth, mask_smooth
+
+
 def apply_window_1Dmean(np.ndarray[DTYPE_t, ndim=1] data,
         double t0, np.ndarray[DTYPE_t, ndim=1] t, double l,
         np.ndarray[np.int_t, ndim=1] I, weight_func):
