@@ -14,7 +14,6 @@ import numpy as np
 from numpy import ma
 
 from window_func import window_func
-from distance import haversine
 
 
 def wmean_1D_serial(data, l, t=None, method='hann', axis=0, interp=False):
