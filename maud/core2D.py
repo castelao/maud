@@ -5,7 +5,7 @@ from numpy import ma
 from window_func import window_func
 
 
-def wmean_2D_serial(x, y, data, l, method='hamming'):
+def wmean_2D_serial(x, y, data, l, method='hamming', interp=False):
     """
         - interp
         - split in two solutions, array and masked array
@@ -18,15 +18,37 @@ def wmean_2D_serial(x, y, data, l, method='hamming'):
     assert type(data) in [np.ndarray, ma.MaskedArray], \
             "data must be an array or masked_array"
 
+    if type(data) is np.ndarray:
+        data_smooth = np.empty(data.shape)
+    else:
+        data_smooth = ma.masked_all(data.shape)
+
+    # ----
+    if data.ndim > 2:
+        for i in xrange(data.shape[0]):
+            data_smooth[i] = wmean_2D_serial(x, y, data[i], l, method, interp)
+        return data_smooth
+    # Below here it is expected only 2D arrays
+    # ----
     winfunc = window_func(method)
 
-    data_smooth = ma.masked_all(data.shape)
+    #I, J = data.shape[-2:]
+    #for i in xrange(I):
+    #    for j in xrange(J):
+    if interp == True:
+        I, J = data.shape
+        I, J = np.meshgrid(range(I), range(J))
+        I = I.reshape(-1); J = J.reshape(-1)
+    else:
+        I, J = np.nonzero(~ma.getmaskarray(data))
 
-    I, J = data.shape[-2:]
-    for i in xrange(I):
-        for j in xrange(J):
-            data_smooth[..., i, j] = _convolve_2D(x[i,j], y[i,j], x, y, l,
-                    winfunc, data)
+    for i, j in zip(I, J):
+        data_smooth[..., i, j] = _convolve_2D(x[i,j], y[i,j], x, y, l,
+                winfunc, data)
+
+    ind_nan = np.isnan(data_smooth)
+    if ind_nan.any():
+        data_smooth.mask[ind_nan] = True
 
     return data_smooth
 
@@ -58,15 +80,14 @@ def _apply_convolve_2D(data, w):
             output[i] = _apply_convolve_2D(data[i], w)
         return output
 
-    #tmp = data[ind]*w
-    tmp = data*w
-    wsum = w.sum()
+    ind = (w != 0) & (~ma.getmaskarray(data))
+    tmp = data[ind]*w[ind]
+    wsum = w[ind].sum()
     if wsum != 0:
         return (tmp).sum()/wsum
 
 
-
-def wmean_2D(x, y, data, l, method='hamming'):
+def wmean_2D(x, y, data, l, method='hamming', interp=False):
 
     print("I'm not ready yet to run in parallel. I'll do serial instead.")
-    return wmean_2D_serial(x, y, data, l, method)
+    return wmean_2D_serial(x, y, data, l, method, interp)
