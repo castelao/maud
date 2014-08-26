@@ -80,18 +80,18 @@ def wmean_1D_serial(data, l, t=None, method='hann', axis=0, interp=False):
 
     l = float(l)
 
-    if (type(data) is np.ndarray) and (data.ndim == 1):
+    if (data.ndim == 1):
         wfunc = window_func_scalar(method)
-        data_smooth = convolve_1D_array(data, t, l, wfunc)
-        return data_smooth
 
-    elif (type(data) is ma.MaskedArray) and (data.ndim == 1):
-        wfunc = window_func_scalar(method)
-        d, m = convolve_1D_MA(data.data,
-                ma.getmaskarray(data).astype('int8'),
-                t, l, method, interp)
-        return ma.masked_array(d, m)
+        if (type(data) is np.ndarray):
+            data_smooth = convolve_1D_array(data, t, l, wfunc)
+            return data_smooth
 
+        elif (type(data) is ma.MaskedArray) and (data.ndim == 1):
+            d, m = convolve_1D_MA(data.data,
+                    ma.getmaskarray(data).astype('int8'),
+                    t, l, method, interp)
+            return ma.masked_array(d, m)
 
 
     if type(data) is np.ndarray:
