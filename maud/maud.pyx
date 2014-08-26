@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 # cython: profile=True
-# vim: tabstop=4 shiftwidth=4 softtabstop=4 expandtab
+# filename: maud.pyx
 
 """
 
