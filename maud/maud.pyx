@@ -203,6 +203,7 @@ def window_1Dmean(data, double l, t=None, method='hann', axis=0, parallel=True):
 
     return data_smooth
 
+
 def apply_window_1Dmean(np.ndarray[DTYPE_t, ndim=1] data,
         double t0, np.ndarray[DTYPE_t, ndim=1] t, double l,
         np.ndarray[np.int_t, ndim=1] I, weight_func):
