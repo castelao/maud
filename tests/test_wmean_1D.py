@@ -12,6 +12,8 @@ def test_mask(N=10):
     l = 5
     t = np.arange(N)
     y = np.ones(N)
+
+    # Input ndarray -> output ndarray
     h = maud.wmean_1D(y, t=t, l=l)
     assert type(h) is np.ndarray
     h = cmaud.wmean_1D(y, t=t, l=l)
@@ -19,7 +21,9 @@ def test_mask(N=10):
 
     y = ma.array(y)
     h = maud.wmean_1D(y, t=t, l=l)
+    # Input MA -> output MA
     assert type(h) == ma.MaskedArray
+    # Input MA and mask==False -> Output MA and mask==False
     assert ~h.mask.any()
     h = cmaud.wmean_1D(y, t=t, l=l)
     assert type(h) == ma.MaskedArray
@@ -28,6 +32,7 @@ def test_mask(N=10):
     y.mask = ma.getmaskarray(y)
     y.mask[0] = True
     h = maud.wmean_1D(y, t=t, l=l)
+    # The masked values @ input will be masked @ output
     assert h[0].mask == True
     assert ~h[1:].mask.any()
     h = cmaud.wmean_1D(y, t=t, l=l)
