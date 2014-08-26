@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 # cython: profile=True
-# vim: tabstop=4 shiftwidth=4 softtabstop=4 expandtab
+# filename: maud.pyx
 
 """
 
@@ -15,7 +15,7 @@ from numpy import ma
 import multiprocessing as mp
 
 cimport numpy as np
-from libc.math cimport cos, sin, asin, sqrt, M_PI
+from libc.math cimport abs, cos, sin, asin, sqrt, M_PI
 
 from maud.cwindow_func_scalar import window_func_scalar
 from maud.cdistance import haversine_scalar as _haversine_scalar
@@ -75,7 +75,24 @@ def wmean_1D_serial(data, l, t=None, method='hann', axis=0, interp=False):
         print "The scale along the choosed axis weren't defined. I'll consider a constant sequence."
         t = np.arange(data.shape[axis])
 
+    t = t.astype('float64')
     assert t.shape == (data.shape[axis],), "Invalid size of t."
+
+    l = float(l)
+
+    if (data.ndim == 1):
+        wfunc = window_func_scalar(method)
+
+        if (type(data) is np.ndarray):
+            data_smooth = convolve_1D_array(data, t, l, wfunc)
+            return data_smooth
+
+        elif (type(data) is ma.MaskedArray) and (data.ndim == 1):
+            d, m = convolve_1D_MA(data.data,
+                    ma.getmaskarray(data).astype('int8'),
+                    t, l, method, interp)
+            return ma.masked_array(d, m)
+
 
     if type(data) is np.ndarray:
         data_smooth = np.empty(data.shape)
@@ -114,6 +131,10 @@ def wmean_1D_serial(data, l, t=None, method='hann', axis=0, interp=False):
                 data_smooth[i] = (tmp).sum()/wsum
 
     return data_smooth
+
+
+def wmean_1D(data, l, t=None, method='hann', axis=0, interp=False):
+    return wmean_1D_serial(data, l, t, method, axis, interp)
 
 
 def window_1Dmean(data, double l, t=None, method='hann', axis=0, parallel=True):
@@ -202,6 +223,68 @@ def window_1Dmean(data, double l, t=None, method='hann', axis=0, parallel=True):
                     parallel=parallel)
 
     return data_smooth
+
+
+def convolve_1D_array(np.ndarray[DTYPE_t, ndim=1] data,
+        np.ndarray[DTYPE_t, ndim=1] t, double l, wfunc):
+
+    cdef unsigned int I = len(t)
+    cdef unsigned int i, ii
+    cdef double D, W, dt, w
+    # The ideal would be use data.shape instead of I.
+    cdef np.ndarray[DTYPE_t, ndim=1] data_smooth = np.empty(I)
+
+    #wfunc = window_func_scalar(method)
+
+    for i in xrange(I):
+        D = 0
+        W = 0
+        for ii in xrange(I):
+            dt = t[ii] - t[i]
+            if abs(dt) <= l:
+                w = wfunc(dt, l)
+                if w != 0:
+                    D += data[ii]*w
+                    W += w
+
+        assert (W != 0), "It's an array, must have at least one valid data"
+        data_smooth[i] = D/W
+
+    return data_smooth
+
+
+def convolve_1D_MA(np.ndarray[DTYPE_t, ndim=1] data,
+        np.ndarray[np.int8_t, ndim=1] mask,
+        np.ndarray[DTYPE_t, ndim=1] t, double l, method, bint interp):
+
+    cdef unsigned int I = len(t)
+    cdef unsigned int i, ii
+    cdef double D, W, dt, w
+    # The ideal would be use data.shape instead of I.
+    cdef np.ndarray[DTYPE_t, ndim=1] data_smooth = np.empty(I)
+    cdef np.ndarray[np.int8_t, ndim=1] mask_smooth = np.zeros(I, 'int8')
+
+    wfunc = window_func_scalar(method)
+
+    for i in xrange(I):
+        if (interp == 0) and (mask[i] == 1):
+            mask_smooth[i] = 1
+        else:
+            D = 0
+            W = 0
+            for ii in xrange(I):
+                if mask[ii] == 0:
+                    dt = t[ii] - t[i]
+                    if abs(dt) <= l:
+                        w = wfunc(dt, l)
+                        if w != 0:
+                            D += data[ii]*w
+                            W += w
+
+            assert (W != 0), "It's an array, must have at least one valid data"
+            data_smooth[i] = D/W
+
+    return data_smooth, mask_smooth
 
 
 def apply_window_1Dmean(np.ndarray[DTYPE_t, ndim=1] data,

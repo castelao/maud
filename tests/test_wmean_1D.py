@@ -14,9 +14,14 @@ def test_mask(N=10):
     y = np.ones(N)
     h = maud.wmean_1D(y, t=t, l=l)
     assert type(h) is np.ndarray
+    h = cmaud.wmean_1D(y, t=t, l=l)
+    assert type(h) is np.ndarray
 
     y = ma.array(y)
     h = maud.wmean_1D(y, t=t, l=l)
+    assert type(h) == ma.MaskedArray
+    assert ~h.mask.any()
+    h = cmaud.wmean_1D(y, t=t, l=l)
     assert type(h) == ma.MaskedArray
     assert ~h.mask.any()
 
@@ -25,11 +30,16 @@ def test_mask(N=10):
     h = maud.wmean_1D(y, t=t, l=l)
     assert h[0].mask == True
     assert ~h[1:].mask.any()
+    h = cmaud.wmean_1D(y, t=t, l=l)
+    assert h[0].mask == True
+    assert ~h[1:].mask.any()
 
 
 def eval_ones(y, t, l):
 
     h = maud.wmean_1D(y, t=t, l=l)
+    assert (h == 1).all()
+    h = cmaud.wmean_1D(y, t=t, l=l)
     assert (h == 1).all()
 
     # Ones masked array with random masked positions
@@ -40,14 +50,20 @@ def eval_ones(y, t, l):
     y = ma.masked_array(y, tmp>=thr)
     h = maud.wmean_1D(y, t=t, l=l)
     assert (h == 1).all()
+    h = cmaud.wmean_1D(y, t=t, l=l)
+    assert (h == 1).all()
 
     # Masked values should not interfere in the filtered output.
     y.data[y.mask==True] = 1e10
     h = maud.wmean_1D(y, t=t, l=l)
     assert (h == 1).all()
+    h = cmaud.wmean_1D(y, t=t, l=l)
+    assert (h == 1).all()
 
     # With interp, the energy should also be preserved
     h = maud.wmean_1D(y, t=t, l=l, interp=True)
+    assert (h == 1).all()
+    h = cmaud.wmean_1D(y, t=t, l=l, interp=True)
     assert (h == 1).all()
 
 def test_ones(N=25):
