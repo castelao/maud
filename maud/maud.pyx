@@ -225,6 +225,18 @@ def apply_window_1Dmean(np.ndarray[DTYPE_t, ndim=1] data,
     if W != 0:
         return D/W
 
+# ============================================================================
+def wmean_2D_serial(x, y, data, l, method='hamming', interp=False):
+    """ Temporary solution
+    """
+    import maud
+    return maud.wmean_2D_serial(x, y, data, l, method, interp)
+
+def wmean_2D(x, y, data, l, method='hamming', interp=False):
+    """ Temporary solution
+    """
+    return wmean_2D_serial(x, y, data, l, method, interp)
+# ============================================================================
 def window_mean_2D_latlon(Lat, Lon, data, l, method='hamming', interp=False):
     """
         Cython version of the window_mean_2D_latlon()
