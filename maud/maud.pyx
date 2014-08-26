@@ -133,6 +133,10 @@ def wmean_1D_serial(data, l, t=None, method='hann', axis=0, interp=False):
     return data_smooth
 
 
+def wmean_1D(data, l, t=None, method='hann', axis=0, interp=False):
+    return wmean_1D_serial(data, l, t, method, axis, interp)
+
+
 def window_1Dmean(data, double l, t=None, method='hann', axis=0, parallel=True):
     """ A moving window mean filter, not necessarily a regular grid.
 
