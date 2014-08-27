@@ -50,6 +50,7 @@ def test_mask(N=4):
     Z = ma.array(Z)
     h = wmean_2D(X, Y, Z, l=l)
     assert type(h) == ma.MaskedArray
+    # Input MA and mask==False -> Output MA and mask==False
     assert ~h.mask.any()
 
     # Only the masked inputs should return as masked.
