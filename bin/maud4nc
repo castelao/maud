@@ -18,8 +18,9 @@ import numpy as np
 from numpy import ma
 from netCDF4 import Dataset
 
-from maud import window_1Dbandpass
-from cmaud import window_1Dmean
+from maud import wmean_bandpass_1D
+from maud import wmean_1D
+#from cmaud import wmean_1D
 
 
 # ==== Parsing the options on command line
@@ -158,30 +159,27 @@ if newfile == True:
 
         if (options.highpasswindowlength is not None) and \
                 (options.lowpasswindowlength is not None):
-                    tmp = window_1Dbandpass(data[:, n],
+                    tmp = wmean_bandpass_1D(data[:, n],
                             lshorterpass = options.highpasswindowlength,
                             llongerpass = options.lowpasswindowlength,
                             t = scale,
                             method = options.windowmethod,
-                            axis=0,
-                            parallel=True)
+                            axis=0)
 
         elif (options.lowpasswindowlength is not None):
-            tmp = window_1Dmean(data[:, n],
+            tmp = wmean_1D(data[:, n],
                     l=options.lowpasswindowlength,
                     t=scale,
                     method=options.windowmethod,
-                    axis=0,
-                    parallel=True)
+                    axis=0)
 
         elif (options.highpasswindowlength is not None):
             tmp = data[:, n] - \
-                    window_1Dmean(data[:, n],
+                    wmean_1D(data[:, n],
                             l=options.highpasswindowlength,
                             t=scale,
                             method=options.windowmethod,
-                            axis=0,
-                            parallel=True)
+                            axis=0)
 
         else:
             import sys; sys.exit()
@@ -227,23 +225,20 @@ for i in range(I):
             pbar.update((i+1)*(j+1))
         except:
             pass
-        #tmp = window_1Dmean(data=ma.array(data[:, i, j]), 
+        #tmp = wmean_1D_serial(data=ma.array(data[:, i, j]), 
         #                t = nc.variables[options.scalevar][:],
-        #                l=options.lowpasswindowlength, axis=axis, 
-        #                parallel=False)
+        #                l=options.lowpasswindowlength, axis=axis)
 
-        #out[:, i, j] = tmp - window_1Dmean(data = tmp, 
+        #out[:, i, j] = tmp - wmean_1D_serial(data = tmp, 
         #                t = nc.variables[options.scalevar][:],
         #                l = options.highpasswindowlength, 
-        #                axis = axis, 
-        #                parallel=False)
+        #                axis = axis)
 
-        out[:, i, j] = window_1Dbandpass(data[:, i, j], 
+        out[:, i, j] = wmean_bandpass_1D_serial(data[:, i, j],
                 lshorterpass = options.highpasswindowlength, 
                 llongerpass = options.lowpasswindowlength, 
                 t = nc.variables[options.scalevar][:], 
                 method = options.windowmethod, 
-                axis=0, 
-                parallel = False)
+                axis=0)
 
 nc.close()
