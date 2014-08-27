@@ -66,7 +66,7 @@ def test_whitenoise():
 
         Need to improve this.
     """
-    grid = np.arange(-10, 10, 0.25)
+    grid = np.arange(-9, 9, 0.25)
     X, Y = np.meshgrid(grid, grid)
 
     #h = ma.array(random(X.shape)-0.5)
