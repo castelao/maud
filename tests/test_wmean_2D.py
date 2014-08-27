@@ -134,6 +134,27 @@ def test_ones(N=9):
     eval_ones(X, Y, data, l)
 
 
+def test_mask_at_interp():
+    """ Test the behavior of masked points with interp on|off
+
+        As long as the filter is wide enough to capture at least
+          one data point per point, the interp=True will return
+    """
+    N = 25
+    l = N/2
+
+    grid = np.linspace(-10, 10, N)
+    X, Y = np.meshgrid(grid, grid)
+    data = np.ones((N, N))
+    thr = np.percentile(data, 90)
+    data = ma.masked_greater(data, thr)
+    # Equivalent to interp=False
+    h = wmean_2D(X, Y, data, l=l)
+    assert (data.mask == h.mask).all()
+    h = wmean_2D(X, Y, data, l=l, interp=True)
+    assert (~h.mask).all()
+
+
 def test_Serial_x_Parallel(N=10):
     """
 
