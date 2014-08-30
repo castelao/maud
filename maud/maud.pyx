@@ -321,6 +321,12 @@ def wmean_2D(x, y, data, l, method='hamming', interp=False):
     """
     return wmean_2D_serial(x, y, data, l, method, interp)
 # ============================================================================
+def wmean_2D_latlon(Lat, Lon, data, l, method='hamming', interp=False):
+    """ Temporary solution, just a pipe.
+    """
+    return window_mean_2D_latlon(Lat, Lon, data, l, method, interp)
+
+
 def window_mean_2D_latlon(Lat, Lon, data, l, method='hamming', interp=False):
     """
         Cython version of the window_mean_2D_latlon()
