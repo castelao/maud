@@ -97,6 +97,8 @@ def _apply_convolve_2D(data, w):
           array is straight forward, while a 3D array, the procedure is
           repeated along the first dimension as n 2D arrays.
     """
+    assert data.shape == w.shape
+
     if data.ndim > 2:
         output = ma.masked_all(data.shape[:-2])
         I = data.shape[0]
