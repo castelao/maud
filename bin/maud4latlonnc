@@ -29,7 +29,8 @@ import numpy as np
 from numpy import ma
 from netCDF4 import Dataset
 
-from cmaud import window_mean_2D_latlon
+from maud import wmean_2D_latlon
+#from cmaud import wmean_2D_latlon
 
 
 # ==== Parsing the options on command line
@@ -198,7 +199,7 @@ if newfile is True:
 
     for nt in range(T):
         results.append( pool.apply_async(
-            window_mean_2D_latlon,
+            wmean_2D_latlon,
             (Lat, Lon, data[nt], l, options.windowmethod,
                 options.interp)
             ) )
@@ -317,7 +318,7 @@ try:
 
     print "Preparing the workers."
     for nt in range(T):
-        results.append( pool.apply_async( window_mean_2D_latlon, (Lat, Lon, data[nt], options.l, options.windowmethod, options.interp) ) )
+        results.append( pool.apply_async( wmean_2D_latlon, (Lat, Lon, data[nt], options.l, options.windowmethod, options.interp) ) )
 
     pool.close()
     print "Collecting the results."
@@ -339,7 +340,7 @@ except:
 #        except:
 #            pass
 #
-#        tmp = window_mean_2D_latlon(Lat, Lon, data[nt], options.l, method = options.windowmethod) 
+#        tmp = wmean_2D_latlon(Lat, Lon, data[nt], options.l, method = options.windowmethod)
 #        out[nt] = tmp - data[nt]
 
 nc.close()
