@@ -96,3 +96,25 @@ def mask_at_interp(f):
     assert (data.mask == h.mask).all()
     h = f(X, Y, data, l=l, interp=True)
     assert (~h.mask).all()
+
+
+def compare2func(f1, f2):
+    N = 10
+    l = N/2
+    grid = np.linspace(-10, 10, N)
+    X, Y = np.meshgrid(grid, grid)
+    data = random(X.shape)
+    h1 = f1(X, Y, data, l=l)
+    h2 = f2(X, Y, data, l=l)
+    assert (h1 == h2).all()
+
+    data = ma.array(data)
+    h = f1(X, Y, data, l=l)
+    h2 = f2(X, Y, data, l=l)
+    assert (h1 == h2).all()
+
+    thr = np.percentile(data, 70)
+    data = ma.masked_greater(data, thr)
+    h = f1(X, Y, data, l=l)
+    h2 = f2(X, Y, data, l=l)
+    assert (h1 == h2).all()
