@@ -609,10 +609,8 @@ def apply_window_mean_2D_latlon_masked(np.ndarray[DTYPE_t, ndim=2] Lat,
 		np.ndarray[DTYPE_t, ndim=2] data,
 		np.ndarray[np.int8_t, ndim=2] mask,
 		double l, method, interp):
-#    """
-#    """
-    weight_func = window_func_scalar(method)
-
+    """
+    """
     cdef unsigned int i, ii, j, jj
     cdef double r, w
     cdef unsigned int I = data.shape[0]
@@ -623,9 +621,12 @@ def apply_window_mean_2D_latlon_masked(np.ndarray[DTYPE_t, ndim=2] Lat,
     cdef np.ndarray[np.int8_t, ndim=2] mask_smooth = \
 		    np.ones((I,J), dtype=np.int8)
 
+    assert interp == False, "Temporary solution, this func only accepts interp=False"
+    weight_func = window_func_scalar(method)
+
     for i in xrange(I):
         for j in xrange(J):
-            if (interp is True) or (mask[i, j] == 0):
+            if (mask[i, j] == 0):
                 for ii in xrange(i, I):
                     for jj in xrange(j, J):
                         if mask[ii, jj] == 0:
@@ -634,12 +635,62 @@ def apply_window_mean_2D_latlon_masked(np.ndarray[DTYPE_t, ndim=2] Lat,
                             if r <= l:
                                 w = weight_func(r, l)
                                 if w != 0:
-                                    if mask[ii, jj] == 0:
-                                        D[i, j] += data[ii, jj] * w
-                                        W[i, j] += w
-                                    if mask[i, j] == 0:
+                                    # mask[ii, jj] is necessary 0, tested above
+                                    #if mask[ii, jj] == 0:
+                                    D[i, j] += data[ii, jj] * w
+                                    W[i, j] += w
+                                    if (i != ii) & (j != jj):
                                         D[ii, jj] += data[i, j] * w
                                         W[ii, jj] += w
+
+    for i in xrange(I):
+        for j in xrange(J):
+            if W[i, j] != 0:
+                data_smooth[i, j] = D[i,j]/W[i,j]
+                mask_smooth[i, j] = 0
+
+    return data_smooth, mask_smooth
+
+
+def apply_window_mean_2D_latlon_masked_interp(np.ndarray[DTYPE_t, ndim=2] Lat,
+		np.ndarray[DTYPE_t, ndim=2] Lon,
+		np.ndarray[DTYPE_t, ndim=2] data,
+		np.ndarray[np.int8_t, ndim=2] mask,
+		double l, method, interp):
+    """
+    """
+    cdef unsigned int i, ii, j, jj
+    cdef double r, w
+    cdef unsigned int I = data.shape[0]
+    cdef unsigned int J = data.shape[1]
+    cdef np.ndarray[DTYPE_t, ndim=2] D = np.zeros((I,J))
+    cdef np.ndarray[DTYPE_t, ndim=2] W = np.zeros((I,J))
+    cdef np.ndarray[DTYPE_t, ndim=2] data_smooth = np.empty((I,J))
+    cdef np.ndarray[np.int8_t, ndim=2] mask_smooth = \
+		    np.ones((I,J), dtype=np.int8)
+
+    weight_func = window_func_scalar(method)
+
+    for i in xrange(I):
+        for j in xrange(J):
+            for ii in xrange(i, I):
+                for jj in xrange(j, J):
+                    if (mask[i, j] == 0) or (mask[ii, jj] == 0):
+                        r = _haversine_scalar(Lat[i,j], Lon[i,j],
+                                Lat[ii,jj], Lon[ii,jj])
+                        if r <= l:
+                            w = weight_func(r, l)
+                            if w != 0:
+                                # mask[ii, jj] is necessary 0, tested above
+                                #if mask[ii, jj] == 0:
+                                if (mask[ii, jj] == 0):
+                                    D[i, j] += data[ii, jj] * w
+                                    W[i, j] += w
+                                if (mask[i, j] == 0):
+                                    if (i != ii) & (j != jj):
+                                        D[ii, jj] += data[i, j] * w
+                                        W[ii, jj] += w
+
     for i in xrange(I):
         for j in xrange(J):
             if W[i, j] != 0:
