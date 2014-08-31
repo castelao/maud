@@ -383,6 +383,15 @@ def wmean_2D_latlon(lat, lon, data, l, method='hamming', interp='False'):
                         lat.astype(np.float), lon.astype(np.float),
                         data.data.astype(np.float), l, method)
                 return ma.array(d)
+            elif interp == False:
+                d, m = apply_window_mean_2D_latlon_masked(
+                        lat.astype(np.float), lon.astype(np.float),
+                        data.data.astype(np.float), data.mask.astype('int8'),
+                        l, method, interp)
+                return ma.masked_array(d, m)
+            else:
+                import maud
+                return maud.wmean_2D_latlon(lat, lon, data, l, method, interp)
 
     elif data.ndim > 2:
         s = data.shape
