@@ -774,7 +774,6 @@ def apply_wmean_2Dn_latlon_masked_interp(np.ndarray[DTYPE_t, ndim=2] Lat,
     cdef np.ndarray[np.int8_t, ndim=3] mask_smooth = \
 		    np.ones((N,I,J), dtype=np.int8)
 
-    assert interp == False, "Temporary solution, this func only accepts interp=False"
     weight_func = window_func_scalar(method)
 
     for i in xrange(I):
