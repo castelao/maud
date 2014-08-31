@@ -76,3 +76,23 @@ def eval_ones_2D(f, x, y, z, l):
     h = f(x, y, z, l=l, interp=True)
     assert (h == 1).all()
 
+
+def mask_at_interp(f):
+    """ Test the behavior of masked points with interp on|off
+
+        As long as the filter is wide enough to capture at least
+          one data point per point, the interp=True will return
+    """
+    N = 25
+    l = 2*N/3
+
+    grid = np.linspace(-10, 10, N)
+    X, Y = np.meshgrid(grid, grid)
+    data = np.ones((N, N))
+    thr = np.percentile(data, 90)
+    data = ma.masked_greater(data, thr)
+    # Equivalent to interp=False
+    h = f(X, Y, data, l=l)
+    assert (data.mask == h.mask).all()
+    h = f(X, Y, data, l=l, interp=True)
+    assert (~h.mask).all()
