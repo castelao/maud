@@ -88,19 +88,8 @@ def test_mask_at_interp():
         As long as the filter is wide enough to capture at least
           one data point per point, the interp=True will return
     """
-    N = 25
-    l = N/2
-
-    grid = np.linspace(-10, 10, N)
-    X, Y = np.meshgrid(grid, grid)
-    data = np.ones((N, N))
-    thr = np.percentile(data, 90)
-    data = ma.masked_greater(data, thr)
-    # Equivalent to interp=False
-    h = wmean_2D_latlon(X, Y, data, l=l)
-    assert (data.mask == h.mask).all()
-    h = wmean_2D_latlon(X, Y, data, l=l, interp=True)
-    assert (~h.mask).all()
+    tests_support.mask_at_interp(wmean_2D_latlon)
+    tests_support.mask_at_interp(cwmean_2D_latlon)
 
 
 def test_Serial_x_Parallel(N=10):
