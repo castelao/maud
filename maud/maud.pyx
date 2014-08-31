@@ -411,7 +411,19 @@ def wmean_2D_latlon(lat, lon, data, l, method='hamming', interp='False'):
                         lat.astype(np.float), lon.astype(np.float),
                         tmp.data.astype(np.float), l, method)
                 return ma.array(d.reshape(s))
+            elif interp == False:
+                # I can use tmp.mask, since it necessarily has at least
+                #   one masked value.
+                d, m = apply_window_mean_2Dn_latlon_masked(
+                        lat.astype(np.float), lon.astype(np.float),
+                        tmp.data.astype(np.float),
+                        tmp.mask.astype('int8'),
+                        l, method, interp)
+                return (ma.masked_array(d, m)).reshape(s)
 
+            else:
+                import maud
+                return maud.wmean_2D_latlon(lat, lon, data, l, method, interp)
 
     # ==== data is larger than 2D array ======================================
     if type(data) is np.ndarray:
