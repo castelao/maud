@@ -452,10 +452,6 @@ def window_mean_2D_latlon(Lat, Lon, data, l, method='hamming', interp=False):
         Output: An array of the same type and dimension of the input
 	  data. This will be the low (frequency) pass filtered data,
 	  i.e. it will eliminate all short variability
-
-        !!!ATENTION!!!
-        - Might be a good idea to eliminate the dependence on
-          fluid.
     """
 
     #if type(data) == dict:
