@@ -118,6 +118,12 @@ def test_Python_x_Cython(N=10):
     ch = cwmean_2D_latlon(X, Y, data, l=l)
     assert (h == ch).all()
 
+    thr = np.percentile(data, 70)
+    data = ma.masked_greater(data, thr)
+    h = wmean_2D_latlon(X, Y, data, l=l)
+    ch = cwmean_2D_latlon(X, Y, data, l=l)
+    assert (h == ch).all()
+
 
 
 
