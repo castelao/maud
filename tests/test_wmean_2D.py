@@ -4,6 +4,8 @@
 import numpy as np
 from numpy import ma
 from numpy.random import random
+
+from maud import tests_support
 from maud import wmean_2D, wmean_2D_serial
 from cmaud import wmean_2D as cwmean_2D
 from cmaud import wmean_2D_serial as cwmean_2D_serial
@@ -11,27 +13,8 @@ from cmaud import wmean_2D_serial as cwmean_2D_serial
 #def random_input(N=10):
 #    I, J = (N*random(2)).astype('i')+1
 
-def test_inputsizes():
-    l = 3
-
-    # 1D input
-    #x = np.arange(10)
-    #y = x
-    #z = random(x.shape)
-    #h = wmean_2D(x, y, z, l)
-
-    # 2D input
-    x = np.arange(10)
-    y = np.arange(3)
-    X, Y = np.meshgrid(x, y)
-    Z = random(X.shape)
-    h = wmean_2D(X, Y, Z, l)
-    assert Z.shape == h.shape
-
-    # 3D input
-    Z = random([3]+list(X.shape))
-    h = wmean_2D(X, Y, Z, l)
-    assert Z.shape == h.shape
+def test_inputsizes(f=wmean_2D):
+    tests_support.inputsizes_f2D(f)
 
 
 def test_mask(N=4):
