@@ -385,9 +385,9 @@ def wmean_2D_latlon(lat, lon, data, l, method='hamming', interp='False'):
                 return ma.array(d)
 
     elif data.ndim > 2:
+        s = data.shape
+        tmp = data.reshape((-1, s[-2], s[-1]))
         if (type(data) is np.ndarray):
-            s = data.shape
-            tmp = data.reshape((-1, s[-2], s[-1]))
             d = apply_window_mean_2Dn_latlon(lat.astype(np.float),
                     lon.astype(np.float), tmp.astype(np.float),
                     l, method)
