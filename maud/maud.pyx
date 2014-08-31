@@ -19,7 +19,6 @@ from libc.math cimport abs, cos, sin, asin, sqrt, M_PI
 
 from maud.cwindow_func_scalar import window_func_scalar
 from maud.cdistance import haversine_scalar as _haversine_scalar
-from maud.distance import haversine
 
 try:
     from progressbar import ProgressBar
@@ -425,76 +424,7 @@ def wmean_2D_latlon(lat, lon, data, l, method='hamming', interp='False'):
                 import maud
                 return maud.wmean_2D_latlon(lat, lon, data, l, method, interp)
 
-    # ==== data is larger than 2D array ======================================
-    if type(data) is np.ndarray:
-        data_smooth = np.empty(data.shape)
-    else:
-        data_smooth = ma.masked_all(data.shape)
-
-    # ----
-    if data.ndim > 2:
-        for i in xrange(data.shape[0]):
-            #data_smooth[i] = wmean_2D_latlon_serial(lat, lon, data[i], l,
-            data_smooth[i] = wmean_2D_latlon(lat, lon, data[i], l,
-                    method, interp)
-            return data_smooth
-    # Below here it is expected only 2D arrays
-    # ----
-    winfunc = window_func(method)
-
-    if interp == True:
-        I, J = data.shape
-        I, J = np.meshgrid(range(I), range(J))
-        I = I.reshape(-1); J = J.reshape(-1)
-    else:
-        I, J = np.nonzero(~ma.getmaskarray(data))
-
-    for i, j in zip(I, J):
-        data_smooth[..., i, j] = _convolve_2D_latlon(lat[i,j], lon[i,j],
-                lat, lon, l, winfunc, data)
-
-    ind_nan = np.isnan(data_smooth)
-    if ind_nan.any():
-        data_smooth.mask[ind_nan] = True
-
-    return data_smooth
-
-
-def _convolve_2D_latlon(lat0, lon0, lat, lon, l, winfunc, data):
-    r = haversine(lat, lon, lat0, lon0)
-    if len(r) > 0:
-        # Index only the valid data that is inside the window
-        #ind = (np.absolute(r) < l) & (~ma.getmaskarray(data))
-        #w = winfunc(r[ind], l)
-        w = winfunc(r, l)
-        return _apply_convolve_2D(data, w)
-
-
-def _apply_convolve_2D(data, w):
-    """ Apply weights w into data
-
-        This functions is usefull for arrays with more than 2D, so that the
-          r and w are estimated the minimum ammount of times. It assumes that
-          the weights (w) are applicable at the last 2 dimensions, and repeat
-          the procedure to any number of previous dimensions. I.e., a 2D
-          array is straight forward, while a 3D array, the procedure is
-          repeated along the first dimension as n 2D arrays.
-    """
-    assert data.shape == w.shape
-
-    if data.ndim > 2:
-        output = ma.masked_all(data.shape[:-2])
-        I = data.shape[0]
-        for i in xrange(I):
-            output[i] = _apply_convolve_2D(data[i], w)
-        return output
-
-    ind = (w != 0) & (~ma.getmaskarray(data))
-    tmp = data[ind]*w[ind]
-    # Sum the weights only at the valid data positions.
-    wsum = w[ind].sum()
-    if wsum != 0:
-        return (tmp).sum()/wsum
+    assert False, "Was not supposed to reach here. Code under development."
 
 
 def window_mean_2D_latlon(Lat, Lon, data, l, method='hamming', interp=False):
