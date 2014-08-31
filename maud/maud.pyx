@@ -619,32 +619,32 @@ def apply_window_mean_2Dn_latlon(np.ndarray[DTYPE_t, ndim=2] Lat,
     """
     """
 
-    cdef unsigned int i, ii, j, jj, k, kk
+    cdef unsigned int i, ii, j, jj, n
     cdef double r, w
-    cdef unsigned int I = data.shape[0]
-    cdef unsigned int J = data.shape[1]
-    cdef unsigned int K = data.shape[2]
-    cdef np.ndarray[DTYPE_t, ndim=3] D = np.zeros((I,J,K))
-    cdef np.ndarray[DTYPE_t, ndim=3] W = np.zeros((I,J,K))
+    cdef unsigned int N = data.shape[0]
+    cdef unsigned int I = data.shape[1]
+    cdef unsigned int J = data.shape[2]
+    cdef np.ndarray[DTYPE_t, ndim=3] D = np.zeros((N,I,J))
+    cdef np.ndarray[DTYPE_t, ndim=3] W = np.zeros((N,I,J))
 
     weight_func = window_func_scalar(method)
 
-    for j in xrange(J):
-        for k in xrange(K):
-            for jj in xrange(j, J):
-                for kk in xrange(k, K):
-                    r = _haversine_scalar(Lat[j,k], Lon[j,k],
-                            Lat[jj,kk], Lon[jj,kk])
+    for i in xrange(I):
+        for j in xrange(J):
+            for ii in xrange(i, I):
+                for jj in xrange(j, J):
+                    r = _haversine_scalar(Lat[i,j], Lon[i,j],
+                            Lat[ii,jj], Lon[ii,jj])
                     if r <= l:
-                        for i in xrange(I):
+                        for n in xrange(N):
                             w = weight_func(r, l)
                             if w != 0:
-                                D[i, j, k] += data[i, jj, kk] * w
-                                W[i, j, k] += w
+                                D[n, i, j] += data[n, ii, jj] * w
+                                W[n, i, j] += w
 
-                                if (j != jj) & (k != kk):
-                                    D[i, jj, kk] += data[i, j, k] * w
-                                    W[i, jj, kk] += w
+                                if (i != ii) & (j != jj):
+                                    D[n, ii, jj] += data[n, i, j] * w
+                                    W[n, ii, jj] += w
 
     return D/W
 
