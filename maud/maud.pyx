@@ -364,16 +364,20 @@ def window_mean_2D_latlon(Lat, Lon, data, l, method='hamming', interp=False):
     if data.ndim == 2:
         if hasattr(data, 'mask'):
             if (data.mask == True).any():
-                data_smooth, mask = apply_window_mean_2D_latlon_masked(Lat,
-                        Lon, data.data, data.mask.astype('int8'), l, method,
-                        interp)
+                data_smooth, mask = apply_window_mean_2D_latlon_masked(
+                        Lat.astype(np.float), Lon.astype(np.float),
+                        data.data.astype(np.float), data.mask.astype('int8'),
+                        float(l), method, interp)
                 return ma.masked_array(data_smooth, mask)
             else:
-                data_smooth = apply_window_mean_2D_latlon(Lat, Lon, data.data,
-                        l, method)
+                data_smooth = apply_window_mean_2D_latlon(
+                        Lat.astype(np.float), Lon.astype(np.float),
+                        data.data.astype(np.float), float(l), method)
                 return ma.array(data_smooth)
         else: # type(data) == np.ndarray:
-            return apply_window_mean_2D_latlon(Lat, Lon, data, l, method)
+            return apply_window_mean_2D_latlon(Lat.astype(np.float),
+                    Lon.astype(np.float), data.astype(np.float),
+                    float(l), method)
 
     # ==== data is a 3D array ======================================
     elif data.ndim == 3:
