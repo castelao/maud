@@ -109,22 +109,7 @@ def test_Serial_x_Parallel(N=10):
 
 
 def test_Python_x_Cython(N=10):
-    l = N/2
-    # ATENTION, in the future I should not force t to be np.float.
-    grid = np.linspace(-10, 10, N)
-    X, Y = np.meshgrid(grid, grid)
-    data = random(X.shape)
-    h = wmean_2D_latlon(X, Y, data, l=l)
-    ch = cwmean_2D_latlon(X, Y, data, l=l)
-    assert (h == ch).all()
-
-    thr = np.percentile(data, 70)
-    data = ma.masked_greater(data, thr)
-    h = wmean_2D_latlon(X, Y, data, l=l)
-    ch = cwmean_2D_latlon(X, Y, data, l=l)
-    assert (h == ch).all()
-
-
+    tests_support.compare2func(wmean_2D_latlon, cwmean_2D_latlon)
 
 
 def latlon_2D(I=10, J=10):
