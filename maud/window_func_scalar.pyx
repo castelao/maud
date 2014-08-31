@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
-# cython: profile=True
+# cython: profile=False
+# filename: window_func_scalar.pyx
 # http://docs.cython.org/src/userguide/numpy_tutorial.html#numpy-tutorial
 
 import numpy as np
