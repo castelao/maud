@@ -53,7 +53,7 @@ def masked_input_2D(f, N=4):
     assert ~h[1:, 1:].mask.any()
 
 
-def eval_ones(f, x, y, z, l):
+def eval_ones_2D(f, x, y, z, l):
 
     h = f(x, y, z, l=l)
     assert (h == 1).all()

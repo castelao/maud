@@ -73,13 +73,13 @@ def test_ones(N=9):
     grid = np.linspace(-10, 10, N)
     X, Y = np.meshgrid(grid, grid)
     data = np.ones((N, N))
-    tests_support.eval_ones(wmean_2D_latlon, X, Y, data, l)
-    tests_support.eval_ones(cwmean_2D_latlon, X, Y, data, l)
+    tests_support.eval_ones_2D(wmean_2D_latlon, X, Y, data, l)
+    tests_support.eval_ones_2D(cwmean_2D_latlon, X, Y, data, l)
 
     print("Testing 3D array")
     data = np.ones((3, N, N))
-    tests_support.eval_ones(wmean_2D_latlon, X, Y, data, l)
-    tests_support.eval_ones(cwmean_2D_latlon, X, Y, data, l)
+    tests_support.eval_ones_2D(wmean_2D_latlon, X, Y, data, l)
+    tests_support.eval_ones_2D(cwmean_2D_latlon, X, Y, data, l)
 
 
 def test_mask_at_interp():
