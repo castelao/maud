@@ -4,61 +4,28 @@
 import numpy as np
 from numpy import ma
 from numpy.random import random
+
+from maud import tests_support
 from maud import wmean_2D_latlon_serial, wmean_2D_latlon
 from cmaud import wmean_2D_latlon as cwmean_2D_latlon
+
+
+#def random_input(N=10):
+#    I, J = (N*random(2)).astype('i')+1
+
 
 
 WINTYPES = ['hamming', 'hann', 'blackman', 'boxcar']
 
 
-def test_inputsizes(f=wmean_2D_latlon):
-    l = 3
-
-    # 1D input
-    #x = np.arange(10)
-    #y = x
-    #z = random(x.shape)
-    #h = wmean_2D_latlon(x, y, z, l)
-
-    # 2D input
-    x = np.arange(10)
-    y = np.arange(3)
-    X, Y = np.meshgrid(x, y)
-    Z = random(X.shape)
-    h = f(X, Y, Z, l)
-    assert Z.shape == h.shape
-
-    # 3D input
-    Z = random([3]+list(X.shape))
-    h = f(X, Y, Z, l)
-    assert Z.shape == h.shape
+def test_inputsizes():
+    tests_support.inputsizes_f2D(wmean_2D_latlon)
+    tests_support.inputsizes_f2D(cwmean_2D_latlon)
 
 
 def test_mask(N=4):
-    l = 5
-
-    x = np.arange(N)
-    y = np.arange(N)
-    X, Y = np.meshgrid(x, y)
-
-    # input ndarray -> output ndarray
-    Z = np.ones(X.shape)
-    h = wmean_2D_latlon(X, Y, Z, l=l)
-    assert type(h) is np.ndarray
-
-    # input MA array -> output MA array
-    Z = ma.array(Z)
-    h = wmean_2D_latlon(X, Y, Z, l=l)
-    assert type(h) == ma.MaskedArray
-    # Input MA and mask==False -> Output MA and mask==False
-    assert ~h.mask.any()
-
-    # Only the masked inputs should return as masked.
-    Z.mask = ma.getmaskarray(Z)
-    Z.mask[0, 0] = True
-    h = wmean_2D_latlon(X, Y, Z, l=l)
-    assert h[0, 0].mask == True
-    assert ~h[1:, 1:].mask.any()
+    tests_support.masked_input_2D(wmean_2D_latlon, N)
+    tests_support.masked_input_2D(cwmean_2D_latlon, N)
 
 
 def test_whitenoise():
@@ -94,29 +61,6 @@ def test_2Dmasked_array(N=25):
     assert h.mask.any()
 
 
-def eval_ones(x, y, z, l):
-
-    h = wmean_2D_latlon(x, y, z, l=l)
-    assert (h == 1).all()
-
-    # Ones masked array with random masked positions
-    tmp = random(z.shape)
-    # Select the top 1 third of the positions
-    thr = np.percentile(tmp, 70)
-
-    z = ma.masked_array(z, tmp>=thr)
-    h = wmean_2D_latlon(x, y, z, l=l)
-    assert (h == 1).all()
-
-    # Masked values should not interfere in the filtered output.
-    z.data[z.mask==True] = 1e10
-    h = wmean_2D_latlon(x, y, z, l=l)
-    assert (h == 1).all()
-
-    # With interp, the energy should also be preserved
-    h = wmean_2D_latlon(x, y, z, l=l, interp=True)
-    assert (h == 1).all()
-
 def test_ones(N=9):
     """ The energy must be preserved
 
@@ -129,11 +73,13 @@ def test_ones(N=9):
     grid = np.linspace(-10, 10, N)
     X, Y = np.meshgrid(grid, grid)
     data = np.ones((N, N))
-    eval_ones(X, Y, data, l)
+    tests_support.eval_ones(wmean_2D_latlon, X, Y, data, l)
+    tests_support.eval_ones(cwmean_2D_latlon, X, Y, data, l)
 
     print("Testing 3D array")
     data = np.ones((3, N, N))
-    eval_ones(X, Y, data, l)
+    tests_support.eval_ones(wmean_2D_latlon, X, Y, data, l)
+    tests_support.eval_ones(cwmean_2D_latlon, X, Y, data, l)
 
 
 def test_mask_at_interp():
