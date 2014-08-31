@@ -375,7 +375,10 @@ def wmean_2D_latlon(lat, lon, data, l, method='hamming', interp='False'):
                     l, method)
 
         elif (type(data) is ma.MaskedArray):
-            if (data.mask == False).all():
+            if (data.mask == True).all():
+                return ma.masked_all(data.shape)
+
+            elif (data.mask == False).all():
                 d = apply_window_mean_2D_latlon(
                         lat.astype(np.float), lon.astype(np.float),
                         data.data.astype(np.float), l, method)
@@ -391,9 +394,10 @@ def wmean_2D_latlon(lat, lon, data, l, method='hamming', interp='False'):
             return d.reshape(s)
 
         elif (type(data) is ma.MaskedArray):
-            if (data.mask == False).all():
-                s = data.shape
-                tmp = data.reshape((-1, s[-2], s[-1]))
+            if (data.mask == True).all():
+                return ma.masked_all(data.shape)
+
+            elif (data.mask == False).all():
                 d = apply_window_mean_2Dn_latlon(
                         lat.astype(np.float), lon.astype(np.float),
                         tmp.data.astype(np.float), l, method)
