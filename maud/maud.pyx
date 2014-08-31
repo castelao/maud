@@ -369,7 +369,7 @@ def wmean_2D_latlon(lat, lon, data, l, method='hamming', interp='False'):
     # ==== data is a 2D array ======================================
     if data.ndim == 2:
         if (type(data) is np.ndarray):
-            return apply_window_mean_2D_latlon(lat.astype(np.float),
+            return apply_wmean_2D_latlon(lat.astype(np.float),
                     lon.astype(np.float), data.astype(np.float),
                     l, method)
 
@@ -378,18 +378,18 @@ def wmean_2D_latlon(lat, lon, data, l, method='hamming', interp='False'):
                 return ma.masked_all(data.shape)
 
             elif (data.mask == False).all():
-                d = apply_window_mean_2D_latlon(
+                d = apply_wmean_2D_latlon(
                         lat.astype(np.float), lon.astype(np.float),
                         data.data.astype(np.float), l, method)
                 return ma.array(d)
             elif interp == False:
-                d, m = apply_window_mean_2D_latlon_masked(
+                d, m = apply_wmean_2D_latlon_masked(
                         lat.astype(np.float), lon.astype(np.float),
                         data.data.astype(np.float), data.mask.astype('int8'),
                         l, method, interp)
                 return ma.masked_array(d, m)
             else:
-                d, m = apply_window_mean_2D_latlon_masked_interp(
+                d, m = apply_wmean_2D_latlon_masked_interp(
                         lat.astype(np.float), lon.astype(np.float),
                         data.data.astype(np.float), data.mask.astype('int8'),
                         l, method, interp)
@@ -399,7 +399,7 @@ def wmean_2D_latlon(lat, lon, data, l, method='hamming', interp='False'):
         s = data.shape
         tmp = data.reshape((-1, s[-2], s[-1]))
         if (type(data) is np.ndarray):
-            d = apply_window_mean_2Dn_latlon(lat.astype(np.float),
+            d = apply_wmean_2Dn_latlon(lat.astype(np.float),
                     lon.astype(np.float), tmp.astype(np.float),
                     l, method)
             return d.reshape(s)
@@ -409,14 +409,14 @@ def wmean_2D_latlon(lat, lon, data, l, method='hamming', interp='False'):
                 return ma.masked_all(data.shape)
 
             elif (data.mask == False).all():
-                d = apply_window_mean_2Dn_latlon(
+                d = apply_wmean_2Dn_latlon(
                         lat.astype(np.float), lon.astype(np.float),
                         tmp.data.astype(np.float), l, method)
                 return ma.array(d.reshape(s))
             elif interp == False:
                 # I can use tmp.mask, since it necessarily has at least
                 #   one masked value.
-                d, m = apply_window_mean_2Dn_latlon_masked(
+                d, m = apply_wmean_2Dn_latlon_masked(
                         lat.astype(np.float), lon.astype(np.float),
                         tmp.data.astype(np.float),
                         tmp.mask.astype('int8'),
@@ -424,7 +424,7 @@ def wmean_2D_latlon(lat, lon, data, l, method='hamming', interp='False'):
                 return (ma.masked_array(d, m)).reshape(s)
 
             else:
-                d, m = apply_window_mean_2Dn_latlon_masked_interp(
+                d, m = apply_wmean_2Dn_latlon_masked_interp(
                         lat.astype(np.float), lon.astype(np.float),
                         tmp.data.astype(np.float),
                         tmp.mask.astype('int8'),
@@ -471,18 +471,18 @@ def window_mean_2D_latlon(Lat, Lon, data, l, method='hamming', interp=False):
     if data.ndim == 2:
         if hasattr(data, 'mask'):
             if (data.mask == True).any():
-                data_smooth, mask = apply_window_mean_2D_latlon_masked(
+                data_smooth, mask = apply_wmean_2D_latlon_masked(
                         Lat.astype(np.float), Lon.astype(np.float),
                         data.data.astype(np.float), data.mask.astype('int8'),
                         float(l), method, interp)
                 return ma.masked_array(data_smooth, mask)
             else:
-                data_smooth = apply_window_mean_2D_latlon(
+                data_smooth = apply_wmean_2D_latlon(
                         Lat.astype(np.float), Lon.astype(np.float),
                         data.data.astype(np.float), float(l), method)
                 return ma.array(data_smooth)
         else: # type(data) == np.ndarray:
-            return apply_window_mean_2D_latlon(Lat.astype(np.float),
+            return apply_wmean_2D_latlon(Lat.astype(np.float),
                     Lon.astype(np.float), data.astype(np.float),
                     float(l), method)
 
@@ -541,7 +541,7 @@ def window_mean_2D_latlon(Lat, Lon, data, l, method='hamming', interp=False):
 #    return data_out
     #return data_smooth
 
-def apply_window_mean_2D_latlon(np.ndarray[DTYPE_t, ndim=2] Lat,
+def apply_wmean_2D_latlon(np.ndarray[DTYPE_t, ndim=2] Lat,
         np.ndarray[DTYPE_t, ndim=2] Lon, np.ndarray[DTYPE_t, ndim=2] data,
         double l, method='hamming'):
     """
@@ -575,7 +575,7 @@ def apply_window_mean_2D_latlon(np.ndarray[DTYPE_t, ndim=2] Lat,
     return D/W
 
 
-def apply_window_mean_2Dn_latlon(np.ndarray[DTYPE_t, ndim=2] Lat,
+def apply_wmean_2Dn_latlon(np.ndarray[DTYPE_t, ndim=2] Lat,
         np.ndarray[DTYPE_t, ndim=2] Lon, np.ndarray[DTYPE_t, ndim=3] data,
         double l, method='hamming'):
     """
@@ -611,7 +611,7 @@ def apply_window_mean_2Dn_latlon(np.ndarray[DTYPE_t, ndim=2] Lat,
     return D/W
 
 
-def apply_window_mean_2D_latlon_masked(np.ndarray[DTYPE_t, ndim=2] Lat,
+def apply_wmean_2D_latlon_masked(np.ndarray[DTYPE_t, ndim=2] Lat,
 		np.ndarray[DTYPE_t, ndim=2] Lon,
 		np.ndarray[DTYPE_t, ndim=2] data,
 		np.ndarray[np.int8_t, ndim=2] mask,
@@ -659,7 +659,7 @@ def apply_window_mean_2D_latlon_masked(np.ndarray[DTYPE_t, ndim=2] Lat,
     return data_smooth, mask_smooth
 
 
-def apply_window_mean_2D_latlon_masked_interp(np.ndarray[DTYPE_t, ndim=2] Lat,
+def apply_wmean_2D_latlon_masked_interp(np.ndarray[DTYPE_t, ndim=2] Lat,
 		np.ndarray[DTYPE_t, ndim=2] Lon,
 		np.ndarray[DTYPE_t, ndim=2] data,
 		np.ndarray[np.int8_t, ndim=2] mask,
@@ -707,7 +707,7 @@ def apply_window_mean_2D_latlon_masked_interp(np.ndarray[DTYPE_t, ndim=2] Lat,
     return data_smooth, mask_smooth
 
 
-def apply_window_mean_2Dn_latlon_masked(np.ndarray[DTYPE_t, ndim=2] Lat,
+def apply_wmean_2Dn_latlon_masked(np.ndarray[DTYPE_t, ndim=2] Lat,
 		np.ndarray[DTYPE_t, ndim=2] Lon,
 		np.ndarray[DTYPE_t, ndim=3] data,
 		np.ndarray[np.int8_t, ndim=3] mask,
@@ -755,7 +755,7 @@ def apply_window_mean_2Dn_latlon_masked(np.ndarray[DTYPE_t, ndim=2] Lat,
     return data_smooth, mask_smooth
 
 
-def apply_window_mean_2Dn_latlon_masked_interp(np.ndarray[DTYPE_t, ndim=2] Lat,
+def apply_wmean_2Dn_latlon_masked_interp(np.ndarray[DTYPE_t, ndim=2] Lat,
 		np.ndarray[DTYPE_t, ndim=2] Lon,
 		np.ndarray[DTYPE_t, ndim=3] data,
 		np.ndarray[np.int8_t, ndim=3] mask,
