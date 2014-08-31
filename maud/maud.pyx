@@ -19,6 +19,7 @@ from libc.math cimport abs, cos, sin, asin, sqrt, M_PI
 
 from maud.cwindow_func_scalar import window_func_scalar
 from maud.cdistance import haversine_scalar as _haversine_scalar
+from maud.distance import haversine
 
 try:
     from progressbar import ProgressBar
@@ -320,11 +321,155 @@ def wmean_2D(x, y, data, l, method='hamming', interp=False):
     """ Temporary solution
     """
     return wmean_2D_serial(x, y, data, l, method, interp)
+
 # ============================================================================
-def wmean_2D_latlon(Lat, Lon, data, l, method='hamming', interp=False):
-    """ Temporary solution, just a pipe.
+#def wmean_2D_latlon_serial(lat, lon, data, l, method='hamming',
+def wmean_2D_latlon(lat, lon, data, l, method='hamming', interp='False'):
     """
-    return window_mean_2D_latlon(Lat, Lon, data, l, method, interp)
+
+        Cython version of wmean_2D_latlon
+
+        Input:
+          - Lat: 2D array with latitudes
+          - Lon: 2D array with longitudes
+          - data: There are two possibilities, it can be an
+            array of at least 2D, or a dictionary where each
+            element is an array of at least 2D.
+          - l: window filter size, in meters
+          - method: weight function type
+          - interp: if False, estimate only for the gridponits
+              of valid data, i.e. data.mask = output.mask. If
+              True, estimate for all gridpoints that has at
+              least one valida data point inside the l/2 radius
+
+        Output:
+
+    """
+    #assert ((type(l) == float) or (type(l) == int)), \
+    #    "The filter scale (l) must be a float or an int"
+
+    # Temporary solution
+    if type(data) == dict:
+        output = {}
+        for k in data.keys():
+            #output[k] = wmean_2D_latlon_serial(lat, lon, data[k], l, method,
+            output[k] = wmean_2D_latlon(lat, lon, data[k], l, method, interp)
+        return output
+
+    assert data.ndim >= 2, \
+            "The input data has %s dimensions, but it should be >=2" % \
+            data.ndim
+    assert (lat.shape == lon.shape), "lon and lat must have the same shape."
+    assert (data.shape[-2:] == lat.shape), \
+            "The last 2 dimensions of data mush be equal to lat & lon shape"
+    assert type(data) in [np.ndarray, ma.MaskedArray], \
+            "data must be an array or masked_array"
+
+    l = float(l)
+
+    # ==== data is a 2D array ======================================
+    if data.ndim == 2:
+        if (type(data) is np.ndarray):
+            return apply_window_mean_2D_latlon(lat.astype(np.float),
+                    lon.astype(np.float), data.astype(np.float),
+                    l, method)
+
+        elif (type(data) is ma.MaskedArray):
+            if (data.mask == False).all():
+                d = apply_window_mean_2D_latlon(
+                        lat.astype(np.float), lon.astype(np.float),
+                        data.data.astype(np.float), l, method)
+                return ma.array(d)
+
+    elif data.ndim > 2:
+        if (type(data) is np.ndarray):
+            s = data.shape
+            tmp = data.reshape((-1, s[-2], s[-1]))
+            d = apply_window_mean_2Dn_latlon(lat.astype(np.float),
+                    lon.astype(np.float), tmp.astype(np.float),
+                    l, method)
+            return d.reshape(s)
+
+        elif (type(data) is ma.MaskedArray):
+            if (data.mask == False).all():
+                s = data.shape
+                tmp = data.reshape((-1, s[-2], s[-1]))
+                d = apply_window_mean_2Dn_latlon(
+                        lat.astype(np.float), lon.astype(np.float),
+                        tmp.data.astype(np.float), l, method)
+                return ma.array(d.reshape(s))
+
+
+    # ==== data is larger than 2D array ======================================
+    if type(data) is np.ndarray:
+        data_smooth = np.empty(data.shape)
+    else:
+        data_smooth = ma.masked_all(data.shape)
+
+    # ----
+    if data.ndim > 2:
+        for i in xrange(data.shape[0]):
+            #data_smooth[i] = wmean_2D_latlon_serial(lat, lon, data[i], l,
+            data_smooth[i] = wmean_2D_latlon(lat, lon, data[i], l,
+                    method, interp)
+            return data_smooth
+    # Below here it is expected only 2D arrays
+    # ----
+    winfunc = window_func(method)
+
+    if interp == True:
+        I, J = data.shape
+        I, J = np.meshgrid(range(I), range(J))
+        I = I.reshape(-1); J = J.reshape(-1)
+    else:
+        I, J = np.nonzero(~ma.getmaskarray(data))
+
+    for i, j in zip(I, J):
+        data_smooth[..., i, j] = _convolve_2D_latlon(lat[i,j], lon[i,j],
+                lat, lon, l, winfunc, data)
+
+    ind_nan = np.isnan(data_smooth)
+    if ind_nan.any():
+        data_smooth.mask[ind_nan] = True
+
+    return data_smooth
+
+
+def _convolve_2D_latlon(lat0, lon0, lat, lon, l, winfunc, data):
+    r = haversine(lat, lon, lat0, lon0)
+    if len(r) > 0:
+        # Index only the valid data that is inside the window
+        #ind = (np.absolute(r) < l) & (~ma.getmaskarray(data))
+        #w = winfunc(r[ind], l)
+        w = winfunc(r, l)
+        return _apply_convolve_2D(data, w)
+
+
+def _apply_convolve_2D(data, w):
+    """ Apply weights w into data
+
+        This functions is usefull for arrays with more than 2D, so that the
+          r and w are estimated the minimum ammount of times. It assumes that
+          the weights (w) are applicable at the last 2 dimensions, and repeat
+          the procedure to any number of previous dimensions. I.e., a 2D
+          array is straight forward, while a 3D array, the procedure is
+          repeated along the first dimension as n 2D arrays.
+    """
+    assert data.shape == w.shape
+
+    if data.ndim > 2:
+        output = ma.masked_all(data.shape[:-2])
+        I = data.shape[0]
+        for i in xrange(I):
+            output[i] = _apply_convolve_2D(data[i], w)
+        return output
+
+    ind = (w != 0) & (~ma.getmaskarray(data))
+    tmp = data[ind]*w[ind]
+    # Sum the weights only at the valid data positions.
+    wsum = w[ind].sum()
+    if wsum != 0:
+        return (tmp).sum()/wsum
 
 
 def window_mean_2D_latlon(Lat, Lon, data, l, method='hamming', interp=False):
@@ -464,6 +609,42 @@ def apply_window_mean_2D_latlon(np.ndarray[DTYPE_t, ndim=2] Lat,
                             if (i != ii) & (j != jj):
                                 D[ii, jj] += data[i, j] * w
                                 W[ii, jj] += w
+
+    return D/W
+
+
+def apply_window_mean_2Dn_latlon(np.ndarray[DTYPE_t, ndim=2] Lat,
+        np.ndarray[DTYPE_t, ndim=2] Lon, np.ndarray[DTYPE_t, ndim=3] data,
+        double l, method='hamming'):
+    """
+    """
+
+    cdef unsigned int i, ii, j, jj, k, kk
+    cdef double r, w
+    cdef unsigned int I = data.shape[0]
+    cdef unsigned int J = data.shape[1]
+    cdef unsigned int K = data.shape[2]
+    cdef np.ndarray[DTYPE_t, ndim=3] D = np.zeros((I,J,K))
+    cdef np.ndarray[DTYPE_t, ndim=3] W = np.zeros((I,J,K))
+
+    weight_func = window_func_scalar(method)
+
+    for j in xrange(J):
+        for k in xrange(K):
+            for jj in xrange(j, J):
+                for kk in xrange(k, K):
+                    r = _haversine_scalar(Lat[j,k], Lon[j,k],
+                            Lat[jj,kk], Lon[jj,kk])
+                    if r <= l:
+                        for i in xrange(I):
+                            w = weight_func(r, l)
+                            if w != 0:
+                                D[i, j, k] += data[i, jj, kk] * w
+                                W[i, j, k] += w
+
+                                if (j != jj) & (k != kk):
+                                    D[i, jj, kk] += data[i, j, k] * w
+                                    W[i, jj, kk] += w
 
     return D/W
 
