@@ -29,8 +29,7 @@ import numpy as np
 from numpy import ma
 from netCDF4 import Dataset
 
-from maud import wmean_2D_latlon
-#from cmaud import wmean_2D_latlon
+from cmaud import wmean_2D_latlon
 
 
 # ==== Parsing the options on command line
@@ -71,8 +70,6 @@ parser.add_option("--output", dest="outputfile",
 
 (options, args) = parser.parse_args()
 
-print "args: ", args
-print "options: ", options
 # ============================================================================
 if ((options.largerpasslength is None) and
         (options.shorterpasslength is not None)):
