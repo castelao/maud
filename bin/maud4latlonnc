@@ -29,7 +29,7 @@ import numpy as np
 from numpy import ma
 from netCDF4 import Dataset
 
-from cmaud import wmean_2D_latlon
+from cmaud import wmean_2D_latlon_serial as nmean_2D_latlon
 
 
 # ==== Parsing the options on command line
