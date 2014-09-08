@@ -594,9 +594,9 @@ def apply_wmean_2Dn_latlon(np.ndarray[DTYPE_t, ndim=2] Lat,
                     r = _haversine_scalar(Lat[i,j], Lon[i,j],
                             Lat[ii,jj], Lon[ii,jj])
                     if r <= l:
-                        for n in xrange(N):
-                            w = weight_func(r, l)
-                            if w != 0:
+                        w = weight_func(r, l)
+                        if w != 0:
+                            for n in xrange(N):
                                 D[n, i, j] += data[n, ii, jj] * w
                                 W[n, i, j] += w
 
