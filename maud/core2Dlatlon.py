@@ -31,11 +31,13 @@ def wmean_2D_latlon_serial(lat, lon, data, l, method='hamming',
     #assert ((type(l) == float) or (type(l) == int)), \
     #    "The filter scale (l) must be a float or an int"
 
-    #if type(data) == dict:
-    #    output = {}
-    #    for k in data.keys():
-    #        output[k] = window_mean_2D_latlon(Lat, Lon, data[k], l, method)
-    #    return output
+    # Temporary solution
+    if type(data) == dict:
+        output = {}
+        for k in data.keys():
+            output[k] = wmean_2D_latlon_serial(lat, lon, data[k], l, method,
+                    interp)
+        return output
 
     assert data.ndim >= 2, "The input data must has at leas 2 dimensions"
     assert (lat.shape == lon.shape), "lon and lat must have the same shape."
