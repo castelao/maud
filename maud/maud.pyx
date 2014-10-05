@@ -322,8 +322,11 @@ def wmean_2D(x, y, data, l, method='hamming', interp=False):
     return wmean_2D_serial(x, y, data, l, method, interp)
 
 # ============================================================================
-#def wmean_2D_latlon_serial(lat, lon, data, l, method='hamming',
 def wmean_2D_latlon(lat, lon, data, l, method='hamming', interp='False'):
+    return wmean_2D_latlon_serial(lat, lon, data, l, method, interp)
+
+
+def wmean_2D_latlon_serial(lat, lon, data, l, method='hamming', interp='False'):
     """
 
         Cython version of wmean_2D_latlon
