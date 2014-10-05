@@ -89,9 +89,9 @@ def haversine_1Darray(np.ndarray[DTYPE_t, ndim=1] lat,
 
     cdef unsigned int i
     cdef unsigned int I = lat.shape[0]
-    cdef np.ndarray[DTYPE_t, ndim=1] h = np.empty(I)
     cdef double dlat, dlon, d
     cdef double cos_lat_c
+    cdef np.ndarray[DTYPE_t, ndim=1] h = np.empty(I)
 
     lat_c = lat_c * DEG2RAD
     lon_c = lon_c * DEG2RAD
@@ -126,9 +126,9 @@ def haversine_2Darray(np.ndarray[DTYPE_t, ndim=2] lat,
     cdef unsigned int i, j
     cdef unsigned int I = lat.shape[0]
     cdef unsigned int J = lat.shape[1]
-    cdef np.ndarray[DTYPE_t, ndim=2] h = np.empty((I, J))
     cdef double dlat, dlon, d
     cdef double cos_lat_c
+    cdef np.ndarray[DTYPE_t, ndim=2] h = np.empty((I, J))
 
     lat_c = lat_c * DEG2RAD
     lon_c = lon_c * DEG2RAD
