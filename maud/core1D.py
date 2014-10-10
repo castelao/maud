@@ -53,7 +53,7 @@ def wmean_1D_serial(data, l, t=None, method='hann', axis=0, interp=False):
     # Below here, the filter will be always applied on axis=0
 
     # If t is not given, creates a regularly spaced t
-    if t == None:
+    if t is None:
         print "The scale along the choosed axis weren't defined. I'll consider a constant sequence."
 	t = np.arange(data.shape[axis])
 
@@ -124,7 +124,7 @@ def wmean_1D(data, l, t=None, method='hann', axis=0, interp = False):
     # Below here, the filter will be always applied on axis=0
 
     # If t is not given, creates a regularly spaced t
-    if t == None:
+    if t is None:
         print "The scale along the choosed axis weren't defined. I'll consider a constant sequence."
 	t = np.arange(data.shape[axis])
 
