@@ -107,7 +107,7 @@ elif ('lat' in ncin.variables) and ('lon' in ncin.variables):
     lat_var = 'lat'
     lon_var = 'lon'
 else:
-    print "Sorry, I couldn't guess the name of the lat lon variables."
+    assert False, "Sorry, I couldn't guess the name of the lat lon variables."
 
 lat = ncin.variables[lat_var]
 lon = ncin.variables[lon_var]
