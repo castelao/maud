@@ -84,8 +84,6 @@ elif ((options.largerpasslength is not None) and
 elif ((options.largerpasslength is not None) and
         (options.shorterpasslength is not None)):
     filtertype = 'bandpass'
-else:
-    import sys; sys.exit()
 
 # ============================================================================
 assert isfile(args[0])
