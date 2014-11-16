@@ -69,8 +69,12 @@ parser.add_option("--output", dest="outputfile",
 
 
 (options, args) = parser.parse_args()
-
 # ============================================================================
+
+assert (options.largerpasslength is not None) or \
+        (options.shorterpasslength is not None), \
+        "largerpasslength and shorterpasslength can't be both None"
+
 if ((options.largerpasslength is None) and
         (options.shorterpasslength is not None)):
     filtertype = 'highpass'
