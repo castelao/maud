@@ -86,7 +86,7 @@ elif ((options.largerpasslength is not None) and
     filtertype = 'bandpass'
 
 # ============================================================================
-assert isfile(args[0])
+assert isfile(args[0]), "%s is not a valid file" % args[0]
 
 varname = options.var
 if options.outputfile is None:
