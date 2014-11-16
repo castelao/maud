@@ -128,7 +128,7 @@ if newfile == True:
     N = ncin.variables[varname].shape[1]
     try:
         from progressbar import ProgressBar
-        pbar = ProgressBar(maxval=I*J).start()
+        pbar = ProgressBar(maxval=N).start()
     except:
         pass
 
@@ -151,9 +151,8 @@ if newfile == True:
         scale_factor = None
 
     for n in range(N):
-        print "n: %s/%s " % (n, N)
         try:
-            pbar.update((i+1)*(j+1))
+            pbar.update(n+1)
         except:
             pass
 
