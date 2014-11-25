@@ -30,6 +30,6 @@ To check the available options
 
     >>> maud4latlonnc -h
 
-On this example, it will filter the variable 'temperature' at the netCDF file model_output.nc. The weight function used is hamming, and the window scale is 600e3. The npes define the number of parallel process to be used, in this case 18. The option --iterp defines that any masked value will be replaced in the output as the filtered result of the valid values around it, inside the window lenght.
+On this example, it will filter the variable 'temperature' at the netCDF file model_output.nc. The weight function used is hamming, and the window scale is 600 km (600e3 meters). The npes define the number of parallel process to be used, in this case 18. The option --interp defines that any masked value will be replaced in the output as the filtered result of the valid values around it, inside the window lenght.
 
     >>> maud4latlonnc -l 600e3 --var='temperature' -w hamming --interp --npes=18 model_output.nc
