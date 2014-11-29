@@ -1,4 +1,60 @@
 # -*- coding: utf-8 -*-
+
+
+NAME = 'maud'
+VERSION = '0.9.2'
+DESCRIPTION = 'Moving Average for Uneven Data'
+#here = os.path.abspath(os.path.dirname(__file__))
+#README = open(os.path.join(here, 'README.rst')).read()
+README = ""
+#NEWS = open(os.path.join(here, 'NEWS.txt')).read()
+NEWS = ""
+LONG_DESCRIPTION = README + '\n\n' + NEWS
+AUTHOR = 'Guilherme Castelao, Bia Villas-Boas, Luiz Irber',
+AUTHOR_EMAIL = 'guilherme@castelao.net, bia@melovillasboas.com, luiz.irber@gmail.com',
+LICENSE = 'PSFL'
+PLATFORMS = 'any'
+URL = 'http://maud.castelao.net'
+DOWNLOAD_URL = 'http://pypi.python.org/packages/source/m/maud/maud-%s.tar.gz' % (VERSION),
+CLASSIFIERS = [
+    'Development Status :: 4 - Beta',
+    'Intended Audience :: Developers',
+    'Intended Audience :: Science/Research',
+    'License :: OSI Approved :: Python Software Foundation License',
+    'Operating System :: OS Independent',
+    'Programming Language :: Python',
+    'Programming Language :: Python :: 2',
+    'Programming Language :: Python :: 2.7',
+    'Topic :: Scientific/Engineering',
+    'Topic :: Software Development :: Libraries :: Python Modules',
+]
+
+import sys, os.path
+
+from distutils import log
+from distutils.core import setup#, Command
+#from distutils.core import Distribution as _Distribution
+from distutils.core import Extension as _Extension
+#from distutils.dir_util import mkpath
+from distutils.command.build_ext import build_ext as _build_ext
+#from distutils.command.bdist_rpm import bdist_rpm as _bdist_rpm
+#from distutils.errors import CompileError, LinkError, DistutilsPlatformError
+
+if 'setuptools.extension' in sys.modules:
+    _Extension = sys.modules['setuptools.extension']._Extension
+    sys.modules['distutils.core'].Extension = _Extension
+    sys.modules['distutils.extension'].Extension = _Extension
+    sys.modules['distutils.command.build_ext'].Extension = _Extension
+
+
+#if sys.version_info[0] < 3:
+#    try:
+#        from Cython.Distutils.extension import Extension as _Extension
+#        from Cython.Distutils import build_ext as _build_ext
+#    except:
+#        pass
+
+
 try:
     from setuptools import setup, find_packages
 except ImportError:
@@ -6,9 +62,6 @@ except ImportError:
     distribute_setup.use_setuptools()
     from setuptools import setup, find_packages
 
-import os
-import sys
-from distutils import log
 
 #from distutils.core import setup
 # Which Extension to use?
@@ -31,9 +84,6 @@ class PyTest(TestCommand):
         sys.exit(errno)
 # ============================================================================
 
-here = os.path.abspath(os.path.dirname(__file__))
-README = open(os.path.join(here, 'README.rst')).read()
-NEWS = open(os.path.join(here, 'NEWS.txt')).read()
 
 version='0.9.2'
 
