@@ -11,6 +11,8 @@ Requirements
 
 - distribute 0.6 (>=0.6.40)
 
+- Cython (>= 0.20)
+
 Installing MAUD
 ==================
 
