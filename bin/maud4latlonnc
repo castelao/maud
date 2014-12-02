@@ -140,6 +140,13 @@ except:
 ncin.close()
 
 # ============================================================================
+try:
+    from progressbar import ProgressBar
+    pbar = ProgressBar(maxval=T).start()
+except:
+    print "ProgressBar is not available"
+
+# ============================================================================
 if newfile is True:
     ncin = Dataset(args[0], 'r')
     ncout = Dataset(options.outputfile, 'w')
@@ -294,12 +301,6 @@ setattr(out, 'maud_processing_date', datetime.now().isoformat())
 
 
 data = nc.variables[options.var]
-
-try:
-    from progressbar import ProgressBar
-    pbar = ProgressBar(maxval=T).start()
-except:
-    print "ProgressBar is not available"
 
 try:
     import multiprocessing as mp
