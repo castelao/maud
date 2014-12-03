@@ -1,8 +1,7 @@
 # -*- coding: utf-8 -*-
 
-
 NAME = 'maud'
-VERSION = '0.9.2'
+VERSION = '0.9.3'
 DESCRIPTION = 'Moving Average for Uneven Data'
 #here = os.path.abspath(os.path.dirname(__file__))
 #README = open(os.path.join(here, 'README.rst')).read()
@@ -84,36 +83,24 @@ class PyTest(TestCommand):
         sys.exit(errno)
 # ============================================================================
 
-
-version='0.9.2'
-
 requires = [
     'numpy>=1.1',
     'distribute>=0.6.40',
     ]
 
 setup(
-    name='maud',
-    version=version,
-    url='http://maud.castelao.net',
-    download_url='http://pypi.python.org/packages/source/m/maud/maud-'+version+'.tar.gz',
-    license='PSF',
-    author='Guilherme Castelao, Bia Villas-Boas, Luiz Irber',
-    author_email='guilherme@castelao.net, bia@melovillasboas.com, luiz.irber@gmail.com',
-    description='Moving Average for Uneven Data',
+    name=NAME,
+    version=VERSION,
+    description=DESCRIPTION,
     long_description=README + '\n\n' + NEWS,
+    author=AUTHOR,
+    author_email=AUTHOR_EMAIL,
+    license=LICENSE,
+    platforms=PLATFORMS,
+    url=URL,
+    download_url=DOWNLOAD_URL,
+    classifiers=CLASSIFIERS,
     zip_safe=False,
-    classifiers=[
-        'Development Status :: 3 - Alpha',
-        'Intended Audience :: Developers',
-        'Intended Audience :: Science/Research',
-        'License :: OSI Approved :: Python Software Foundation License',
-        'Operating System :: OS Independent',
-        'Programming Language :: Python :: 2',
-        'Topic :: Scientific/Engineering',
-        'Topic :: Software Development :: Libraries :: Python Modules',
-    ],
-    platforms='any',
     packages=find_packages(),
     install_requires=requires,
     cmdclass = {'build_ext': build_ext, 'test': PyTest},
