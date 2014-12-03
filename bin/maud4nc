@@ -77,6 +77,10 @@ assert options.varname in ncin.variables.keys(), \
         "%s doesn't contain %s" % (inputfilename, options.varname)
 varname = options.varname
 
+axis = ncin.variables[varname].dimensions.index(
+        ncin.variables[options.scalevar].dimensions[0])
+assert axis==0, "Sorry, at this point I only know to filter if time is the first dimension"
+
 # ============================================================================
 if (options.lowpasswindowlength is None) and \
         (options.highpasswindowlength is not None):
@@ -115,8 +119,6 @@ if newfile == True:
                 ncin.variables[dim].datatype.name,
                 ncin.variables[dim].dimensions)
         variables[dim][:] = ncin.variables[dim][:]
-        #attributes = nc.variables[dim].ncattrs()
-        #for a in attributes:
         for a in ncin.variables[dim].ncattrs():    
             setattr(ncout.variables[dim], a, getattr(ncin.variables[dim], a))
 
@@ -131,17 +133,15 @@ except:
               ncin.variables[varname].dtype,
               ncin.variables[varname].dimensions)
 
+output.set_auto_maskandscale(True)
 
-
-# If there is a scale factor, I would need to save the output
-#   considering that.
-#attributes = ncin.variables[varname].ncattrs()
 attrs = ncin.variables[varname].ncattrs()
-attrs = [a for a in attrs if a != '_FillValue']
+if '_FillValue' in attrs:
+    attrs.remove('_FillValue')
+for a in attrs:
+    setattr(ncout.variables[varout], a,
+            getattr(ncin.variables[varname], a))
 
-axis = ncin.variables[varname].dimensions.index(
-        ncin.variables[options.scalevar].dimensions[0])
-assert axis==0, "Sorry, at this point I only know to filter if time is the first dimension"
 
 assert len(ncin.variables[varname].dimensions)==3
 
@@ -155,16 +155,6 @@ except:
 data = ncin.variables[varname]
 
 scale = ncin.variables[options.scalevar][:].astype('f')
-
-try:
-    add_offset = float(getattr(ncin.variables[varname], 'add_offset'))
-except:
-    add_offset = None
-
-try:
-    scale_factor = float(getattr(ncin.variables[varname], 'scale_factor'))
-except:
-    scale_factor = None
 
 for n in range(N):
     try:
@@ -195,20 +185,7 @@ for n in range(N):
                         method=options.windowmethod,
                         axis=0)
 
-
-    if add_offset is not None:
-        tmp = tmp - add_offset
-    if scale_factor is not None:
-        tmp = tmp / scale_factor
-
-    if ncout.variables[varout].dtype.kind == 'i':
-        ncout.variables[varout][:, n] = tmp.round()
-    else:
-        ncout.variables[varout][:, n] = tmp
-
-for a in attrs:
-    setattr(ncout.variables[varout], a,
-            getattr(ncin.variables[varname], a))
+    output[:, n] = tmp
 
 
 # Not beautifull, but works for now.
@@ -237,4 +214,4 @@ setattr(output, 'maud_%i_version' % filter_level, ver_maud)
 setattr(output, 'maud_%i_processing_date' % filter_level, datetime.now().isoformat())
 
 ncout.close()
-ncin.close()
+#ncin.close()
