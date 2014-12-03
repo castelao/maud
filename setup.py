@@ -3,12 +3,7 @@
 NAME = 'maud'
 VERSION = '0.9.3'
 DESCRIPTION = 'Moving Average for Uneven Data'
-#here = os.path.abspath(os.path.dirname(__file__))
-#README = open(os.path.join(here, 'README.rst')).read()
-README = ""
-#NEWS = open(os.path.join(here, 'NEWS.txt')).read()
-NEWS = ""
-LONG_DESCRIPTION = README + '\n\n' + NEWS
+#LONG_DESCRIPTION = README + '\n\n' + NEWS
 AUTHOR = 'Guilherme Castelao, Bia Villas-Boas, Luiz Irber',
 AUTHOR_EMAIL = 'guilherme@castelao.net, bia@melovillasboas.com, luiz.irber@gmail.com',
 LICENSE = 'PSFL'
@@ -82,6 +77,9 @@ class PyTest(TestCommand):
         errno = pytest.main(self.test_args)
         sys.exit(errno)
 # ============================================================================
+here = os.path.abspath(os.path.dirname(__file__))
+README = open(os.path.join(here, 'README.rst')).read()
+NEWS = open(os.path.join(here, 'NEWS.txt')).read()
 
 requires = [
     'numpy>=1.1',
