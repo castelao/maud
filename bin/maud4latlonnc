@@ -139,6 +139,19 @@ except:
     scale_factor = None
 ncin.close()
 
+# Not beautifull, but works for now.
+# Determine if the input was already filtered by MAUD, if so, how many times.
+import re
+ncin = Dataset(args[0], 'r')
+maudattr = re.compile('maud_(\d+)')
+levels = np.unique([int(maudattr.match(a).groups()[0]) \
+        for a in ncin.variables[varname].ncattrs() if maudattr.match(a)])
+if levels.size == 0:
+    filter_level = 1
+else:
+    filter_level = levels.max()+1
+ncin.close()
+
 # ============================================================================
 try:
     from progressbar import ProgressBar
@@ -238,15 +251,16 @@ if newfile is True:
 
     # Saving the filter window size as an attribute of the output variable
     if filtertype == 'highpass':
-        setattr(output, 'filter_window_size' , options.shorterpasslength)
+        setattr(output, 'maud_%i_highpass_size' % filter_level, options.shorterpasslength)
     elif filtertype == 'lowpass':
-        setattr(output, 'filter_window_size' , options.largerpasslength)
-    else:
-        setattr(output, 'filter_window_size' , options.l)
+        setattr(output, 'maud_%i_lowpass_size' % filter_level, options.largerpasslength)
+    elif filtertype == 'bandpass':
+        setattr(output, 'maud_%i_highpass_size' % filter_level, options.shorterpasslength)
+        setattr(output, 'maud_%i_lowpass_size' % filter_level, options.largerpasslength)
     # Saving the version as an attribute of the output variable
-    setattr(output, 'maud_version' , ver_maud)
+    setattr(output, 'maud_%i_version' % filter_level, ver_maud)
     # Saving the filtering date  as an attribute of the output variable
-    setattr(output, 'maud_processing_date', datetime.now().isoformat())
+    setattr(output, 'maud_%i_processing_date' % filter_level, datetime.now().isoformat())
 
 
     ncin.close()
