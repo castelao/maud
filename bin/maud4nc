@@ -7,10 +7,12 @@
 
     Type this command with -h to see the help. Here is an example:
 
-    maud4nc -lowpasswindowlength=7 --highpasswindowlength=90 --var='temperature' -w hamming --npes=18 -o model_output.nc
+    maud4nc -lowpasswindowlength=7 --highpasswindowlength=90 --varname='temperature' -w hamming --npes=18 -o model_output.nc model_input.nc
 """
 
-from os.path import isfile
+import os.path
+import pkg_resources
+from datetime import datetime
 from optparse import OptionParser
 #import multiprocessing as mp
 
@@ -18,78 +20,86 @@ import numpy as np
 from numpy import ma
 from netCDF4 import Dataset
 
-from maud import wmean_bandpass_1D
-from maud import wmean_1D
-#from cmaud import wmean_1D
+try:
+    from cmaud import wmean_1D
+    from cmaud import wmean_bandpass_1D
+    print("Yeahh!, Let's do it with CMAUD!")
+except:
+    from maud import wmean_1D
+    from maud import wmean_bandpass_1D
 
-
+# ============================================================================
 # ==== Parsing the options on command line
 parser = OptionParser()
 
 parser.add_option("--lowpasswindowlength", dest="lowpasswindowlength",
+    type="float", default=None,
     help="Length of the filter window. Must be on the same scale of the scalevar")
 
 parser.add_option("--highpasswindowlength", dest="highpasswindowlength",
+    type="float", default=None,
     help="Length of the filter window. Must be on the same scale of the scalevar")
 
-parser.add_option("-o", dest="outputfile",
-    help="The output file where the filtered data will be saved.")
+parser.add_option("--varname", dest="varname",
+    help="Variable to be filtered")
 
 parser.add_option("--scalevar", dest="scalevar",
     help="The scale on the dimension to be filtered.", default="time")
 
-parser.add_option("--var", dest="var",
-    help="Variable to be filtered")
-
 parser.add_option("-w", dest="windowmethod",
-    help="Type of window [hamming, hann, boxcar, triangle, lanczos]",
-    default="hamming")
+    default="hamming",
+    help="Type of window [hamming, hann, boxcar, triangle, lanczos]")
 
+#parser.add_option("--interp", dest="interp",
+#    action="store_true", default = False,
+#    help="If selected fill the masked points if is there available data around.")
+
+#parser.add_option("--npes",
+#    action="store", type="int", dest="npes",
+#    help="Defines the number of parallel processes.",
+#    default=None)
+
+parser.add_option("-o", "--output", dest="outputfile",
+    help="The output file where the filtered data will be saved.")
 
 (options, args) = parser.parse_args()
 
-if (options.lowpasswindowlength is not None):
-    options.lowpasswindowlength = float(options.lowpasswindowlength)
-if (options.highpasswindowlength is not None):
-    options.highpasswindowlength = float(options.highpasswindowlength)
+# ============================================================================
+assert (options.lowpasswindowlength is not None) or \
+        (options.highpasswindowlength is not None), \
+        "--lowpasswindowlength and --highpasswindowlength can't be both None"
 
-varname = options.var
-if options.outputfile is None:
-    options.varout  = options.var + "_maud"
-    newfile = False
+assert os.path.isfile(args[0]), "%s is not a valid file" % args[0]
+inputfilename = args[0]
+ncin = Dataset(inputfilename, 'r')
+
+assert options.varname in ncin.variables.keys(), \
+        "%s doesn't contain %s" % (inputfilename, options.varname)
+varname = options.varname
+
+# ============================================================================
+if (options.lowpasswindowlength is None) and \
+        (options.highpasswindowlength is not None):
+    filtertype = 'highpass'
+elif (options.lowpasswindowlength is not None) and \
+        (options.highpasswindowlength is None):
+    filtertype = 'lowpass'
 else:
-    options.varout  = options.var
+    filtertype = 'bandpass'
+
+# ============================================================================
+if options.outputfile is None:
+    varout  = options.varname + "_maud"
+    newfile = False
+    ncin.close()
+    ncin = ncout = Dataset(inputfilename, 'a')
+else:
+    varout  = options.varname
     newfile = True
-
-
-if not isfile(args[0]):
-    print("Seems like %s is not a file." % args[0])
-    import sys; sys.exit()
-
-
-#if var not in nc.variables.keys():
-#    import sys; sys.exit()
-
-# ====
-if newfile == False:
-    nc = Dataset(args[0], 'a')
-
-    attributes = nc.variables[options.var].ncattrs()
-    try:
-        out = nc.createVariable(options.varout, 
-                  nc.variables[options.var].dtype, 
-                  nc.variables[options.var].dimensions, 
-                  fill_value=nc.variables[options.var]._FillValue)
-        attributes.remove('_FillValue')
-    except:
-        out = nc.createVariable(options.varout, 
-                  nc.variables[options.var].dtype, 
-                  nc.variables[options.var].dimensions)
-
-if newfile == True:
-    ncin = Dataset(args[0], 'r')
     ncout = Dataset(options.outputfile, 'w')
 
+# ============================================================================
+if newfile == True:
     # Global Attributes
 
     # Copying dimensions
@@ -109,135 +119,122 @@ if newfile == True:
         #for a in attributes:
         for a in ncin.variables[dim].ncattrs():    
             setattr(ncout.variables[dim], a, getattr(ncin.variables[dim], a))
-    
-    output = ncout.createVariable(varname,
-            ncin.variables[varname].dtype.name,
-            ncin.variables[varname].dimensions,
-            fill_value=ncin.variables[varname]._FillValue)
 
-    # If there is a scale factor, I would need to save the output
-    #   considering that.
-    attrs = ncin.variables[varname].ncattrs()
-    attrs = [a for a in attrs if a != '_FillValue']
-
-    axis = ncin.variables[varname].dimensions.index(
-            ncin.variables[options.scalevar].dimensions[0])
-    assert axis==0
-
-    #I, J, K = ncin.variables[varname].shape[1:]
-    N = ncin.variables[varname].shape[1]
-    try:
-        from progressbar import ProgressBar
-        pbar = ProgressBar(maxval=N).start()
-    except:
-        pass
-
-    data = ncin.variables[varname]
-
-    scale = ncin.variables[options.scalevar][:].astype(np.float)
-
-    #npes = 2*mp.cpu_count()
-    #qout = mp.Queue(2*npes)
-    #pool = mp.Pool(npes)
-
-    try:
-        add_offset = float(getattr(ncin.variables[varname], 'add_offset'))
-    except:
-        add_offset = None
-
-    try:
-        scale_factor = float(getattr(ncin.variables[varname], 'scale_factor'))
-    except:
-        scale_factor = None
-
-    for n in range(N):
-        try:
-            pbar.update(n+1)
-        except:
-            pass
-
-        if (options.highpasswindowlength is not None) and \
-                (options.lowpasswindowlength is not None):
-                    tmp = wmean_bandpass_1D(data[:, n],
-                            lshorterpass = options.highpasswindowlength,
-                            llongerpass = options.lowpasswindowlength,
-                            t = scale,
-                            method = options.windowmethod,
-                            axis=0)
-
-        elif (options.lowpasswindowlength is not None):
-            tmp = wmean_1D(data[:, n],
-                    l=options.lowpasswindowlength,
-                    t=scale,
-                    method=options.windowmethod,
-                    axis=0)
-
-        elif (options.highpasswindowlength is not None):
-            tmp = data[:, n] - \
-                    wmean_1D(data[:, n],
-                            l=options.highpasswindowlength,
-                            t=scale,
-                            method=options.windowmethod,
-                            axis=0)
-
-        else:
-            import sys; sys.exit()
-
-        if add_offset is not None:
-            tmp = tmp - add_offset
-        if scale_factor is not None:
-            tmp = tmp / scale_factor
-
-        if ncout.variables[varname].dtype in ['int16']:
-            ncout.variables[varname][:, n] = tmp.round()
-        else:
-            ncout.variables[varname][:, n] = tmp
-
-    for a in attrs:
-        setattr(ncout.variables[varname], a,
-                getattr(ncin.variables[varname], a))
-
-    ncin.close()
-    ncout.sync()
-    ncout.close()
-
-    import sys; sys.exit()
+# ============================================================================
+try:
+    output = ncout.createVariable(varout,
+              ncin.variables[varname].dtype,
+              ncin.variables[varname].dimensions,
+              fill_value=ncin.variables[varname]._FillValue)
+except:
+    output = ncout.createVariable(varout,
+              ncin.variables[varname].dtype,
+              ncin.variables[varname].dimensions)
 
 
-axis = nc.variables[options.var].dimensions.index(nc.variables[options.scalevar].dimensions[0])
 
-assert axis==0
-assert len(nc.variables[options.var].dimensions)==3
-    
-I, J = nc.variables[options.var].shape[1:]
+# If there is a scale factor, I would need to save the output
+#   considering that.
+#attributes = ncin.variables[varname].ncattrs()
+attrs = ncin.variables[varname].ncattrs()
+attrs = [a for a in attrs if a != '_FillValue']
+
+axis = ncin.variables[varname].dimensions.index(
+        ncin.variables[options.scalevar].dimensions[0])
+assert axis==0, "Sorry, at this point I only know to filter if time is the first dimension"
+
+assert len(ncin.variables[varname].dimensions)==3
+
+N = ncin.variables[varname].shape[1]
 try:
     from progressbar import ProgressBar
-    pbar = ProgressBar(maxval=I*J).start()
+    pbar = ProgressBar(maxval=N).start()
 except:
-    pass
+    print("progressbar is not available")
 
-data = nc.variables[options.var]
+data = ncin.variables[varname]
 
-for i in range(I):
-    for j in range(J):
-        try:
-            pbar.update((i+1)*(j+1))
-        except:
-            pass
-        #tmp = wmean_1D_serial(data=ma.array(data[:, i, j]), 
-        #                t = nc.variables[options.scalevar][:],
-        #                l=options.lowpasswindowlength, axis=axis)
+scale = ncin.variables[options.scalevar][:].astype('f')
 
-        #out[:, i, j] = tmp - wmean_1D_serial(data = tmp, 
-        #                t = nc.variables[options.scalevar][:],
-        #                l = options.highpasswindowlength, 
-        #                axis = axis)
+try:
+    add_offset = float(getattr(ncin.variables[varname], 'add_offset'))
+except:
+    add_offset = None
 
-        out[:, i, j] = wmean_bandpass_1D_serial(data[:, i, j],
-                lshorterpass = options.highpasswindowlength, 
-                llongerpass = options.lowpasswindowlength, 
-                t = nc.variables[options.scalevar][:], 
-                method = options.windowmethod, 
+try:
+    scale_factor = float(getattr(ncin.variables[varname], 'scale_factor'))
+except:
+    scale_factor = None
+
+for n in range(N):
+    try:
+        pbar.update(n+1)
+    except:
+        print("%s/%s" % (n+1, N))
+
+    if filtertype == 'bandpass':
+                tmp = wmean_bandpass_1D(data[:, n],
+                        lshorterpass = options.highpasswindowlength,
+                        llongerpass = options.lowpasswindowlength,
+                        t = scale,
+                        method = options.windowmethod,
+                        axis=0)
+
+    elif filtertype == 'lowpass':
+        tmp = wmean_1D(data[:, n],
+                l=options.lowpasswindowlength,
+                t=scale,
+                method=options.windowmethod,
                 axis=0)
 
-nc.close()
+    elif filtertype == 'highpass':
+        tmp = data[:, n] - \
+                wmean_1D(data[:, n],
+                        l=options.highpasswindowlength,
+                        t=scale,
+                        method=options.windowmethod,
+                        axis=0)
+
+
+    if add_offset is not None:
+        tmp = tmp - add_offset
+    if scale_factor is not None:
+        tmp = tmp / scale_factor
+
+    if ncout.variables[varout].dtype.kind == 'i':
+        ncout.variables[varout][:, n] = tmp.round()
+    else:
+        ncout.variables[varout][:, n] = tmp
+
+for a in attrs:
+    setattr(ncout.variables[varout], a,
+            getattr(ncin.variables[varname], a))
+
+
+# Not beautifull, but works for now.
+# Determine if the input was already filtered by MAUD, if so, how many times.
+import re
+maudattr = re.compile('maud_(\d+)')
+levels = np.unique([int(maudattr.match(a).groups()[0]) \
+        for a in ncin.variables[varname].ncattrs() if maudattr.match(a)])
+if levels.size == 0:
+    filter_level = 1
+else:
+    filter_level = levels.max()+1
+
+# Saving the filter window size as an attribute of the output variable
+if filtertype == 'highpass':
+    setattr(output, 'maud_%i_highpass_size' % filter_level, options.highpasswindowlength)
+elif filtertype == 'lowpass':
+    setattr(output, 'maud_%i_lowpass_size' % filter_level, options.lowpasswindowlength)
+elif filtertype == 'bandpass':
+    setattr(output, 'maud_%i_highpass_size' % filter_level, options.highpasswindowlength)
+    setattr(output, 'maud_%i_lowpass_size' % filter_level, options.lowpasswindowlength)
+ver_maud = pkg_resources.get_distribution("maud").version
+# Saving the version as an attribute of the output variable
+setattr(output, 'maud_%i_version' % filter_level, ver_maud)
+# Saving the filtering date  as an attribute of the output variable
+setattr(output, 'maud_%i_processing_date' % filter_level, datetime.now().isoformat())
+
+ncout.close()
+ncin.close()
