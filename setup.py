@@ -86,37 +86,41 @@ requires = [
     'distribute>=0.6.40',
     ]
 
-setup(
-    name=NAME,
-    version=VERSION,
-    description=DESCRIPTION,
-    long_description=README + '\n\n' + NEWS,
-    author=AUTHOR,
-    author_email=AUTHOR_EMAIL,
-    license=LICENSE,
-    platforms=PLATFORMS,
-    url=URL,
-    download_url=DOWNLOAD_URL,
-    classifiers=CLASSIFIERS,
-    zip_safe=False,
-    packages=find_packages(),
-    install_requires=requires,
-    cmdclass = {'build_ext': build_ext, 'test': PyTest},
-    ext_modules = [
-        Extension("cmaud", ["maud/maud.pyx"]),
-        Extension("maud.cwindow_func", ["maud/window_func.pyx"]),
-        Extension("maud.cwindow_func_scalar", ["maud/window_func_scalar.pyx"]),
-        Extension("maud.cdistance", ["maud/distance.pyx"]),
-        ],
-    include_dirs = [np.get_include()],
-    #ext_modules = [
-    #    Extension("maud.cwindow_func", ["window_func.pyx"],
-    #    #libraries=['maud'],
-    #    include_dirs = [np.get_include()],
-    #    #pyrex_include_dirs=['.']
-    #    ),
-    #    ],
-    scripts=["bin/maud4nc", "bin/maud4latlonnc"],
-    tests_require=['pytest'],
-)
+if __name__ == '__main__':
 
+    setup(
+        name=NAME,
+        version=VERSION,
+        description=DESCRIPTION,
+        long_description=README + '\n\n' + NEWS,
+        author=AUTHOR,
+        author_email=AUTHOR_EMAIL,
+        license=LICENSE,
+        platforms=PLATFORMS,
+        url=URL,
+        download_url=DOWNLOAD_URL,
+        classifiers=CLASSIFIERS,
+        zip_safe=False,
+        packages=find_packages(),
+        install_requires=requires,
+        cmdclass = {
+            'build_ext': build_ext,
+            'test': PyTest,
+            },
+        ext_modules = [
+            Extension("cmaud", ["maud/maud.pyx"]),
+            Extension("maud.cwindow_func", ["maud/window_func.pyx"]),
+            Extension("maud.cwindow_func_scalar", ["maud/window_func_scalar.pyx"]),
+            Extension("maud.cdistance", ["maud/distance.pyx"]),
+            ],
+        include_dirs = [np.get_include()],
+        #ext_modules = [
+        #    Extension("maud.cwindow_func", ["window_func.pyx"],
+        #    #libraries=['maud'],
+        #    include_dirs = [np.get_include()],
+        #    #pyrex_include_dirs=['.']
+        #    ),
+        #    ],
+        scripts=["bin/maud4nc", "bin/maud4latlonnc"],
+        tests_require=['pytest'],
+    )
