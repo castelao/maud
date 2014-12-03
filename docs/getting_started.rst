@@ -28,9 +28,9 @@ To check the available options::
 
     >>> maud4latlonnc -h
 
-In the example below, the variable temperature (--var), at the netCDF file model_output.nc, is filtered along the space (lat x lon). The variables latitude and longitude must exist in the same file. This is a lowpass filter (--lowpasswindowlength), hence it attenuates eveything with spatial scale lower than 600e3 meters. The weights are defined by a hamming function (-w). The npes define the number of parallel process to be used, in this case 18. The option --interp defines that any missing value will be replaced in the output as the filtered result of the valid values around it, inside the window lenght.::
+In the example below, the variable temperature (--var), at the netCDF file model_output.nc, is filtered along the space (lat x lon). The variables latitude and longitude must exist in the same file. This is a lowpass filter (--largerpasslength), hence it attenuates eveything with spatial scale smaller than 600e3 meters. The weights are defined by a hamming function (-w). The npes define the number of parallel process to be used, in this case 18. The option --interp defines that any missing value will be replaced in the output as the filtered result of the valid values around it, inside the window lenght.::
 
-    >>> maud4latlonnc --lowpasswindowlength=600e3 --var='temperature' \
+    >>> maud4latlonnc --largerpasslength=600e3 --var='temperature' \
     >>> -w hamming --interp --npes=18 -o model_highpass model_output.nc
 
 Inside Python
