@@ -19,7 +19,15 @@ Installing MAUD
 Using pip
 ---------
 
-    pip install --no-deps maud
+To install the dependencies::
+
+    $ pip install numpy
+    $ pip install distribute
+    $ pip install cython
+
+To install MAUD itself::
+
+    $ pip install --no-deps maud
 
 .. note::
 
