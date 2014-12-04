@@ -244,12 +244,12 @@ else:
 
 # Saving the filter window size as an attribute of the output variable
 if filtertype == 'highpass':
-    setattr(output, 'maud_%i_highpass_size' % filter_level, options.shorterpasslength)
+    setattr(output, 'maud_%i_2Dhighpass_size' % filter_level, options.shorterpasslength)
 elif filtertype == 'lowpass':
-    setattr(output, 'maud_%i_lowpass_size' % filter_level, options.largerpasslength)
+    setattr(output, 'maud_%i_2Dlowpass_size' % filter_level, options.largerpasslength)
 elif filtertype == 'bandpass':
-    setattr(output, 'maud_%i_highpass_size' % filter_level, options.shorterpasslength)
-    setattr(output, 'maud_%i_lowpass_size' % filter_level, options.largerpasslength)
+    setattr(output, 'maud_%i_2Dhighpass_size' % filter_level, options.shorterpasslength)
+    setattr(output, 'maud_%i_2Dlowpass_size' % filter_level, options.largerpasslength)
 ver_maud = pkg_resources.get_distribution("maud").version
 # Saving the version as an attribute of the output variable
 setattr(output, 'maud_%i_version' % filter_level, ver_maud)
