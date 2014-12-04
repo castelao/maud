@@ -20,13 +20,16 @@ import numpy as np
 from numpy import ma
 from netCDF4 import Dataset
 
-try:
-    from cmaud import wmean_1D
-    from cmaud import wmean_bandpass_1D
-    print("Yeahh!, Let's do it with CMAUD!")
-except:
-    from maud import wmean_1D
-    from maud import wmean_bandpass_1D
+#cmaud versions are still too slow.
+#try:
+#    from cmaud import wmean_1D
+#    from cmaud import wmean_bandpass_1D
+#    print("Yeahh!, Let's do it with CMAUD!")
+#except:
+#    from maud import wmean_1D
+#    from maud import wmean_bandpass_1D
+from maud import wmean_1D
+from maud import wmean_bandpass_1D
 
 # ============================================================================
 # ==== Parsing the options on command line
