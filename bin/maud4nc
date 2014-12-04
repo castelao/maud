@@ -190,7 +190,10 @@ for n in range(N):
 
     output[:, n] = tmp
 
-pbar.finish()
+try:
+    pbar.finish()
+except:
+    pass
 
 # Not beautifull, but works for now.
 # Determine if the input was already filtered by MAUD, if so, how many times.
