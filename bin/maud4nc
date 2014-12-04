@@ -93,12 +93,12 @@ else:
 
 # ============================================================================
 if options.outputfile is None:
-    varout  = options.varname + "_maud"
+    varout  = varname + "_maud"
     newfile = False
     ncin.close()
     ncin = ncout = Dataset(inputfilename, 'a')
 else:
-    varout  = options.varname
+    varout  = varname
     newfile = True
     ncout = Dataset(options.outputfile, 'w')
 
@@ -141,8 +141,9 @@ for a in attrs:
     setattr(ncout.variables[varout], a,
             getattr(ncin.variables[varname], a))
 
+ncout.sync()
 
-assert len(ncin.variables[varname].dimensions)==3
+assert len(ncin.variables[varname].dimensions) >= 2
 
 N = ncin.variables[varname].shape[1]
 try:
