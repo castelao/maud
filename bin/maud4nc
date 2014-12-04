@@ -123,11 +123,13 @@ if newfile == True:
             setattr(ncout.variables[dim], a, getattr(ncin.variables[dim], a))
 
 # ============================================================================
+attrs = ncin.variables[varname].ncattrs()
 try:
     output = ncout.createVariable(varout,
               ncin.variables[varname].dtype,
               ncin.variables[varname].dimensions,
               fill_value=ncin.variables[varname]._FillValue)
+    attrs.remove('_FillValue')
 except:
     output = ncout.createVariable(varout,
               ncin.variables[varname].dtype,
@@ -135,9 +137,6 @@ except:
 
 output.set_auto_maskandscale(True)
 
-attrs = ncin.variables[varname].ncattrs()
-if '_FillValue' in attrs:
-    attrs.remove('_FillValue')
 for a in attrs:
     setattr(ncout.variables[varout], a,
             getattr(ncin.variables[varname], a))
