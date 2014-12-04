@@ -231,6 +231,8 @@ for nt, r in enumerate(results):
 
     output[nt] = tmp
 
+pbar.finish()
+
 # Not beautifull, but works for now.
 # Determine if the input was already filtered by MAUD, if so, how many times.
 import re
