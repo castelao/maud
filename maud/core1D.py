@@ -251,7 +251,7 @@ def wmean_bandpass_1D_serial(data, lshorterpass, llongerpass, t=None,
     else:
         I = data.shape[1]
         for i in range(I):
-            data_smooth[:,i] = wmean_bandpass_1D_serial(datai[:,i],
+            data_smooth[:,i] = wmean_bandpass_1D_serial(data[:,i],
                     lshorterpass, llongerpass, t, method, axis)
 
     return data_smooth
