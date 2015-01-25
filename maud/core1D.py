@@ -228,7 +228,7 @@ def wmean_bandpass_1D_serial(data, lshorterpass, llongerpass, t=None,
     # Below here, the filter will be always applied on axis=0
 
     # If t is not given, creates a regularly spaced t
-    if t == None:
+    if t is None:
         print "The scale along the choosed axis weren't defined. I'll consider a constant sequence."
 	t = np.arange(data.shape[axis])
 
