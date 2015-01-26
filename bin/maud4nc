@@ -166,12 +166,24 @@ for n in range(N):
         print("%s/%s" % (n+1, N))
 
     if filtertype == 'bandpass':
-                tmp = wmean_bandpass_1D(data[:, n],
-                        lshorterpass = options.highpasswindowlength,
-                        llongerpass = options.lowpasswindowlength,
-                        t = scale,
-                        method = options.windowmethod,
+        #tmp = wmean_bandpass_1D(data[:, n],
+        #tmp = wmean_bandpass_1D_serial(data[:, n],
+        #                lshorterpass = options.highpasswindowlength,
+        #                llongerpass = options.lowpasswindowlength,
+        #                t = scale,
+        #                method = options.windowmethod,
+        #                axis=0)
+        tmp = data[:, n] - \
+                wmean_1D(data[:, n],
+                        l=options.highpasswindowlength,
+                        t=scale,
+                        method=options.windowmethod,
                         axis=0)
+        tmp = wmean_1D(tmp,
+                l=options.lowpasswindowlength,
+                t=scale,
+                method=options.windowmethod,
+                axis=0)
 
     elif filtertype == 'lowpass':
         tmp = wmean_1D(data[:, n],

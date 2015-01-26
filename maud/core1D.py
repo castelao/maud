@@ -212,6 +212,7 @@ def wmean_bandpass_1D_serial(data, lshorterpass, llongerpass, t=None,
                 Defines the weight function type
             - axis: Dimension which the filter will be applied
     """
+    assert False, "There is a BUG here"
 
     assert axis <= data.ndim, "Invalid axis!"
 
