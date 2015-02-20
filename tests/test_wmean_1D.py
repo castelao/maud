@@ -185,3 +185,22 @@ def test_sin_diff():
     err = S1 - h
     assert (abs(err).mean() < Z).all
 
+
+def test_bandpass():
+    """
+
+        Creates another test with random window lenghts
+    """
+    N = 100
+    x =  ma.array(np.sort(N*np.random.random(N)))
+    y1 = 3*np.sin(2*pi * x/(N/3.) + 2*pi*np.random.random())
+    y2 = 3*np.sin(2*pi * x/(N/11.) + 2*pi*np.random.random())
+    y3 = 3*np.sin(2*pi * x/(N/21.) + 2*pi*np.random.random())
+    y = y1 + y2 + y3 + 1*(np.random.randn(x.size))
+
+    f = y - maud.wmean_1D(data=y, l=N/7., t=x)
+    f = maud.wmean_1D(data=f, l=N/15., t=x)
+    fb = maud.wmean_bandpass_1D(data=y, lshorterpass=N/15., llongerpass=N/7.,
+            t=x)
+    assert ma.allclose(f, fb)
+
