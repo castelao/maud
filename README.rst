@@ -1,6 +1,9 @@
 MAUD
 ====
 
+.. image:: https://zenodo.org/badge/doi/10.5281/zenodo.10524.svg
+   :target: http://dx.doi.org/10.5281/zenodo.10524
+
 Welcome to MAUD, Moving Average of Uneven Data
 
 Check the docmentation at http://maud.readthedocs.org
