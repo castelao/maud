@@ -1,4 +1,7 @@
+#!/usr/bin/env python
 # -*- coding: utf-8 -*-
+# Licensed under a 3-clause BSD style license - see LICENSE
+
 
 NAME = 'maud'
 VERSION = '0.9.3'
@@ -6,7 +9,7 @@ DESCRIPTION = 'Moving Average for Uneven Data'
 #LONG_DESCRIPTION = README + '\n\n' + NEWS
 AUTHOR = 'Guilherme Castelao, Bia Villas-Boas, Luiz Irber',
 AUTHOR_EMAIL = 'guilherme@castelao.net, bia@melovillasboas.com, luiz.irber@gmail.com',
-LICENSE = 'PSFL'
+LICENSE = 'BSD license'
 PLATFORMS = 'any'
 URL = 'http://maud.castelao.net'
 DOWNLOAD_URL = 'http://pypi.python.org/packages/source/m/maud/maud-%s.tar.gz' % (VERSION),
@@ -14,7 +17,7 @@ CLASSIFIERS = [
     'Development Status :: 4 - Beta',
     'Intended Audience :: Developers',
     'Intended Audience :: Science/Research',
-    'License :: OSI Approved :: Python Software Foundation License',
+    'License :: OSI Approved :: BSD License',
     'Operating System :: OS Independent',
     'Programming Language :: Python',
     'Programming Language :: Python :: 2',
