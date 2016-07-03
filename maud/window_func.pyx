@@ -37,6 +37,20 @@ def window_func(method='hamming'):
     return winfunc
 
 
+# boxcar or rectangular
+def _weight_boxcar(np.ndarray r, double l):
+    """
+    """
+    cdef int n
+    cdef int N = len(r)
+    cdef double lhalf = l/2.
+    cdef double scale = 2*np.pi/l
+    cdef np.ndarray w = np.zeros(N, dtype=DTYPE)
+    for n in range(N):
+        if abs(r[n])<=lhalf:
+            w[n] = 1
+    return w
+
 # Hamming
 def _weight_hamming(np.ndarray r, double l):
     """ Cython hamming weight
