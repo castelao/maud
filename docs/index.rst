@@ -18,8 +18,12 @@ Contents:
 .. toctree::
    :maxdepth: 2
 
+   readme
    installation
-   getting_started
+   usage
+   contributing
+   author
+   history
 
 
 Indices and tables

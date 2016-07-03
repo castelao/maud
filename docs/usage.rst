@@ -1,6 +1,6 @@
-*************************
+=========================
 Getting Started with MAUD
-*************************
+=========================
 
 One can use MAUD inside Python or in the shell.
 
