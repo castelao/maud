@@ -4,3 +4,4 @@ flake8==2.6.0
 tox==2.3.1
 pytest==2.9.2
 cython==0.24
+netCDF4>=1.2.4
