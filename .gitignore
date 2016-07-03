@@ -1,15 +1,40 @@
-*.c
-*.pyc
+*.py[cod]
+
+# C extensions
+*.so
 
 # Packages
 *.egg
+.eggs
 *.egg-info
-*.so
 dist
 build
-_build
 eggs
 parts
+var
 sdist
 develop-eggs
-*Profile.prof
+.installed.cfg
+lib
+lib64
+
+# Installer logs
+pip-log.txt
+
+# Unit test / coverage reports
+.coverage
+.tox
+nosetests.xml
+
+# Translations
+*.mo
+
+.*.swp
+*.hdf
+.cache
+
+Profile.prof
+
+docs/notebooks/.ipynb_checkpoints
+
+references
