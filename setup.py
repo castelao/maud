@@ -6,7 +6,6 @@
 NAME = 'maud'
 VERSION = '0.9.3'
 DESCRIPTION = 'Moving Average for Uneven Data'
-#LONG_DESCRIPTION = README + '\n\n' + NEWS
 AUTHOR = 'Guilherme Castelao, Bia Villas-Boas, Luiz Irber',
 AUTHOR_EMAIL = 'guilherme@castelao.net, bia@melovillasboas.com, luiz.irber@gmail.com',
 LICENSE = 'BSD license'
@@ -76,10 +75,16 @@ class PyTest(TestCommand):
         import pytest
         errno = pytest.main(self.test_args)
         sys.exit(errno)
+
 # ============================================================================
-here = os.path.abspath(os.path.dirname(__file__))
-README = open(os.path.join(here, 'README.rst')).read()
-NEWS = open(os.path.join(here, 'NEWS.txt')).read()
+with open('README.rst') as readme_file:
+    readme = readme_file.read()
+
+with open('HISTORY.rst') as history_file:
+    history = history_file.read().replace('.. :changelog:', '')
+
+with open('requirements.txt') as requirements_file:
+    requires = requirements_file.read()
 
 requires = [
     'numpy>=1.1',
@@ -93,7 +98,7 @@ if __name__ == '__main__':
             name=NAME,
             version=VERSION,
             description=DESCRIPTION,
-            long_description=README + '\n\n' + NEWS,
+            long_description=readme + '\n\n' + history,
             author=AUTHOR,
             author_email=AUTHOR_EMAIL,
             license=LICENSE,
