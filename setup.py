@@ -11,7 +11,6 @@ AUTHOR_EMAIL = 'guilherme@castelao.net, bia@melovillasboas.com, luiz.irber@gmail
 LICENSE = 'BSD license'
 PLATFORMS = 'any'
 URL = 'http://maud.castelao.net'
-DOWNLOAD_URL = 'http://pypi.python.org/packages/source/m/maud/maud-%s.tar.gz' % (VERSION),
 CLASSIFIERS = [
     'Development Status :: 4 - Beta',
     'Intended Audience :: Developers',
@@ -104,7 +103,6 @@ if __name__ == '__main__':
             license=LICENSE,
             platforms=PLATFORMS,
             url=URL,
-            download_url=DOWNLOAD_URL,
             classifiers=CLASSIFIERS,
             zip_safe=False,
             packages=find_packages(),
@@ -141,7 +139,6 @@ if __name__ == '__main__':
             license=LICENSE,
             platforms=PLATFORMS,
             url=URL,
-            download_url=DOWNLOAD_URL,
             classifiers=CLASSIFIERS,
             zip_safe=False,
             packages=find_packages(),
