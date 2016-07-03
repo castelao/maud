@@ -4,7 +4,6 @@
 
 
 NAME = 'maud'
-VERSION = '0.9.3'
 DESCRIPTION = 'Moving Average for Uneven Data'
 AUTHOR = 'Guilherme Castelao, Bia Villas-Boas, Luiz Irber',
 AUTHOR_EMAIL = 'guilherme@castelao.net, bia@melovillasboas.com, luiz.irber@gmail.com',
@@ -76,6 +75,9 @@ class PyTest(TestCommand):
         sys.exit(errno)
 
 # ============================================================================
+with open('VERSION') as version_file:
+    version = version_file.read().rstrip('\n')
+
 with open('README.rst') as readme_file:
     readme = readme_file.read()
 
@@ -95,7 +97,7 @@ if __name__ == '__main__':
     if with_cython:
         setup(
             name=NAME,
-            version=VERSION,
+            version=version,
             description=DESCRIPTION,
             long_description=readme + '\n\n' + history,
             author=AUTHOR,
@@ -131,7 +133,7 @@ if __name__ == '__main__':
     else:
         setup(
             name=NAME,
-            version=VERSION,
+            version=version,
             description=DESCRIPTION,
             long_description=README + '\n\n' + NEWS,
             author=AUTHOR,
