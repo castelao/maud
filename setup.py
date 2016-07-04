@@ -135,7 +135,7 @@ if __name__ == '__main__':
             name=NAME,
             version=version,
             description=DESCRIPTION,
-            long_description=README + '\n\n' + NEWS,
+            long_description=readme + '\n\n' + history,
             author=AUTHOR,
             author_email=AUTHOR_EMAIL,
             license=LICENSE,
