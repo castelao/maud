@@ -30,4 +30,3 @@ History
 ----
 
 * MAUD was resulted from a set of functions from my Master's Degree, when I needed to handle PIRATA time series, which is characterized by regular data gaps.
-  
