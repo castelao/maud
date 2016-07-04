@@ -2,7 +2,7 @@ from numpy import array, absolute
 from numpy.random import random
 
 from maud.window_func import _weight_boxcar
-#from maud.cwindow_func import _weight_boxcar as c_weight_boxcar
+from maud.cwindow_func import _weight_boxcar as c_weight_boxcar
 #from maud.cwindow_func_scalar import _weight_boxcar_scalar
 
 # Gotta adjust the coeficcients to the boxcar window !!!
@@ -14,6 +14,13 @@ def test_knownanswer():
     d = w - array([ 0., 1., 1., 1., 1., 1., 0., 0.])
     assert absolute(d).max() < 1e-8
 
+def test_answer():
+    from numpy import array, absolute
+    r = array([-3, -2.1, -1, 0, 1, 2.6, 3, 100])
+    l = 5
+    w = c_weight_boxcar(r,l)
+    a = array([ 0.,  1.,  1.,  1.,  1.,  0.,  0.,  0.])
+    assert (w == a).all()
 
 #def test_PxC(N=50):
 #    for n in range(N):
