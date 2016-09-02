@@ -1,3 +1,4 @@
+import numpy as np
 from numpy import array, absolute
 from numpy.random import random
 
@@ -7,20 +8,26 @@ from maud.cwindow_func import _weight_boxcar as c_weight_boxcar
 
 # Gotta adjust the coeficcients to the boxcar window !!!
 
-def test_knownanswer():
+
+def test_knownanswer_int():
     r = array([-3, -2, -1, 0, 1, 2, 3, 100])
     l = 5
-    w = _weight_boxcar(r,l)
-    d = w - array([ 0., 1., 1., 1., 1., 1., 0., 0.])
-    assert absolute(d).max() < 1e-8
+    answer = array([ 0., 1., 1., 1., 1., 1., 0., 0.])
+    w = _weight_boxcar(r, l)
+    assert np.allclose(w, answer)
+    w = c_weight_boxcar(r, l)
+    assert np.allclose(w, answer)
 
-def test_answer():
+
+def test_knowanswer():
     from numpy import array, absolute
     r = array([-3, -2.1, -1, 0, 1, 2.6, 3, 100])
     l = 5
-    w = c_weight_boxcar(r,l)
-    a = array([ 0.,  1.,  1.,  1.,  1.,  0.,  0.,  0.])
-    assert (w == a).all()
+    answer = array([ 0.,  1.,  1.,  1.,  1.,  0.,  0.,  0.])
+    w = _weight_boxcar(r, l)
+    assert np.allclose(w, answer)
+    w = c_weight_boxcar(r, l)
+    assert np.allclose(w, answer)
 
 #def test_PxC(N=50):
 #    for n in range(N):
@@ -44,7 +51,7 @@ def test_answer():
 def out_of_window():
     r = 5*(2*random(10)-1)
     l = 10*random()
-    w = _weight_boxcar(r,l)
+    w = _weight_boxcar(r, l)
 #    cw = c_weight_boxcar(r,l)
     ind = r>l/2
     assert (w[ind]==0).all()
