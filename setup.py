@@ -87,11 +87,6 @@ with open('HISTORY.rst') as history_file:
 with open('requirements.txt') as requirements_file:
     requires = requirements_file.read()
 
-requires = [
-    'numpy>=1.1',
-    'distribute>=0.6.40',
-    ]
-
 if __name__ == '__main__':
 
     if with_cython:
