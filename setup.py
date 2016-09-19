@@ -59,10 +59,10 @@ if sys.version_info[0] < 3:
         import numpy as np
         with_cython = True
     except ImportError:
-	import time
-	print "Couldn't find Cython. We strongly recommend to install it to " \
+        import time
+        print "Couldn't find Cython. We strongly recommend to install it to " \
                 "increase MAUD's performance"
-	time.sleep(5)
+        time.sleep(5)
 
 # ============================================================================
 from setuptools.command.test import test as TestCommand
