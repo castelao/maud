@@ -23,10 +23,10 @@ def test_zerodistance(N=25):
         lon = 540*random() - 180
         lat = 180*random() - 90
         assert (haversine(lon, lat, lon, lat) == 0.0)
-
-	if with_cython:
-             #assert (c_haversine(lon, lat, lon, lat) == 0.0)
-	     assert (haversine_scalar(lon, lat, lon, lat) == 0.0)
+        
+        if with_cython:
+            #assert (c_haversine(lon, lat, lon, lat) == 0.0)
+            assert (haversine_scalar(lon, lat, lon, lat) == 0.0)
 
 
 def test_360offset(N=25):
@@ -95,7 +95,7 @@ def  test_onedegreedistance(N=25):
     for lon, lat in zip(Lon, Lat):
         d = haversine(lat-0.5, lon, lat+0.5, lon)
         assert abs(d-111195)<0.1
-	
+
         if with_cython:
             c_d = haversine_scalar(lat-0.5, lon, lat+0.5, lon)
             assert abs(c_d-111195)<0.1
