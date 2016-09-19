@@ -60,8 +60,8 @@ if sys.version_info[0] < 3:
         with_cython = True
     except ImportError:
 	import time
-	print "Couldn't find Cython. We strongly recommend to install it to\
-encrease MAUD's performance"
+	print "Couldn't find Cython. We strongly recommend to install it to " \
+                "increase MAUD's performance"
 	time.sleep(5)
 
 # ============================================================================
