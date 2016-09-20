@@ -7,7 +7,15 @@ from numpy.random import random
 
 from maud import tests_support
 from maud import wmean_2D_latlon_serial, wmean_2D_latlon
-from cmaud import wmean_2D_latlon as cwmean_2D_latlon
+
+try:
+    import cython
+    with_cython = True
+except:
+    with_cython = False
+
+if with_cython:
+    from cmaud import wmean_2D_latlon as cwmean_2D_latlon
 
 
 #def random_input(N=10):
@@ -20,12 +28,16 @@ WINTYPES = ['hamming', 'hann', 'blackman', 'boxcar']
 
 def test_inputsizes():
     tests_support.inputsizes_f2D(wmean_2D_latlon)
-    tests_support.inputsizes_f2D(cwmean_2D_latlon)
+
+    if with_cython:
+        tests_support.inputsizes_f2D(cwmean_2D_latlon)
 
 
 def test_mask(N=4):
     tests_support.masked_input_2D(wmean_2D_latlon, N)
-    tests_support.masked_input_2D(cwmean_2D_latlon, N)
+
+    if with_cython:
+        tests_support.masked_input_2D(cwmean_2D_latlon, N)
 
 
 def test_whitenoise():
@@ -89,7 +101,8 @@ def test_mask_at_interp():
           one data point per point, the interp=True will return
     """
     tests_support.mask_at_interp(wmean_2D_latlon)
-    tests_support.mask_at_interp(cwmean_2D_latlon)
+    if with_cython:
+        tests_support.mask_at_interp(cwmean_2D_latlon)
 
 
 def test_Serial_x_Parallel(N=10):
@@ -109,6 +122,9 @@ def test_Serial_x_Parallel(N=10):
 
 
 def test_Python_x_Cython(N=10):
+    if not with_cython:
+        return
+
     tests_support.compare2func(wmean_2D_latlon, cwmean_2D_latlon)
 
 

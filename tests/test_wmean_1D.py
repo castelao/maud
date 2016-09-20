@@ -6,7 +6,15 @@ from numpy import ma
 from numpy import pi
 from numpy.random import random
 import maud
-import cmaud
+
+try:
+    import cython
+    with_cython = True
+except:
+    with_cython = False
+
+if with_cython:
+    import cmaud
 
 def test_mask(N=10):
     l = 5
@@ -16,8 +24,9 @@ def test_mask(N=10):
     # Input ndarray -> output ndarray
     h = maud.wmean_1D(y, t=t, l=l)
     assert type(h) is np.ndarray
-    h = cmaud.wmean_1D(y, t=t, l=l)
-    assert type(h) is np.ndarray
+    if with_cython:
+        h = cmaud.wmean_1D(y, t=t, l=l)
+        assert type(h) is np.ndarray
 
     y = ma.array(y)
     h = maud.wmean_1D(y, t=t, l=l)
@@ -25,9 +34,10 @@ def test_mask(N=10):
     assert type(h) == ma.MaskedArray
     # Input MA and mask==False -> Output MA and mask==False
     assert ~h.mask.any()
-    h = cmaud.wmean_1D(y, t=t, l=l)
-    assert type(h) == ma.MaskedArray
-    assert ~h.mask.any()
+    if with_cython:
+        h = cmaud.wmean_1D(y, t=t, l=l)
+        assert type(h) == ma.MaskedArray
+        assert ~h.mask.any()
 
     y.mask = ma.getmaskarray(y)
     y.mask[0] = True
@@ -35,17 +45,19 @@ def test_mask(N=10):
     # The masked values @ input will be masked @ output
     assert h[0].mask == True
     assert ~h[1:].mask.any()
-    h = cmaud.wmean_1D(y, t=t, l=l)
-    assert h[0].mask == True
-    assert ~h[1:].mask.any()
+    if with_cython:
+        h = cmaud.wmean_1D(y, t=t, l=l)
+        assert h[0].mask == True
+        assert ~h[1:].mask.any()
 
 
 def eval_ones(y, t, l):
 
     h = maud.wmean_1D(y, t=t, l=l)
     assert (h == 1).all()
-    h = cmaud.wmean_1D(y, t=t, l=l)
-    assert (h == 1).all()
+    if with_cython:
+        h = cmaud.wmean_1D(y, t=t, l=l)
+        assert (h == 1).all()
 
     # Ones masked array with random masked positions
     tmp = random(y.shape)
@@ -55,21 +67,24 @@ def eval_ones(y, t, l):
     y = ma.masked_array(y, tmp>=thr)
     h = maud.wmean_1D(y, t=t, l=l)
     assert (h == 1).all()
-    h = cmaud.wmean_1D(y, t=t, l=l)
-    assert (h == 1).all()
+    if with_cython:
+        h = cmaud.wmean_1D(y, t=t, l=l)
+        assert (h == 1).all()
 
     # Masked values should not interfere in the filtered output.
     y.data[y.mask==True] = 1e10
     h = maud.wmean_1D(y, t=t, l=l)
     assert (h == 1).all()
-    h = cmaud.wmean_1D(y, t=t, l=l)
-    assert (h == 1).all()
+    if with_cython:
+        h = cmaud.wmean_1D(y, t=t, l=l)
+        assert (h == 1).all()
 
     # With interp, the energy should also be preserved
     h = maud.wmean_1D(y, t=t, l=l, interp=True)
     assert (h == 1).all()
-    h = cmaud.wmean_1D(y, t=t, l=l, interp=True)
-    assert (h == 1).all()
+    if with_cython:
+        h = cmaud.wmean_1D(y, t=t, l=l, interp=True)
+        assert (h == 1).all()
 
 def test_ones(N=25):
     """ The energy must be preserved
@@ -122,6 +137,9 @@ def test_Serial_x_Parallel(N=10):
     assert (h_serial == h).all()
 
 def Python_x_Cython(N=10):
+    if not with_cython:
+        return
+
     l = 5
     # ATENTION, in the future I should not force t to be np.float.
     t = np.arange(N, dtype=np.float)
@@ -137,6 +155,9 @@ def test_answer():
         Consider to sum a reference function to make the test harder,
           otherwise I'm just filtering white noise.
     """
+    if not with_cython:
+        return
+
 
     N = 7
     Nt = 20

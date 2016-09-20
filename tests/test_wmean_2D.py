@@ -7,8 +7,16 @@ from numpy.random import random
 
 from maud import tests_support
 from maud import wmean_2D, wmean_2D_serial
-from cmaud import wmean_2D as cwmean_2D
-from cmaud import wmean_2D_serial as cwmean_2D_serial
+
+try:
+    import cython
+    with_cython = True
+except:
+    with_cython = False
+
+if with_cython:
+    from cmaud import wmean_2D as cwmean_2D
+    from cmaud import wmean_2D_serial as cwmean_2D_serial
 
 #def random_input(N=10):
 #    I, J = (N*random(2)).astype('i')+1
@@ -155,6 +163,9 @@ def test_Serial_x_Parallel(N=10):
 
 
 def test_Python_x_Cython(N=10):
+    if not with_cython:
+        return
+
     l = N/2
     # ATENTION, in the future I should not force t to be np.float.
     grid = np.linspace(-10, 10, N)
