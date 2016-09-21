@@ -21,8 +21,7 @@ before_install:
 
 install:
   #- conda install --yes python=$TRAVIS_PYTHON_VERSION pip numpy cython libnetcdf netcdf4 pytest
-  - conda install --yes python=$TRAVIS_PYTHON_VERSION pip numpy libnetcdf netcdf4 pytest
-  - pip install -r requirements_dev.txt
+  - conda install --yes python=$TRAVIS_PYTHON_VERSION pip numpy pytest
   - pip install codecov pytest-cov
   - python setup.py install
 
