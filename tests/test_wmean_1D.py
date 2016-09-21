@@ -207,7 +207,7 @@ def test_sin_diff():
     assert (abs(err).mean() < Z).all
 
 
-def test_bandpass():
+def notest_bandpass():
     """
 
         Creates another test with random window lenghts
