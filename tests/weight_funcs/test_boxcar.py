@@ -2,9 +2,16 @@ import numpy as np
 from numpy import array, absolute
 from numpy.random import random
 
+try:
+    import cython
+    with_cython = True
+except:
+    with_cython = False
+
 from maud.window_func import _weight_boxcar
-from maud.cwindow_func import _weight_boxcar as c_weight_boxcar
-#from maud.cwindow_func_scalar import _weight_boxcar_scalar
+if with_cython:
+    from maud.cwindow_func import _weight_boxcar as c_weight_boxcar
+    from maud.cwindow_func_scalar import _weight_boxcar_scalar
 
 # Gotta adjust the coeficcients to the boxcar window !!!
 
@@ -15,8 +22,9 @@ def test_knownanswer_int():
     answer = array([ 0., 1., 1., 1., 1., 1., 0., 0.])
     w = _weight_boxcar(r, l)
     assert np.allclose(w, answer)
-    w = c_weight_boxcar(r, l)
-    assert np.allclose(w, answer)
+    if with_cython:
+        w = c_weight_boxcar(r, l)
+        assert np.allclose(w, answer)
 
 
 def test_knowanswer():
@@ -26,10 +34,13 @@ def test_knowanswer():
     answer = array([ 0.,  1.,  1.,  1.,  1.,  0.,  0.,  0.])
     w = _weight_boxcar(r, l)
     assert np.allclose(w, answer)
-    w = c_weight_boxcar(r, l)
-    assert np.allclose(w, answer)
+    if with_cython:
+        w = c_weight_boxcar(r, l)
+        assert np.allclose(w, answer)
 
-#def test_PxC(N=50):
+def test_PxC(N=50):
+    if not with_cython:
+        return
 #    for n in range(N):
 #        r = 5*(2*random(10)-1)
 #        l = 10*random()
@@ -52,10 +63,11 @@ def out_of_window():
     r = 5*(2*random(10)-1)
     l = 10*random()
     w = _weight_boxcar(r, l)
-#    cw = c_weight_boxcar(r,l)
     ind = r>l/2
     assert (w[ind]==0).all()
-    assert (cw[ind]==0).all()
+    if with_cython:
+        #    cw = c_weight_boxcar(r,l)
+        assert (cw[ind]==0).all()
 
 # Question: _weight_boxcar(ma.masked_all(3), 5) should return a masked array?
 # _weight_boxcar(ma.masked_all(4),5)
