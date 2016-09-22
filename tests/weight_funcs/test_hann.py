@@ -1,4 +1,4 @@
-from numpy import array, absolute
+from numpy import array
 from numpy.random import random
 
 
@@ -17,9 +17,9 @@ if with_cython:
 def test_knownanswer():
     r = array([-3, -2, -1, 0, 1, 2, 3, 100])
     l = 5
-    w = _weight_hann(r,l)
-    d = w - array([ 0., 0.0954915, 0.6545085, 1., 0.6545085, 0.0954915, 0., 0.])
-    assert absolute(d).max() < 1e-8
+    w = _weight_hann(r, l)
+    answer = array([ 0., 0.0954915, 0.6545085, 1., 0.6545085, 0.0954915, 0., 0.])
+    assert np.allclose(w, answer)
 
 
 def test_PxC(N=50):
@@ -31,7 +31,7 @@ def test_PxC(N=50):
         w = _weight_hann(r,l)
         cw = c_weight_hann(r,l)
         assert type(w) == type(cw)
-        assert absolute(w - cw).max() < 1e-10
+        assert np.allclose(w - cw)
 
 
 def test_cython_scalar():
@@ -42,8 +42,8 @@ def test_cython_scalar():
     l = 5
     for r, w in zip(R, W):
         w2 = _weight_hann_scalar(r, l)
-        d = w - w2
-        assert absolute(d) < 1e-8
+        assert np.allclose(w, w2)
+
 
 def out_of_window():
     r = 5*(2*random(10)-1)
