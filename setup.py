@@ -88,7 +88,7 @@ with open('HISTORY.rst') as history_file:
     history = history_file.read().replace('.. :changelog:', '')
 
 with open('requirements.txt') as requirements_file:
-    requires = requirements_file.read()
+    requirements = requirements_file.read()
 
 if __name__ == '__main__':
 
@@ -106,7 +106,7 @@ if __name__ == '__main__':
             classifiers=CLASSIFIERS,
             zip_safe=False,
             packages=find_packages(),
-            install_requires=requires,
+            install_requires=requirements,
             cmdclass = {
                 'build_ext': build_ext,
                 'test': PyTest,
