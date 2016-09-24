@@ -136,13 +136,17 @@ if __name__ == '__main__':
             long_description=readme + '\n\n' + history,
             author=AUTHOR,
             author_email=AUTHOR_EMAIL,
-            license=LICENSE,
-            platforms=PLATFORMS,
             url=URL,
-            classifiers=CLASSIFIERS,
+            packages=[
+                'maud',
+                ],
+            package_dir={
+                'maud': 'maud'},
+            install_requires=requirements,
+            license=LICENSE,
             zip_safe=False,
-            packages=find_packages(),
-            install_requires=requires,
+            keywords='filter, uneven data, gaps',
+            classifiers=CLASSIFIERS,
             cmdclass = {
                 'build_ext': build_ext,
                 'test': PyTest,
