@@ -8,7 +8,7 @@
 try:
     import multiprocessing as mp
 except:
-    print "I couldn't import multiprocessing"
+    print("I couldn't import multiprocessing")
 
 import numpy as N
 import numpy

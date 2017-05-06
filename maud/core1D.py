@@ -8,7 +8,7 @@
 try:
     import multiprocessing as mp
 except:
-    print "I couldn't import multiprocessing"
+    print("I couldn't import multiprocessing")
 
 import numpy as np
 from numpy import ma
@@ -54,8 +54,8 @@ def wmean_1D_serial(data, l, t=None, method='hann', axis=0, interp=False):
 
     # If t is not given, creates a regularly spaced t
     if t is None:
-        print "The scale along the choosed axis weren't defined. I'll consider a constant sequence."
-	t = np.arange(data.shape[axis])
+        print("The scale along the choosed axis weren't defined. I'll consider a constant sequence.")
+        t = np.arange(data.shape[axis])
 
     assert t.shape == (data.shape[axis],), "Invalid size of t."
 
@@ -125,8 +125,8 @@ def wmean_1D(data, l, t=None, method='hann', axis=0, interp = False):
 
     # If t is not given, creates a regularly spaced t
     if t is None:
-        print "The scale along the choosed axis weren't defined. I'll consider a constant sequence."
-	t = np.arange(data.shape[axis])
+        print("The scale along the choosed axis weren't defined. I'll consider a constant sequence.")
+        t = np.arange(data.shape[axis])
 
     assert t.shape == (data.shape[axis],), "Invalid size of t."
 
@@ -230,8 +230,8 @@ def wmean_bandpass_1D_serial(data, lshorterpass, llongerpass, t=None,
 
     # If t is not given, creates a regularly spaced t
     if t is None:
-        print "The scale along the choosed axis weren't defined. I'll consider a constant sequence."
-	t = np.arange(data.shape[axis])
+        print("The scale along the choosed axis weren't defined. I'll consider a constant sequence.")
+        t = np.arange(data.shape[axis])
 
     assert t.shape == (data.shape[axis],), "Invalid size of t."
 
@@ -285,8 +285,8 @@ def wmean_bandpass_1D(data, lshorterpass, llongerpass, t=None,
 
     # If t is not given, creates a regularly spaced t
     if t is None:
-        print "The scale along the choosed axis weren't defined. I'll consider a constant sequence."
-	t = np.arange(data.shape[axis])
+        print("The scale along the choosed axis weren't defined. I'll consider a constant sequence.")
+        t = np.arange(data.shape[axis])
 
     assert t.shape == (data.shape[axis],), "Invalid size of t."
 
