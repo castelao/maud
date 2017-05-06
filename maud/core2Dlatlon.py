@@ -53,7 +53,7 @@ def wmean_2D_latlon_serial(lat, lon, data, l, method='hamming',
 
     # ----
     if data.ndim > 2:
-        for i in xrange(data.shape[0]):
+        for i in range(data.shape[0]):
             data_smooth[i] = wmean_2D_latlon_serial(lat, lon, data[i], l,
                     method, interp)
         return data_smooth
@@ -104,7 +104,7 @@ def _apply_convolve_2D(data, w):
     if data.ndim > 2:
         output = ma.masked_all(data.shape[:-2])
         I = data.shape[0]
-        for i in xrange(I):
+        for i in range(I):
             output[i] = _apply_convolve_2D(data[i], w)
         return output
 

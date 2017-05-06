@@ -98,7 +98,7 @@ def haversine_1Darray(np.ndarray[DTYPE_t, ndim=1] lat,
 
     cos_lat_c = cos(lat_c)
 
-    for i in xrange(I):
+    for i in range(I):
         lat[i] = lat[i] * DEG2RAD
         lon[i] = lon[i] * DEG2RAD
 
@@ -135,8 +135,8 @@ def haversine_2Darray(np.ndarray[DTYPE_t, ndim=2] lat,
 
     cos_lat_c = cos(lat_c)
 
-    for i in xrange(I):
-        for j in xrange(J):
+    for i in range(I):
+        for j in range(J):
             lat[i, j] = lat[i, j] * DEG2RAD
             lon[i, j] = lon[i, j] * DEG2RAD
 

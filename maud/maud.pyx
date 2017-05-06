@@ -236,10 +236,10 @@ def convolve_1D_array(np.ndarray[DTYPE_t, ndim=1] data,
 
     #wfunc = window_func_scalar(method)
 
-    for i in xrange(I):
+    for i in range(I):
         D = 0
         W = 0
-        for ii in xrange(I):
+        for ii in range(I):
             dt = t[ii] - t[i]
             if abs(dt) <= l:
                 w = wfunc(dt, l)
@@ -266,13 +266,13 @@ def convolve_1D_MA(np.ndarray[DTYPE_t, ndim=1] data,
 
     wfunc = window_func_scalar(method)
 
-    for i in xrange(I):
+    for i in range(I):
         if (interp == 0) and (mask[i] == 1):
             mask_smooth[i] = 1
         else:
             D = 0
             W = 0
-            for ii in xrange(I):
+            for ii in range(I):
                 if mask[ii] == 0:
                     dt = t[ii] - t[i]
                     if abs(dt) <= l:
@@ -555,10 +555,10 @@ def apply_wmean_2D_latlon(np.ndarray[DTYPE_t, ndim=2] Lat,
 
     weight_func = window_func_scalar(method)
 
-    for i in xrange(I):
-        for j in xrange(J):
-            for ii in xrange(i, I):
-                for jj in xrange(j, J):
+    for i in range(I):
+        for j in range(J):
+            for ii in range(i, I):
+                for jj in range(j, J):
                     r = _haversine_scalar(Lat[i,j], Lon[i,j],
                             Lat[ii,jj], Lon[ii,jj])
                     if r <= l:
@@ -590,16 +590,16 @@ def apply_wmean_2Dn_latlon(np.ndarray[DTYPE_t, ndim=2] Lat,
 
     weight_func = window_func_scalar(method)
 
-    for i in xrange(I):
-        for j in xrange(J):
-            for ii in xrange(i, I):
-                for jj in xrange(j, J):
+    for i in range(I):
+        for j in range(J):
+            for ii in range(i, I):
+                for jj in range(j, J):
                     r = _haversine_scalar(Lat[i,j], Lon[i,j],
                             Lat[ii,jj], Lon[ii,jj])
                     if r <= l:
                         w = weight_func(r, l)
                         if w != 0:
-                            for n in xrange(N):
+                            for n in range(N):
                                 D[n, i, j] += data[n, ii, jj] * w
                                 W[n, i, j] += w
 
@@ -630,11 +630,11 @@ def apply_wmean_2D_latlon_masked(np.ndarray[DTYPE_t, ndim=2] Lat,
     assert interp == False, "Temporary solution, this func only accepts interp=False"
     weight_func = window_func_scalar(method)
 
-    for i in xrange(I):
-        for j in xrange(J):
+    for i in range(I):
+        for j in range(J):
             if (mask[i, j] == 0):
-                for ii in xrange(i, I):
-                    for jj in xrange(j, J):
+                for ii in range(i, I):
+                    for jj in range(j, J):
                         if mask[ii, jj] == 0:
                             r = _haversine_scalar(Lat[i,j], Lon[i,j],
                                     Lat[ii,jj], Lon[ii,jj])
@@ -649,8 +649,8 @@ def apply_wmean_2D_latlon_masked(np.ndarray[DTYPE_t, ndim=2] Lat,
                                         D[ii, jj] += data[i, j] * w
                                         W[ii, jj] += w
 
-    for i in xrange(I):
-        for j in xrange(J):
+    for i in range(I):
+        for j in range(J):
             if W[i, j] != 0:
                 data_smooth[i, j] = D[i,j]/W[i,j]
                 mask_smooth[i, j] = 0
@@ -677,10 +677,10 @@ def apply_wmean_2D_latlon_masked_interp(np.ndarray[DTYPE_t, ndim=2] Lat,
 
     weight_func = window_func_scalar(method)
 
-    for i in xrange(I):
-        for j in xrange(J):
-            for ii in xrange(i, I):
-                for jj in xrange(j, J):
+    for i in range(I):
+        for j in range(J):
+            for ii in range(i, I):
+                for jj in range(j, J):
                     if (mask[i, j] == 0) or (mask[ii, jj] == 0):
                         r = _haversine_scalar(Lat[i,j], Lon[i,j],
                                 Lat[ii,jj], Lon[ii,jj])
@@ -697,8 +697,8 @@ def apply_wmean_2D_latlon_masked_interp(np.ndarray[DTYPE_t, ndim=2] Lat,
                                         D[ii, jj] += data[i, j] * w
                                         W[ii, jj] += w
 
-    for i in xrange(I):
-        for j in xrange(J):
+    for i in range(I):
+        for j in range(J):
             if W[i, j] != 0:
                 data_smooth[i, j] = D[i,j]/W[i,j]
                 mask_smooth[i, j] = 0
@@ -728,25 +728,25 @@ def apply_wmean_2Dn_latlon_masked(np.ndarray[DTYPE_t, ndim=2] Lat,
     assert interp == False, "Temporary solution, this func only accepts interp=False"
     weight_func = window_func_scalar(method)
 
-    for i in xrange(I):
-        for j in xrange(J):
-            for ii in xrange(i,I):
-                for jj in xrange(j,J):
+    for i in range(I):
+        for j in range(J):
+            for ii in range(i,I):
+                for jj in range(j,J):
                     r = _haversine_scalar(Lat[i,j], Lon[i,j],
                             Lat[ii,jj], Lon[ii,jj])
                     if r <= l:
                         w = weight_func(r, l)
                         if w != 0:
-                            for n in xrange(N):
+                            for n in range(N):
                                 if (mask[n, i, j] == 0) & (mask[n, ii, jj] == 0):
                                     D[n, i, j] += data[n, ii, jj] * w
                                     W[n, i, j] += w
                                     if (i != ii) & (j != jj):
                                         D[n, ii, jj] += data[n, i, j] * w
                                         W[n, ii, jj] += w
-    for n in xrange(N):
-        for i in xrange(I):
-            for j in xrange(J):
+    for n in range(N):
+        for i in range(I):
+            for j in range(J):
                 if W[n, i, j] != 0:
                     data_smooth[n, i, j] = D[n, i,j]/W[n, i,j]
                     mask_smooth[n, i, j] = 0
@@ -775,16 +775,16 @@ def apply_wmean_2Dn_latlon_masked_interp(np.ndarray[DTYPE_t, ndim=2] Lat,
 
     weight_func = window_func_scalar(method)
 
-    for i in xrange(I):
-        for j in xrange(J):
-            for ii in xrange(i,I):
-                for jj in xrange(j,J):
+    for i in range(I):
+        for j in range(J):
+            for ii in range(i,I):
+                for jj in range(j,J):
                     r = _haversine_scalar(Lat[i,j], Lon[i,j],
                             Lat[ii,jj], Lon[ii,jj])
                     if r <= l:
                         w = weight_func(r, l)
                         if w != 0:
-                            for n in xrange(N):
+                            for n in range(N):
                                 if (mask[n, i, j] == 0) or (mask[n, ii, jj] == 0):
                                     if (mask[n, ii, jj] == 0):
                                         D[n, i, j] += data[n, ii, jj] * w
@@ -794,9 +794,9 @@ def apply_wmean_2Dn_latlon_masked_interp(np.ndarray[DTYPE_t, ndim=2] Lat,
                                             D[n, ii, jj] += data[n, i, j] * w
                                             W[n, ii, jj] += w
 
-    for n in xrange(N):
-        for i in xrange(I):
-            for j in xrange(J):
+    for n in range(N):
+        for i in range(I):
+            for j in range(J):
                 if W[n, i, j] != 0:
                     data_smooth[n, i, j] = D[n, i,j]/W[n, i,j]
                     mask_smooth[n, i, j] = 0

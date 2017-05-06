@@ -25,7 +25,7 @@ def wmean_2D_serial(x, y, data, l, method='hamming', interp=False):
 
     # ----
     if data.ndim > 2:
-        for i in xrange(data.shape[0]):
+        for i in range(data.shape[0]):
             data_smooth[i] = wmean_2D_serial(x, y, data[i], l, method, interp)
         return data_smooth
     # Below here it is expected only 2D arrays
@@ -33,8 +33,8 @@ def wmean_2D_serial(x, y, data, l, method='hamming', interp=False):
     winfunc = window_func(method)
 
     #I, J = data.shape[-2:]
-    #for i in xrange(I):
-    #    for j in xrange(J):
+    #for i in range(I):
+    #    for j in range(J):
     if interp == True:
         I, J = data.shape
         I, J = np.meshgrid(range(I), range(J))
@@ -76,7 +76,7 @@ def _apply_convolve_2D(data, w):
     if data.ndim > 2:
         output = ma.masked_all(data.shape[:-2])
         I = data.shape[0]
-        for i in xrange(I):
+        for i in range(I):
             output[i] = _apply_convolve_2D(data[i], w)
         return output
 

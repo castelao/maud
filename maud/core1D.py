@@ -186,7 +186,7 @@ def _convolve_1D(t0, t, l, winfunc, data):
 def _apply_convolve_1D(data, w):
     if data.ndim > 1:
         output = ma.masked_all(data.shape[1:])
-        for i in xrange(data.shape[1]):
+        for i in range(data.shape[1]):
             output[i] = _apply_convolve_1D(data[:,i], w)
         return output
     ind = (~ma.getmaskarray(data))
