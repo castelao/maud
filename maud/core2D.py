@@ -2,7 +2,7 @@
 
 import numpy as np
 from numpy import ma
-from window_func import window_func
+from .window_func import window_func
 
 
 def wmean_2D_serial(x, y, data, l, method='hamming', interp=False):

@@ -2,8 +2,8 @@
 import numpy as np
 from numpy import ma
 
-from window_func import window_func
-from distance import haversine
+from .window_func import window_func
+from .distance import haversine
 
  
 def wmean_2D_latlon_serial(lat, lon, data, l, method='hamming',
