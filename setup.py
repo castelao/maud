@@ -3,26 +3,6 @@
 # Licensed under a 3-clause BSD style license - see LICENSE
 
 
-NAME = 'maud'
-DESCRIPTION = 'Moving Average for Uneven Data'
-AUTHOR = 'Guilherme Castelao, Bia Villas-Boas, Luiz Irber',
-AUTHOR_EMAIL = 'guilherme@castelao.net, bia@melovillasboas.com, luiz.irber@gmail.com',
-LICENSE = 'BSD license'
-PLATFORMS = 'any'
-URL = 'http://maud.castelao.net'
-CLASSIFIERS = [
-    'Development Status :: 4 - Beta',
-    'Intended Audience :: Developers',
-    'Intended Audience :: Science/Research',
-    'License :: OSI Approved :: BSD License',
-    'Operating System :: OS Independent',
-    'Programming Language :: Python',
-    'Programming Language :: Python :: 2',
-    'Programming Language :: Python :: 2.7',
-    'Topic :: Scientific/Engineering',
-    'Topic :: Software Development :: Libraries :: Python Modules',
-]
-
 import sys, os.path
 
 from distutils import log
@@ -78,39 +58,51 @@ class PyTest(TestCommand):
         sys.exit(errno)
 
 # ============================================================================
+setup_args = {
+    'name': 'maud',
+    'description': 'Moving Average for Uneven Data',
+    'author': 'Guilherme Castelao, Bia Villas-Boas, Luiz Irber',
+    'author_email': 'guilherme@castelao.net, bia@melovillasboas.com, luiz.irber@gmail.com',
+    'classifiers': [
+        'Development Status :: 4 - Beta',
+        'Intended Audience :: Developers',
+        'Intended Audience :: Science/Research',
+        'License :: OSI Approved :: BSD License',
+        'Operating System :: OS Independent',
+        'Programming Language :: Python',
+        'Programming Language :: Python :: 2.7',
+        'Topic :: Scientific/Engineering',
+        'Topic :: Software Development :: Libraries :: Python Modules'
+        ],
+    'cmdclass': {
+        'build_ext': build_ext,
+        'test': PyTest
+        },
+    'keywords': 'filter, uneven data, gaps',
+    'license': 'BSD license',
+    'scripts': ['bin/maud4nc', 'bin/maud4latlonnc'],
+    'tests_require': ['pytest'],
+    'url': 'http://maud.castelao.net',
+    'zip_safe': False,
+    }
+
 with open('VERSION') as version_file:
-    version = version_file.read().rstrip('\n')
+    setup_args['version'] = version_file.read().rstrip('\n')
 
 with open('README.rst') as readme_file:
     readme = readme_file.read()
-
 with open('HISTORY.rst') as history_file:
     history = history_file.read().replace('.. :changelog:', '')
+setup_args['long_description'] = readme + '\n\n' + history
 
 with open('requirements.txt') as requirements_file:
-    requirements = requirements_file.read()
+    setup_args['install_requires'] = requirements_file.read()
 
 if __name__ == '__main__':
 
     if with_cython:
         setup(
-            name=NAME,
-            version=version,
-            description=DESCRIPTION,
-            long_description=readme + '\n\n' + history,
-            author=AUTHOR,
-            author_email=AUTHOR_EMAIL,
-            license=LICENSE,
-            platforms=PLATFORMS,
-            url=URL,
-            classifiers=CLASSIFIERS,
-            zip_safe=False,
             packages=find_packages(),
-            install_requires=requirements,
-            cmdclass = {
-                'build_ext': build_ext,
-                'test': PyTest,
-                },
             ext_modules = [
                 Extension("cmaud", ["maud/maud.pyx"]),
                 Extension("maud.cwindow_func", ["maud/window_func.pyx"]),
@@ -125,32 +117,14 @@ if __name__ == '__main__':
             #    #pyrex_include_dirs=['.']
             #    ),
             #    ],
-            scripts=["bin/maud4nc", "bin/maud4latlonnc"],
-            tests_require=['pytest'],
+            **setup_args
         )
     else:
         setup(
-            name=NAME,
-            version=version,
-            description=DESCRIPTION,
-            long_description=readme + '\n\n' + history,
-            author=AUTHOR,
-            author_email=AUTHOR_EMAIL,
-            url=URL,
             packages=[
                 'maud',
                 ],
             package_dir={
                 'maud': 'maud'},
-            install_requires=requirements,
-            license=LICENSE,
-            zip_safe=False,
-            keywords='filter, uneven data, gaps',
-            classifiers=CLASSIFIERS,
-            cmdclass = {
-                'build_ext': build_ext,
-                'test': PyTest,
-                },
-            scripts=["bin/maud4nc", "bin/maud4latlonnc"],
-            tests_require=['pytest'],
+            **setup_args
         )
