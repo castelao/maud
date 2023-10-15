@@ -1,3 +1,5 @@
+**Archived**: This repository has not been active in a while, so I'm archiving it and will keep it as a reference. This package was mostly active between 2012 and 2014, and it was based in some even older Pyhton code that I wrote on my Master's to smooth timeseries with gaps, and later during my PhD to smooth unevenly sampled CTD profiles (raw data) as well as 2D maps to study eddies in the oceans. The last time I used it for real was for the paper https://doi.org/10.1002/2015GL063105. By combining Cython with multiprocessing, I improved the performance by 2 orders of magnitude, and that was crucial while we were figuring out the filters scales that we should use.
+
 ====
 MAUD
 ====
